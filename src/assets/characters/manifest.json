@@ -1,0 +1,44 @@
+[
+  {
+    "type": "CTRL",
+    "title": "控制者",
+    "sourceUrl": "",
+    "quality": "placeholder",
+    "states": {
+      "transparent": "/assets/characters/ctrl/transparent.png",
+      "idle": "/assets/characters/ctrl/idle.png",
+      "walk": "/assets/characters/ctrl/walk.png",
+      "work": "/assets/characters/ctrl/work.png",
+      "rest": "/assets/characters/ctrl/rest.png",
+      "train": "/assets/characters/ctrl/train.png"
+    }
+  },
+  {
+    "type": "EXEC",
+    "title": "执行者",
+    "sourceUrl": "",
+    "quality": "placeholder",
+    "states": {
+      "transparent": "/assets/characters/exec/transparent.png",
+      "idle": "/assets/characters/exec/idle.png",
+      "walk": "/assets/characters/exec/walk.png",
+      "work": "/assets/characters/exec/work.png",
+      "rest": "/assets/characters/exec/rest.png",
+      "train": "/assets/characters/exec/train.png"
+    }
+  },
+  {
+    "type": "HARM",
+    "title": "协调者",
+    "sourceUrl": "",
+    "quality": "placeholder",
+    "states": {
+      "transparent": "/assets/characters/harm/transparent.png",
+      "idle": "/assets/characters/harm/idle.png",
+      "walk": "/assets/characters/harm/walk.png",
+      "work": "/assets/characters/harm/work.png",
+      "rest": "/assets/characters/harm/rest.png",
+      "train": "/assets/characters/harm/train.png"
+    }
+  }
+]
