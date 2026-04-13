@@ -3,6 +3,8 @@ import { useCallback } from "react";
 
 import { GameCanvas } from "../../game/GameCanvas";
 import { useAppStore } from "../../state/appStore";
+import { OfficeHUD } from "./OfficeHUD";
+import { RoomPanelHost } from "./RoomPanelHost";
 import type { RoomId } from "../../types/domain";
 
 export function OfficeRoute() {
@@ -27,5 +29,11 @@ export function OfficeRoute() {
     return <Navigate to="/quiz" replace />;
   }
 
-  return <GameCanvas onRoomChanged={handleRoomChanged} />;
+  return (
+    <>
+      <GameCanvas onRoomChanged={handleRoomChanged} />
+      <OfficeHUD />
+      <RoomPanelHost />
+    </>
+  );
 }
