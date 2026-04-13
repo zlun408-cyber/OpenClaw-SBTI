@@ -5,6 +5,7 @@ import { GameCanvas } from "../../game/GameCanvas";
 import { useAppStore } from "../../state/appStore";
 import { OfficeHUD } from "./OfficeHUD";
 import { RoomPanelHost } from "./RoomPanelHost";
+import { FloatingChatBox } from "../openclaw/FloatingChatBox";
 import type { RoomId } from "../../types/domain";
 
 export function OfficeRoute() {
@@ -37,6 +38,7 @@ export function OfficeRoute() {
       <div aria-label="office-scene-overlay-layer">
         <OfficeHUD />
         <RoomPanelHost />
+        <FloatingChatBox />
       </div>
     </section>
   );

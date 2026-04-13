@@ -66,6 +66,7 @@ test("mounts the office scene canvas and overlay UI together", async () => {
   expect(screen.getByTestId("office-scene-layout")).toBeInTheDocument();
   expect(screen.getByTestId("mock-canvas")).toBeInTheDocument();
   expect(screen.getByLabelText("office-hud")).toBeInTheDocument();
+  expect(screen.getByLabelText("openclaw-chat")).toBeInTheDocument();
 
   await waitFor(() => {
     expect(screen.getByRole("heading", { name: /hr office/i })).toBeInTheDocument();
