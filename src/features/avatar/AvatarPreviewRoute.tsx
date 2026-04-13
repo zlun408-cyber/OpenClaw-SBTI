@@ -1,23 +1,22 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 
 import { useAppStore } from "../../state/appStore";
 import { AvatarPreviewCard } from "./AvatarPreviewCard";
 
 export function AvatarPreviewRoute() {
   const navigate = useNavigate();
+  const result = useAppStore((state) => state.result);
   const character = useAppStore((state) => state.character);
+  const enterOffice = useAppStore((state) => state.enterOffice);
   const [customName, setCustomName] = useState(character.customName);
 
-  const enterOffice = () => {
-    useAppStore.setState((state) => ({
-      ...state,
-      phase: "office",
-      character: {
-        ...state.character,
-        customName: customName.trim()
-      }
-    }));
+  if (result === null) {
+    return <Navigate to="/quiz" replace />;
+  }
+
+  const handleEnterOffice = () => {
+    enterOffice(customName);
     navigate("/office");
   };
 
@@ -28,7 +27,7 @@ export function AvatarPreviewRoute() {
         character={character}
         customName={customName}
         onCustomNameChange={setCustomName}
-        onEnterOffice={enterOffice}
+        onEnterOffice={handleEnterOffice}
       />
     </>
   );

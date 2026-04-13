@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppStore } from "../../state/appStore";
@@ -6,12 +6,17 @@ import { questions } from "./questions";
 import { type QuizAnswer, scoreQuiz } from "./scoring";
 
 export function SbtiQuizRoute() {
+  const startQuiz = useAppStore((state) => state.startQuiz);
   const completeQuiz = useAppStore((state) => state.completeQuiz);
   const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
 
   const currentQuestion = questions[currentQuestionIndex];
+
+  useEffect(() => {
+    startQuiz();
+  }, [startQuiz]);
 
   const submitAnswer = (optionId: string) => {
     const collectedAnswers = [

@@ -1,8 +1,14 @@
 import "@testing-library/jest-dom";
 import { render, screen } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
+import { beforeEach } from "vitest";
 import App from "./App";
 import { appRoutes } from "./router";
+import { createInitialAppState, useAppStore } from "../state/appStore";
+
+beforeEach(() => {
+  useAppStore.setState(createInitialAppState());
+});
 
 test("lands on the intro route by default", async () => {
   render(<App />);
@@ -13,9 +19,9 @@ test("lands on the intro route by default", async () => {
 
 test.each([
   ["/quiz", /sbti quiz/i],
-  ["/avatar", /avatar preview/i],
-  ["/office", /^office$/i],
-] as const)("renders route shell for %s", async (path, heading) => {
+  ["/avatar", /sbti quiz/i],
+  ["/office", /sbti quiz/i],
+] as const)("renders guarded route shell for %s", async (path, heading) => {
   const router = createMemoryRouter(appRoutes, { initialEntries: [path] });
 
   render(<RouterProvider router={router} />);

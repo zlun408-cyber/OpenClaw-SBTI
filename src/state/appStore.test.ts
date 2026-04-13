@@ -18,6 +18,22 @@ test("can complete quiz and enter avatar preview", () => {
   expect(useAppStore.getState().phase).toBe("avatarPreview");
 });
 
+test("can enter office and persist trimmed custom name after preview", () => {
+  const store = useAppStore.getState();
+  store.completeQuiz({ resultType: "CTRL", title: "控制者" });
+  store.enterOffice(" 阿控 ");
+
+  expect(useAppStore.getState().phase).toBe("office");
+  expect(useAppStore.getState().character.customName).toBe("阿控");
+});
+
+test("does not enter office without quiz result", () => {
+  useAppStore.getState().enterOffice("阿控");
+
+  expect(useAppStore.getState().phase).toBe("intro");
+  expect(useAppStore.getState().character.customName).toBe("");
+});
+
 test("completeQuiz stores a copied result payload", () => {
   const result: QuizResult = { resultType: "CTRL", title: "控制者" };
 

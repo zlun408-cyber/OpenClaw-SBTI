@@ -13,10 +13,12 @@ export type AppState = {
   currentRoomId: RoomId;
   result: QuizResult | null;
   character: CharacterProfile;
+  startQuiz: () => void;
   completeQuiz: (result: QuizResult) => void;
+  enterOffice: (customName: string) => void;
 };
 
-export const createInitialAppState = (): Omit<AppState, "completeQuiz"> => ({
+export const createInitialAppState = (): Omit<AppState, "startQuiz" | "completeQuiz" | "enterOffice"> => ({
   phase: "intro",
   currentRoomId: "office",
   result: null,
@@ -25,6 +27,12 @@ export const createInitialAppState = (): Omit<AppState, "completeQuiz"> => ({
 
 export const useAppStore = create<AppState>((set) => ({
   ...createInitialAppState(),
+  startQuiz() {
+    set((state) => ({
+      ...state,
+      phase: "quiz"
+    }));
+  },
   completeQuiz(result) {
     set({
       phase: "avatarPreview",
@@ -33,6 +41,22 @@ export const useAppStore = create<AppState>((set) => ({
         ...DEFAULT_CHARACTER_PROFILE,
         title: result.title
       }
+    });
+  },
+  enterOffice(customName) {
+    set((state) => {
+      if (state.result === null) {
+        return state;
+      }
+
+      return {
+        ...state,
+        phase: "office",
+        character: {
+          ...state.character,
+          customName: customName.trim()
+        }
+      };
     });
   }
 }));
