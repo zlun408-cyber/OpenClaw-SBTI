@@ -30,9 +30,8 @@ export const useAppStore = create<AppState>((set) => ({
       phase: "avatarPreview",
       result: { ...result },
       character: {
-        title: result.title,
-        customName: "",
-        state: "idle"
+        ...DEFAULT_CHARACTER_PROFILE,
+        title: result.title
       }
     });
   }
