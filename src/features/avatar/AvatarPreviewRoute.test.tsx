@@ -54,7 +54,7 @@ test("entering office persists the chosen name", async () => {
     expect(useAppStore.getState().character.customName).toBe("阿张");
     expect(useAppStore.getState().phase).toBe("office");
   });
-  expect(await screen.findByRole("heading", { name: /^office$/i })).toBeInTheDocument();
+  expect(await screen.findByTestId("game-canvas")).toBeInTheDocument();
 });
 
 test("blocks cold-load deep-link to avatar", async () => {
@@ -118,11 +118,11 @@ test("blocks avatar revisit after entering office", async () => {
   expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
 
   fireEvent.click(screen.getByRole("button", { name: /进入数字办公室/i }));
-  expect(await screen.findByRole("heading", { name: /^office$/i })).toBeInTheDocument();
+  expect(await screen.findByTestId("game-canvas")).toBeInTheDocument();
 
   await act(async () => {
     await router.navigate("/avatar");
   });
 
-  expect(await screen.findByRole("heading", { name: /^office$/i })).toBeInTheDocument();
+  expect(await screen.findByTestId("game-canvas")).toBeInTheDocument();
 });
