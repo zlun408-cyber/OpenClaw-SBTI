@@ -34,6 +34,22 @@ test("does not enter office without quiz result", () => {
   expect(useAppStore.getState().character.customName).toBe("");
 });
 
+test("startQuiz clears stale result and character state", () => {
+  const store = useAppStore.getState();
+  store.completeQuiz({ resultType: "CTRL", title: "控制者" });
+  store.enterOffice("阿控");
+
+  store.startQuiz();
+
+  expect(useAppStore.getState().phase).toBe("quiz");
+  expect(useAppStore.getState().result).toBeNull();
+  expect(useAppStore.getState().character).toEqual({
+    title: "数字员工",
+    customName: "",
+    state: "idle"
+  });
+});
+
 test("completeQuiz stores a copied result payload", () => {
   const result: QuizResult = { resultType: "CTRL", title: "控制者" };
 

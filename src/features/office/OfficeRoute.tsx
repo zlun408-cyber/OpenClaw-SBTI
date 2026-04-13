@@ -4,7 +4,10 @@ import { useAppStore } from "../../state/appStore";
 
 export function OfficeRoute() {
   const canEnterOffice = useAppStore(
-    (state) => state.result !== null && state.phase === "office" && state.character.title === state.result.title
+    (state) =>
+      state.result !== null &&
+      state.character.title === state.result.title &&
+      (state.phase === "avatarPreview" || state.phase === "office")
   );
 
   if (!canEnterOffice) {

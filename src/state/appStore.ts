@@ -30,7 +30,9 @@ export const useAppStore = create<AppState>((set) => ({
   startQuiz() {
     set((state) => ({
       ...state,
-      phase: "quiz"
+      phase: "quiz",
+      result: null,
+      character: { ...DEFAULT_CHARACTER_PROFILE }
     }));
   },
   completeQuiz(result) {
