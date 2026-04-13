@@ -30,10 +30,14 @@ export function OfficeRoute() {
   }
 
   return (
-    <>
-      <GameCanvas onRoomChanged={handleRoomChanged} />
-      <OfficeHUD />
-      <RoomPanelHost />
-    </>
+    <section aria-label="office-scene-layout" data-testid="office-scene-layout">
+      <div aria-label="office-scene-canvas-layer">
+        <GameCanvas onRoomChanged={handleRoomChanged} />
+      </div>
+      <div aria-label="office-scene-overlay-layer">
+        <OfficeHUD />
+        <RoomPanelHost />
+      </div>
+    </section>
   );
 }

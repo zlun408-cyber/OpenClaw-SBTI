@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { render, waitFor } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { createElement } from "react";
 import { beforeEach, expect, test, vi } from "vitest";
 
@@ -55,5 +55,19 @@ test("updates store with room enter events from game bridge", async () => {
 
   await waitFor(() => {
     expect(useAppStore.getState().currentRoomId).toBe("meeting");
+  });
+});
+
+test("mounts the office scene canvas and overlay UI together", async () => {
+  bridgeState.emittedRoomId = "hr";
+
+  render(createElement(OfficeRoute));
+
+  expect(screen.getByTestId("office-scene-layout")).toBeInTheDocument();
+  expect(screen.getByTestId("mock-canvas")).toBeInTheDocument();
+  expect(screen.getByLabelText("office-hud")).toBeInTheDocument();
+
+  await waitFor(() => {
+    expect(screen.getByRole("heading", { name: /hr office/i })).toBeInTheDocument();
   });
 });
