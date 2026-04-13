@@ -1,3 +1,8 @@
 export function StoneGateRoute() {
-  return <button type="button">穿越之门</button>;
+  return (
+    <>
+      <h1>SBTI Digital Employee</h1>
+      <button type="button">穿越之门</button>
+    </>
+  );
 }
