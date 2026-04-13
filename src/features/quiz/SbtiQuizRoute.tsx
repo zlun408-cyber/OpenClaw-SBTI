@@ -41,6 +41,7 @@ export function useWarpOverlaySequence({ durationMs = 320 }: WarpTransitionOptio
 export function SbtiQuizRoute() {
   const startQuiz = useAppStore((state) => state.startQuiz);
   const completeQuiz = useAppStore((state) => state.completeQuiz);
+  const enterAvatarPreview = useAppStore((state) => state.enterAvatarPreview);
   const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
@@ -53,6 +54,10 @@ export function SbtiQuizRoute() {
   }, [startQuiz]);
 
   const submitAnswer = (optionId: string) => {
+    if (isWarping) {
+      return;
+    }
+
     const collectedAnswers = [
       ...answers,
       { questionId: currentQuestion.id, value: optionId }
@@ -61,6 +66,7 @@ export function SbtiQuizRoute() {
     if (currentQuestionIndex === questions.length - 1) {
       completeQuiz(scoreQuiz(collectedAnswers));
       runWarpSequence(() => {
+        enterAvatarPreview();
         navigate("/avatar");
       });
       return;
@@ -79,7 +85,12 @@ export function SbtiQuizRoute() {
       <h2>{currentQuestion.prompt}</h2>
       <div>
         {currentQuestion.options.map((option) => (
-          <button key={option.id} type="button" onClick={() => submitAnswer(option.id)}>
+          <button
+            key={option.id}
+            type="button"
+            disabled={isWarping}
+            onClick={() => submitAnswer(option.id)}
+          >
             {option.label}
           </button>
         ))}

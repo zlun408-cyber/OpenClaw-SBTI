@@ -15,10 +15,11 @@ export type AppState = {
   character: CharacterProfile;
   startQuiz: () => void;
   completeQuiz: (result: QuizResult) => void;
+  enterAvatarPreview: () => void;
   enterOffice: (customName: string) => void;
 };
 
-export const createInitialAppState = (): Omit<AppState, "startQuiz" | "completeQuiz" | "enterOffice"> => ({
+export const createInitialAppState = (): Omit<AppState, "startQuiz" | "completeQuiz" | "enterAvatarPreview" | "enterOffice"> => ({
   phase: "intro",
   currentRoomId: "office",
   result: null,
@@ -37,12 +38,29 @@ export const useAppStore = create<AppState>((set) => ({
   },
   completeQuiz(result) {
     set({
-      phase: "avatarPreview",
+      phase: "warp",
       result: { ...result },
       character: {
         ...DEFAULT_CHARACTER_PROFILE,
         title: result.title
       }
+    });
+  },
+  enterAvatarPreview() {
+    set((state) => {
+      const canEnterPreviewFromWarp =
+        state.phase === "warp" &&
+        state.result !== null &&
+        state.character.title === state.result.title;
+
+      if (!canEnterPreviewFromWarp) {
+        return state;
+      }
+
+      return {
+        ...state,
+        phase: "avatarPreview"
+      };
     });
   },
   enterOffice(customName) {

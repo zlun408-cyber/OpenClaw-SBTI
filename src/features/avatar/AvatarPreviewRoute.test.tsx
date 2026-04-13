@@ -13,6 +13,7 @@ beforeEach(() => {
 
 test("lets the user rename the generated character", async () => {
   useAppStore.getState().completeQuiz({ resultType: "CTRL", title: "控制者" });
+  useAppStore.getState().enterAvatarPreview();
   const router = createMemoryRouter([{ path: "/avatar", element: <AvatarPreviewRoute /> }], {
     initialEntries: ["/avatar"]
   });

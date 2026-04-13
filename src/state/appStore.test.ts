@@ -11,16 +11,20 @@ beforeEach(() => {
   useAppStore.setState(createInitialAppState());
 });
 
-test("can complete quiz and enter avatar preview", () => {
+test("can complete quiz into warp then enter avatar preview", () => {
   const store = useAppStore.getState();
   store.completeQuiz({ resultType: "CTRL", title: "控制者" });
 
+  expect(useAppStore.getState().phase).toBe("warp");
+
+  store.enterAvatarPreview();
   expect(useAppStore.getState().phase).toBe("avatarPreview");
 });
 
 test("can enter office and persist trimmed custom name after preview", () => {
   const store = useAppStore.getState();
   store.completeQuiz({ resultType: "CTRL", title: "控制者" });
+  store.enterAvatarPreview();
   store.enterOffice(" 阿控 ");
 
   expect(useAppStore.getState().phase).toBe("office");
@@ -37,6 +41,7 @@ test("does not enter office without quiz result", () => {
 test("startQuiz clears stale result and character state", () => {
   const store = useAppStore.getState();
   store.completeQuiz({ resultType: "CTRL", title: "控制者" });
+  store.enterAvatarPreview();
   store.enterOffice("阿控");
 
   store.startQuiz();
@@ -73,6 +78,12 @@ test("completeQuiz hydrates preview-ready character data", () => {
     customName: "",
     state: "idle"
   });
+});
+
+test("enterAvatarPreview ignores transitions outside warp", () => {
+  useAppStore.getState().enterAvatarPreview();
+
+  expect(useAppStore.getState().phase).toBe("intro");
 });
 
 test("selectors expose room context and character label", () => {
