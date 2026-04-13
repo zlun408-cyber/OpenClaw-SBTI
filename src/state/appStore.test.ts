@@ -27,6 +27,21 @@ test("completeQuiz stores a copied result payload", () => {
   expect(state.result).not.toBe(result);
 });
 
+test("completeQuiz hydrates preview-ready character data", () => {
+  useAppStore.setState((state) => ({
+    ...state,
+    character: { ...state.character, title: "旧称号", customName: "老名字", state: "dance" }
+  }));
+
+  useAppStore.getState().completeQuiz({ resultType: "CTRL", title: "控制者" });
+
+  expect(useAppStore.getState().character).toEqual({
+    title: "控制者",
+    customName: "",
+    state: "idle"
+  });
+});
+
 test("selectors expose room context and character label", () => {
   useAppStore.setState((state) => ({
     ...state,
