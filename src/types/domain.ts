@@ -12,8 +12,10 @@ export type CharacterState =
   | "train"
   | "task-submit";
 
+export type QuizResultType = "CTRL" | "EXEC" | "HARM";
+
 export type QuizResult = {
-  resultType: string;
+  resultType: QuizResultType;
   title: string;
 };
 

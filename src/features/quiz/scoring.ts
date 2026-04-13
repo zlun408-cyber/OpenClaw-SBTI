@@ -1,4 +1,5 @@
 import { questions, type QuizAxis } from "./questions";
+import type { QuizResultType } from "../../types/domain";
 
 export type QuizAnswer = {
   questionId: string;
@@ -6,7 +7,7 @@ export type QuizAnswer = {
 };
 
 export type QuizScoreResult = {
-  resultType: "CTRL" | "EXEC" | "HARM";
+  resultType: QuizResultType;
   title: string;
 };
 
@@ -18,10 +19,17 @@ const RESULT_META: readonly ResultMeta[] = [
   { axis: "harmony", resultType: "HARM", title: "协调者" }
 ] as const;
 
-const AXIS_PRIORITY: readonly QuizAxis[] = RESULT_META.map((item) => item.axis);
+const TIE_BREAK_PRIORITY: readonly QuizAxis[] = ["control", "execution", "harmony"];
 
 export function scoreQuiz(answers: QuizAnswer[]): QuizScoreResult {
-  const answersByQuestionId = new Map(answers.map((answer) => [answer.questionId, answer.value]));
+  const answersByQuestionId = new Map<string, string>();
+  for (const answer of answers) {
+    if (answersByQuestionId.has(answer.questionId)) {
+      throw new Error(`Duplicate quiz answer: ${answer.questionId}`);
+    }
+    answersByQuestionId.set(answer.questionId, answer.value);
+  }
+
   if (answersByQuestionId.size !== questions.length) {
     throw new Error("Incomplete quiz answers");
   }
@@ -46,9 +54,9 @@ export function scoreQuiz(answers: QuizAnswer[]): QuizScoreResult {
     axisScore[selectedOption.axis] += selectedOption.weight;
   }
 
-  const topScore = Math.max(...AXIS_PRIORITY.map((axis) => axisScore[axis]));
+  const topScore = Math.max(...TIE_BREAK_PRIORITY.map((axis) => axisScore[axis]));
   const winningAxis =
-    AXIS_PRIORITY.find((axis) => axisScore[axis] === topScore) ?? AXIS_PRIORITY[0];
+    TIE_BREAK_PRIORITY.find((axis) => axisScore[axis] === topScore) ?? TIE_BREAK_PRIORITY[0];
   const result = RESULT_META.find((item) => item.axis === winningAxis) ?? RESULT_META[0];
 
   return {

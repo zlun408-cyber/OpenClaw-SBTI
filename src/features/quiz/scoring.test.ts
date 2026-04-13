@@ -31,4 +31,25 @@ describe("scoreQuiz", () => {
       ])
     ).toThrow("Incomplete quiz answers");
   });
+
+  test("rejects duplicate answers for the same question", () => {
+    expect(() =>
+      scoreQuiz([
+        { questionId: "q1", value: "A" },
+        { questionId: "q1", value: "B" },
+        { questionId: "q2", value: "B" },
+        { questionId: "q3", value: "C" }
+      ])
+    ).toThrow("Duplicate quiz answer: q1");
+  });
+
+  test("rejects invalid option ids", () => {
+    expect(() =>
+      scoreQuiz([
+        { questionId: "q1", value: "Z" },
+        { questionId: "q2", value: "B" },
+        { questionId: "q3", value: "C" }
+      ])
+    ).toThrow("Invalid answer option: q1:Z");
+  });
 });
