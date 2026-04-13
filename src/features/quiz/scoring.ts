@@ -6,16 +6,16 @@ export type QuizAnswer = {
 };
 
 export type QuizScoreResult = {
-  type: "CTRL" | "EXEC" | "HARM";
+  resultType: "CTRL" | "EXEC" | "HARM";
   title: string;
 };
 
 type ResultMeta = QuizScoreResult & { axis: QuizAxis };
 
 const RESULT_META: readonly ResultMeta[] = [
-  { axis: "control", type: "CTRL", title: "控制者" },
-  { axis: "execution", type: "EXEC", title: "执行者" },
-  { axis: "harmony", type: "HARM", title: "协调者" }
+  { axis: "control", resultType: "CTRL", title: "控制者" },
+  { axis: "execution", resultType: "EXEC", title: "执行者" },
+  { axis: "harmony", resultType: "HARM", title: "协调者" }
 ] as const;
 
 const AXIS_PRIORITY: readonly QuizAxis[] = RESULT_META.map((item) => item.axis);
@@ -52,7 +52,7 @@ export function scoreQuiz(answers: QuizAnswer[]): QuizScoreResult {
   const result = RESULT_META.find((item) => item.axis === winningAxis) ?? RESULT_META[0];
 
   return {
-    type: result.type,
+    resultType: result.resultType,
     title: result.title
   };
 }

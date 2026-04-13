@@ -10,7 +10,7 @@ describe("scoreQuiz", () => {
       { questionId: "q3", value: "C" }
     ]);
 
-    expect(result).toEqual({ type: "CTRL", title: "控制者" });
+    expect(result).toEqual({ resultType: "CTRL", title: "控制者" });
   });
 
   test("resolves ties with a stable axis priority", () => {
@@ -20,7 +20,7 @@ describe("scoreQuiz", () => {
       { questionId: "q3", value: "B" }
     ]);
 
-    expect(result.type).toBe("CTRL");
+    expect(result.resultType).toBe("CTRL");
   });
 
   test("rejects incomplete answer sets", () => {
