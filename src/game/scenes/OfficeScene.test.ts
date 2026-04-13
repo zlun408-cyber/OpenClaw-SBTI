@@ -11,13 +11,13 @@ beforeEach(() => {
     ...createInitialAppState(),
     phase: "office",
     result: {
-      title: "Architect",
-      tagline: "Designs robust systems",
-      archetype: "INTJ"
+      resultType: "CTRL",
+      title: "Architect"
     },
     character: {
       title: "Architect",
-      customName: "Alex"
+      customName: "Alex",
+      state: "idle"
     }
   });
 });
