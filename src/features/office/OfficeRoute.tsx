@@ -1,5 +1,6 @@
 import { Navigate } from "react-router-dom";
 
+import { GameCanvas } from "../../game/GameCanvas";
 import { useAppStore } from "../../state/appStore";
 
 export function OfficeRoute() {
@@ -14,5 +15,5 @@ export function OfficeRoute() {
     return <Navigate to="/quiz" replace />;
   }
 
-  return <h1>Office</h1>;
+  return <GameCanvas />;
 }
