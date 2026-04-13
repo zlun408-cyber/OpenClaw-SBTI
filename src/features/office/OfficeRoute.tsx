@@ -7,7 +7,7 @@ export function OfficeRoute() {
     (state) =>
       state.result !== null &&
       state.character.title === state.result.title &&
-      (state.phase === "avatarPreview" || state.phase === "office")
+      state.phase === "office"
   );
 
   if (!canEnterOffice) {

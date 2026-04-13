@@ -89,3 +89,20 @@ test("restarting quiz clears stale preview state and blocks avatar deep-link", a
   });
   expect(await screen.findByRole("heading", { name: /sbti quiz/i })).toBeInTheDocument();
 });
+
+test("blocks manual office deep-link from avatar preview before CTA", async () => {
+  const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
+  render(<RouterProvider router={router} />);
+
+  fireEvent.click(screen.getByRole("button", { name: "先定规则和边界，确保方向可控" }));
+  fireEvent.click(screen.getByRole("button", { name: "设定决策原则，快速收敛" }));
+  fireEvent.click(screen.getByRole("button", { name: "优先排定优先级，避免失控" }));
+  expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
+  expect(useAppStore.getState().phase).toBe("avatarPreview");
+
+  await act(async () => {
+    await router.navigate("/office");
+  });
+
+  expect(await screen.findByRole("heading", { name: /sbti quiz/i })).toBeInTheDocument();
+});

@@ -47,7 +47,12 @@ export const useAppStore = create<AppState>((set) => ({
   },
   enterOffice(customName) {
     set((state) => {
-      if (state.result === null) {
+      const canEnterFromPreview =
+        state.phase === "avatarPreview" &&
+        state.result !== null &&
+        state.character.title === state.result.title;
+
+      if (!canEnterFromPreview) {
         return state;
       }
 
