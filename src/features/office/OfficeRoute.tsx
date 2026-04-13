@@ -12,7 +12,7 @@ export function OfficeRoute() {
       state.character.title === state.result.title &&
       state.phase === "office"
   );
-  const handleRoomEntered = useCallback((roomId: RoomId) => {
+  const handleRoomChanged = useCallback((roomId: RoomId | null) => {
     useAppStore.setState((state) =>
       state.currentRoomId === roomId
         ? state
@@ -27,5 +27,5 @@ export function OfficeRoute() {
     return <Navigate to="/quiz" replace />;
   }
 
-  return <GameCanvas onRoomEntered={handleRoomEntered} />;
+  return <GameCanvas onRoomChanged={handleRoomChanged} />;
 }

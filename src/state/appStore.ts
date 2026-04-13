@@ -10,7 +10,7 @@ import { DEFAULT_CHARACTER_PROFILE } from "../types/domain";
 
 export type AppState = {
   phase: AppPhase;
-  currentRoomId: RoomId;
+  currentRoomId: RoomId | null;
   result: QuizResult | null;
   character: CharacterProfile;
   startQuiz: () => void;
@@ -21,7 +21,7 @@ export type AppState = {
 
 export const createInitialAppState = (): Omit<AppState, "startQuiz" | "completeQuiz" | "enterAvatarPreview" | "enterOffice"> => ({
   phase: "intro",
-  currentRoomId: "office",
+  currentRoomId: null,
   result: null,
   character: { ...DEFAULT_CHARACTER_PROFILE }
 });
@@ -77,6 +77,7 @@ export const useAppStore = create<AppState>((set) => ({
       return {
         ...state,
         phase: "office",
+        currentRoomId: "office",
         character: {
           ...state.character,
           customName: customName.trim()

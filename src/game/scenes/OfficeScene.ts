@@ -10,8 +10,13 @@ const ROOM_WIDTH = 128;
 const ROOM_HEIGHT = 80;
 
 type RoomEnteredEvent = {
-  type: "ROOM_ENTERED";
-  roomId: RoomId;
+  type: "ROOM_CHANGED";
+  roomId: RoomId | null;
+};
+
+type Point = {
+  x: number;
+  y: number;
 };
 
 export class OfficeScene extends Phaser.Scene {
@@ -23,6 +28,7 @@ export class OfficeScene extends Phaser.Scene {
   private player?: Phaser.GameObjects.Arc;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd?: Record<"W" | "A" | "S" | "D", Phaser.Input.Keyboard.Key>;
+  private readonly playableArea = this.createPlayableArea();
 
   constructor() {
     super(OfficeScene.KEY);
@@ -70,10 +76,12 @@ export class OfficeScene extends Phaser.Scene {
       | undefined;
 
     this.input.on("pointerdown", (pointer: Phaser.Input.Pointer) => {
-      this.movement.startAutoMove({ x: pointer.worldX, y: pointer.worldY });
+      this.movement.startAutoMove(
+        this.clampWorldPosition({ x: pointer.worldX, y: pointer.worldY })
+      );
     });
 
-    this.emitRoomEnteredIfNeeded();
+    this.emitRoomChangedIfNeeded();
   }
 
   update(_time: number, deltaMs: number) {
@@ -83,14 +91,16 @@ export class OfficeScene extends Phaser.Scene {
 
     this.movement.applyKeyboardInput(this.readKeyboardInput());
 
-    const nextPosition = this.movement.update(
-      { x: this.player.x, y: this.player.y },
-      deltaMs / 1000
+    const nextPosition = this.clampWorldPosition(
+      this.movement.update(
+        { x: this.player.x, y: this.player.y },
+        deltaMs / 1000
+      )
     );
 
     this.player.setPosition(nextPosition.x, nextPosition.y);
 
-    this.emitRoomEnteredIfNeeded();
+    this.emitRoomChangedIfNeeded();
   }
 
   private readKeyboardInput() {
@@ -110,7 +120,7 @@ export class OfficeScene extends Phaser.Scene {
     };
   }
 
-  private emitRoomEnteredIfNeeded() {
+  private emitRoomChangedIfNeeded() {
     if (!this.player) {
       return;
     }
@@ -125,9 +135,33 @@ export class OfficeScene extends Phaser.Scene {
       return;
     }
 
-    this.game.events.emit("ROOM_ENTERED", {
-      type: "ROOM_ENTERED",
-      roomId: event.enteredRoomId
+    this.game.events.emit("ROOM_CHANGED", {
+      type: "ROOM_CHANGED",
+      roomId: event.roomId
     } satisfies RoomEnteredEvent);
+  }
+
+  private createPlayableArea() {
+    const roomPositions = Object.values(mapConfig.rooms);
+    const minX = Math.min(...roomPositions.map((room) => room.x)) - ROOM_WIDTH / 2 - 48;
+    const maxX = Math.max(...roomPositions.map((room) => room.x)) + ROOM_WIDTH / 2 + 48;
+    const minY = Math.min(...roomPositions.map((room) => room.y)) - ROOM_HEIGHT / 2 - 48;
+    const maxY = Math.max(...roomPositions.map((room) => room.y)) + ROOM_HEIGHT / 2 + 48;
+
+    return { minX, maxX, minY, maxY };
+  }
+
+  private clampWorldPosition(position: Point): Point {
+    const localX = position.x - this.scale.width / 2;
+    const localY = position.y - this.scale.height / 2;
+
+    return {
+      x:
+        this.scale.width / 2 +
+        Phaser.Math.Clamp(localX, this.playableArea.minX, this.playableArea.maxX),
+      y:
+        this.scale.height / 2 +
+        Phaser.Math.Clamp(localY, this.playableArea.minY, this.playableArea.maxY)
+    };
   }
 }

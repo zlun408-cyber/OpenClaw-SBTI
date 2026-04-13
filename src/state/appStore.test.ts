@@ -111,6 +111,13 @@ test("character label falls back to title", () => {
   expect(selectCharacterLabel(useAppStore.getState())).toBe("控制者");
 });
 
+
+
+test("current room selector returns null when outside all rooms", () => {
+  useAppStore.setState((state) => ({ ...state, currentRoomId: null }));
+
+  expect(selectCurrentRoomContext(useAppStore.getState())).toBeNull();
+});
 test("room registry is immutable through selector output", () => {
   useAppStore.setState((state) => ({ ...state, currentRoomId: "office" }));
   const room = selectCurrentRoomContext(useAppStore.getState());
@@ -119,5 +126,5 @@ test("room registry is immutable through selector output", () => {
   expect(() => {
     (room as { label: string }).label = "被改坏";
   }).toThrow(TypeError);
-  expect(selectCurrentRoomContext(useAppStore.getState()).label).toBe("办公室");
+  expect(selectCurrentRoomContext(useAppStore.getState())?.label).toBe("办公室");
 });

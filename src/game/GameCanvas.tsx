@@ -3,17 +3,22 @@ import { useEffect, useRef } from "react";
 import type { RoomId } from "../types/domain";
 
 type RoomEnteredEvent = {
-  type: "ROOM_ENTERED";
-  roomId: RoomId;
+  type: "ROOM_CHANGED";
+  roomId: RoomId | null;
 };
 
 type GameCanvasProps = {
-  onRoomEntered?: (roomId: RoomId) => void;
+  onRoomChanged?: (roomId: RoomId | null) => void;
 };
 
-export function GameCanvas({ onRoomEntered }: GameCanvasProps) {
+export function GameCanvas({ onRoomChanged }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const destroyRef = useRef<(() => void) | null>(null);
+  const onRoomChangedRef = useRef(onRoomChanged);
+
+  useEffect(() => {
+    onRoomChangedRef.current = onRoomChanged;
+  }, [onRoomChanged]);
 
   useEffect(() => {
     if (import.meta.env.MODE === "test" || !containerRef.current) {
@@ -45,12 +50,12 @@ export function GameCanvas({ onRoomEntered }: GameCanvasProps) {
 
       const game = new Phaser.Game(config);
       const handleRoomEntered = (event: RoomEnteredEvent) => {
-        onRoomEntered?.(event.roomId);
+        onRoomChangedRef.current?.(event.roomId);
       };
 
-      game.events.on("ROOM_ENTERED", handleRoomEntered);
+      game.events.on("ROOM_CHANGED", handleRoomEntered);
       destroyRef.current = () => {
-        game.events.off("ROOM_ENTERED", handleRoomEntered);
+        game.events.off("ROOM_CHANGED", handleRoomEntered);
         game.destroy(true);
       };
     })();
@@ -60,7 +65,7 @@ export function GameCanvas({ onRoomEntered }: GameCanvasProps) {
       destroyRef.current?.();
       destroyRef.current = null;
     };
-  }, [onRoomEntered]);
+  }, []);
 
   return <div data-testid="game-canvas" ref={containerRef} />;
 }

@@ -3,7 +3,7 @@ import type { RoomTrigger } from "../data/roomTriggers";
 import type { Point } from "./PathfindingSystem";
 
 export type RoomTriggerEvent = {
-  enteredRoomId: RoomId;
+  roomId: RoomId | null;
 };
 
 export class RoomTriggerSystem {
@@ -18,16 +18,13 @@ export class RoomTriggerSystem {
       return Math.hypot(dx, dy) <= trigger.radius;
     });
 
-    if (!activeTrigger) {
+    const nextRoomId = activeTrigger?.id ?? null;
+    if (nextRoomId === this.currentRoomId) {
       return null;
     }
 
-    if (activeTrigger.id === this.currentRoomId) {
-      return null;
-    }
-
-    this.currentRoomId = activeTrigger.id;
-    return { enteredRoomId: activeTrigger.id };
+    this.currentRoomId = nextRoomId;
+    return { roomId: nextRoomId };
   }
 
   getCurrentRoomId() {
