@@ -4,7 +4,6 @@ import { roomTriggers } from "../data/roomTriggers";
 import { mapConfig } from "../data/mapConfig";
 import { MovementSystem } from "../systems/MovementSystem";
 import { RoomTriggerSystem } from "../systems/RoomTriggerSystem";
-import { useAppStore } from "../../state/appStore";
 import type { RoomId } from "../../types/domain";
 
 const ROOM_WIDTH = 128;
@@ -20,7 +19,6 @@ export class OfficeScene extends Phaser.Scene {
 
   private readonly movement = new MovementSystem();
   private readonly roomTriggerSystem = new RoomTriggerSystem(roomTriggers);
-  private readonly eventBus = new Phaser.Events.EventEmitter();
 
   private player?: Phaser.GameObjects.Arc;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -75,21 +73,6 @@ export class OfficeScene extends Phaser.Scene {
       this.movement.startAutoMove({ x: pointer.worldX, y: pointer.worldY });
     });
 
-    this.eventBus.on("ROOM_ENTERED", (event: RoomEnteredEvent) => {
-      useAppStore.setState((state) =>
-        state.currentRoomId === event.roomId
-          ? state
-          : {
-              ...state,
-              currentRoomId: event.roomId
-            }
-      );
-    });
-
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
-      this.eventBus.removeAllListeners();
-    });
-
     this.emitRoomEnteredIfNeeded();
   }
 
@@ -142,7 +125,7 @@ export class OfficeScene extends Phaser.Scene {
       return;
     }
 
-    this.eventBus.emit("ROOM_ENTERED", {
+    this.game.events.emit("ROOM_ENTERED", {
       type: "ROOM_ENTERED",
       roomId: event.enteredRoomId
     } satisfies RoomEnteredEvent);

@@ -1,6 +1,17 @@
 import { useEffect, useRef } from "react";
 
-export function GameCanvas() {
+import type { RoomId } from "../types/domain";
+
+type RoomEnteredEvent = {
+  type: "ROOM_ENTERED";
+  roomId: RoomId;
+};
+
+type GameCanvasProps = {
+  onRoomEntered?: (roomId: RoomId) => void;
+};
+
+export function GameCanvas({ onRoomEntered }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const destroyRef = useRef<(() => void) | null>(null);
 
@@ -33,7 +44,15 @@ export function GameCanvas() {
       };
 
       const game = new Phaser.Game(config);
-      destroyRef.current = () => game.destroy(true);
+      const handleRoomEntered = (event: RoomEnteredEvent) => {
+        onRoomEntered?.(event.roomId);
+      };
+
+      game.events.on("ROOM_ENTERED", handleRoomEntered);
+      destroyRef.current = () => {
+        game.events.off("ROOM_ENTERED", handleRoomEntered);
+        game.destroy(true);
+      };
     })();
 
     return () => {
@@ -41,7 +60,7 @@ export function GameCanvas() {
       destroyRef.current?.();
       destroyRef.current = null;
     };
-  }, []);
+  }, [onRoomEntered]);
 
   return <div data-testid="game-canvas" ref={containerRef} />;
 }
