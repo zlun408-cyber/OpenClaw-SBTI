@@ -5,6 +5,7 @@ import {
   selectCharacterLabel,
   selectCurrentRoomContext
 } from "./selectors";
+import type { QuizResult } from "../types/domain";
 
 beforeEach(() => {
   useAppStore.setState(createInitialAppState());
@@ -18,7 +19,7 @@ test("can complete quiz and enter avatar preview", () => {
 });
 
 test("completeQuiz stores a copied result payload", () => {
-  const result = { resultType: "CTRL", title: "控制者" };
+  const result: QuizResult = { resultType: "CTRL", title: "控制者" };
 
   useAppStore.getState().completeQuiz(result);
 
