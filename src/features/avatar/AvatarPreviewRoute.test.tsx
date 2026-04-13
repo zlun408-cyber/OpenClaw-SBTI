@@ -106,3 +106,22 @@ test("blocks manual office deep-link from avatar preview before CTA", async () =
 
   expect(await screen.findByRole("heading", { name: /sbti quiz/i })).toBeInTheDocument();
 });
+
+test("blocks avatar revisit after entering office", async () => {
+  const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
+  render(<RouterProvider router={router} />);
+
+  fireEvent.click(screen.getByRole("button", { name: "先定规则和边界，确保方向可控" }));
+  fireEvent.click(screen.getByRole("button", { name: "设定决策原则，快速收敛" }));
+  fireEvent.click(screen.getByRole("button", { name: "优先排定优先级，避免失控" }));
+  expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
+
+  fireEvent.click(screen.getByRole("button", { name: /进入数字办公室/i }));
+  expect(await screen.findByRole("heading", { name: /^office$/i })).toBeInTheDocument();
+
+  await act(async () => {
+    await router.navigate("/avatar");
+  });
+
+  expect(await screen.findByRole("heading", { name: /^office$/i })).toBeInTheDocument();
+});

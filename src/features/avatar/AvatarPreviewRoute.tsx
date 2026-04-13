@@ -12,10 +12,13 @@ export function AvatarPreviewRoute() {
   const enterOffice = useAppStore((state) => state.enterOffice);
   const [customName, setCustomName] = useState(character.customName);
   const customNameRef = useRef(customName);
-  const canPreviewAvatar =
-    (phase === "avatarPreview" || phase === "office") &&
-    result !== null &&
-    character.title === result.title;
+  const hasCoherentResult = result !== null && character.title === result.title;
+
+  if (phase === "office" && hasCoherentResult) {
+    return <Navigate to="/office" replace />;
+  }
+
+  const canPreviewAvatar = phase === "avatarPreview" && hasCoherentResult;
 
   if (!canPreviewAvatar) {
     return <Navigate to="/quiz" replace />;
