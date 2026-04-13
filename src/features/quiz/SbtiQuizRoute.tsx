@@ -1,9 +1,42 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAppStore } from "../../state/appStore";
 import { questions } from "./questions";
 import { type QuizAnswer, scoreQuiz } from "./scoring";
+
+type WarpTransitionOptions = {
+  durationMs?: number;
+};
+
+export function useWarpOverlaySequence({ durationMs = 320 }: WarpTransitionOptions = {}) {
+  const [isWarping, setWarping] = useState(false);
+  const timerRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  const runWarpSequence = useCallback(
+    (onComplete: () => void) => {
+      if (timerRef.current !== null) {
+        window.clearTimeout(timerRef.current);
+      }
+
+      setWarping(true);
+      timerRef.current = window.setTimeout(() => {
+        onComplete();
+      }, durationMs);
+    },
+    [durationMs]
+  );
+
+  return { isWarping, runWarpSequence };
+}
 
 export function SbtiQuizRoute() {
   const startQuiz = useAppStore((state) => state.startQuiz);
@@ -11,6 +44,7 @@ export function SbtiQuizRoute() {
   const navigate = useNavigate();
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<QuizAnswer[]>([]);
+  const { isWarping, runWarpSequence } = useWarpOverlaySequence();
 
   const currentQuestion = questions[currentQuestionIndex];
 
@@ -26,7 +60,9 @@ export function SbtiQuizRoute() {
 
     if (currentQuestionIndex === questions.length - 1) {
       completeQuiz(scoreQuiz(collectedAnswers));
-      navigate("/avatar");
+      runWarpSequence(() => {
+        navigate("/avatar");
+      });
       return;
     }
 
@@ -48,6 +84,11 @@ export function SbtiQuizRoute() {
           </button>
         ))}
       </div>
+      {isWarping && (
+        <div className="warp-overlay" role="status" aria-live="polite">
+          跃迁中...
+        </div>
+      )}
     </section>
   );
 }
