@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 
+import { parseMeetingTaskIntent } from "./meetingTaskIntent";
 import { createWebchatAdapter } from "./WebchatAdapter";
 import { useAppStore } from "../../state/appStore";
 import { selectCharacterLabel, selectCurrentRoomContext } from "../../state/selectors";
@@ -145,6 +146,27 @@ export function FloatingChatBox({ adapter = DEFAULT_ADAPTER }: FloatingChatBoxPr
         text: input
       }
     ]);
+
+    const taskIntent = parseMeetingTaskIntent(input, currentRoomId);
+
+    if (taskIntent) {
+      const createdTask = useAppStore.getState().createMeetingTask({
+        title: taskIntent.title,
+        description: currentRoomId === "meeting" ? "来自会议室对话创建" : "来自对话快捷创建",
+        source: "chat"
+      });
+
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          text: `已创建会议任务《${createdTask.title}》，已同步到会议室任务板。`
+        }
+      ]);
+      setIsSending(false);
+      return;
+    }
 
     try {
       const reply = await adapter.sendMessage(input, {

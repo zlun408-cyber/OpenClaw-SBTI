@@ -20,5 +20,5 @@ test("wasd movement can reach the meeting room", async ({ page }) => {
   await page.keyboard.up("w");
 
   await expect(page.getByRole("heading", { name: /meeting room/i })).toBeVisible();
-  await expect(page.getByText(/task intake queue/i)).toBeVisible();
+  await expect(page.getByText(/Chat-first task control console/i)).toBeVisible();
 });

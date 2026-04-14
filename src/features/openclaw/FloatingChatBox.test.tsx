@@ -48,7 +48,7 @@ test("updates the prompt copy when the active room changes", () => {
   expect(screen.getByPlaceholderText("更新 soul 或 memory")).toBeInTheDocument();
 });
 
-test("sends the input through the adapter and renders the reply", async () => {
+test("sends the input through the adapter and renders the reply for non-task chat", async () => {
   const adapter: OpenClawAdapter = {
     buildRequest: (input, context) => ({
       message: input,
@@ -61,11 +61,34 @@ test("sends the input through the adapter and renders the reply", async () => {
   render(<FloatingChatBox adapter={adapter} />);
 
   fireEvent.change(screen.getByLabelText(/openclaw input/i), {
-    target: { value: "整理今天的任务" }
+    target: { value: "最近状态怎么样" }
   });
   fireEvent.submit(screen.getByLabelText(/openclaw composer/i));
 
-  expect(await screen.findByText("mock:整理今天的任务")).toBeInTheDocument();
+  expect(await screen.findByText("mock:最近状态怎么样")).toBeInTheDocument();
+});
+
+
+test("creates a meeting task from chat-first task requests", async () => {
+  const adapter: OpenClawAdapter = {
+    buildRequest: (input, context) => ({
+      message: input,
+      session: "main",
+      context: buildContextSnapshot(context)
+    }),
+    sendMessage: vi.fn(async () => ({ text: "不应该走到这里", source: "mock" as const }))
+  };
+
+  render(<FloatingChatBox adapter={adapter} />);
+
+  fireEvent.change(screen.getByLabelText(/openclaw input/i), {
+    target: { value: "新增任务：整理今天客户反馈" }
+  });
+  fireEvent.submit(screen.getByLabelText(/openclaw composer/i));
+
+  expect(await screen.findByText(/已创建会议任务《整理今天客户反馈》/)).toBeInTheDocument();
+  expect(useAppStore.getState().meetingTasks.some((task) => task.title === "整理今天客户反馈")).toBe(true);
+  expect(adapter.sendMessage).not.toHaveBeenCalled();
 });
 
 

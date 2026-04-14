@@ -128,3 +128,29 @@ test("room registry is immutable through selector output", () => {
   }).toThrow(TypeError);
   expect(selectCurrentRoomContext(useAppStore.getState())?.label).toBe("办公室");
 });
+
+
+test("meeting tasks can be claimed, marked ready, and submitted", () => {
+  const store = useAppStore.getState();
+  const createdTask = store.createMeetingTask({
+    title: "整理今天客户反馈",
+    description: "来自会议室对话",
+    source: "chat"
+  });
+
+  store.claimMeetingTask(createdTask.id);
+  expect(useAppStore.getState().meetingTasks.find((task) => task.id === createdTask.id)?.status).toBe("in_progress");
+  expect(useAppStore.getState().activeMeetingTaskId).toBe(createdTask.id);
+  expect(useAppStore.getState().character.state).toBe("work");
+
+  store.markMeetingTaskReady(createdTask.id);
+  expect(useAppStore.getState().meetingTasks.find((task) => task.id === createdTask.id)?.status).toBe("ready_to_submit");
+  expect(useAppStore.getState().character.state).toBe("task-submit");
+
+  store.submitMeetingTask(createdTask.id, "已输出客户反馈总结");
+  const submittedTask = useAppStore.getState().meetingTasks.find((task) => task.id === createdTask.id);
+  expect(submittedTask?.status).toBe("submitted");
+  expect(submittedTask?.resultText).toBe("已输出客户反馈总结");
+  expect(useAppStore.getState().activeMeetingTaskId).toBeNull();
+  expect(useAppStore.getState().character.state).toBe("idle");
+});

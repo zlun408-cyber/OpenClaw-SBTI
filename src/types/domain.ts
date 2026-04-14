@@ -30,6 +30,21 @@ export type RoomContext = {
   label: string;
 };
 
+export type MeetingTaskStatus = "new" | "in_progress" | "ready_to_submit" | "submitted";
+
+export type MeetingTaskSource = "seed" | "chat";
+
+export type MeetingTask = {
+  id: string;
+  title: string;
+  description: string;
+  source: MeetingTaskSource;
+  status: MeetingTaskStatus;
+  createdAt: string;
+  updatedAt: string;
+  resultText: string;
+};
+
 type DeepReadonly<T> = T extends (...args: never[]) => unknown
   ? T
   : T extends object
