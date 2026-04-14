@@ -31,7 +31,6 @@ export type RoomContext = {
 };
 
 export type MeetingTaskStatus = "new" | "in_progress" | "ready_to_submit" | "submitted";
-
 export type MeetingTaskSource = "seed" | "chat";
 
 export type MeetingTask = {
@@ -43,6 +42,21 @@ export type MeetingTask = {
   createdAt: string;
   updatedAt: string;
   resultText: string;
+};
+
+export type TrainingSkillStatus = "available" | "installing" | "installed" | "failed";
+export type TrainingSkillSource = "preset" | "chat";
+export type TrainingSkillInstallChannel = "openclaw" | "local";
+
+export type TrainingSkill = {
+  id: string;
+  name: string;
+  description: string;
+  source: TrainingSkillSource;
+  status: TrainingSkillStatus;
+  installChannel: TrainingSkillInstallChannel | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 type DeepReadonly<T> = T extends (...args: never[]) => unknown

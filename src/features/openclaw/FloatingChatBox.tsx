@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { parseMeetingTaskIntent } from "./meetingTaskIntent";
+import { parseTrainingSkillIntent } from "./trainingSkillIntent";
 import { defaultOpenClawAdapter } from "./defaultAdapter";
 import { useAppStore } from "../../state/appStore";
 import { selectCharacterLabel, selectCurrentRoomContext } from "../../state/selectors";
@@ -157,6 +158,38 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
           id: `assistant-${Date.now()}`,
           role: "assistant",
           text: `已创建会议任务《${createdTask.title}》，已同步到会议室任务板。`
+        }
+      ]);
+      setIsSending(false);
+      return;
+    }
+
+    const skillIntent = parseTrainingSkillIntent(input, currentRoomId);
+
+    if (skillIntent) {
+      const createdSkill = useAppStore.getState().createTrainingSkill({
+        name: skillIntent.skillName,
+        description: currentRoomId === "training" ? "来自培训室对话创建" : "来自对话快捷安装",
+        source: "chat"
+      });
+      useAppStore.getState().beginTrainingSkillInstall(createdSkill.id);
+
+      const reply = await adapter.sendMessage(`请安装训练技能：${createdSkill.name}`, {
+        roomId: currentRoomId,
+        roomLabel: roomContext?.label ?? null,
+        characterName,
+        characterTitle: useAppStore.getState().character.title
+      });
+
+      const installChannel = reply.source === "webchat" ? "openclaw" : "local";
+      useAppStore.getState().completeTrainingSkillInstall(createdSkill.id, installChannel);
+
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          text: `已安装训练技能《${createdSkill.name}》，当前通道：${installChannel === "openclaw" ? "OpenClaw" : "本地回退"}。`
         }
       ]);
       setIsSending(false);

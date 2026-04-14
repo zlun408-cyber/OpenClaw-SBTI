@@ -37,3 +37,20 @@ test("meeting-room chat can create a task card without leaving the room", async 
   await expect(page.getByText(/已创建会议任务《整理今天客户反馈》/)).toBeVisible();
   await expect(page.getByRole("button", { name: "领取任务 整理今天客户反馈" })).toBeVisible();
 });
+
+
+test("training-room chat can install a new skill", async ({ page }) => {
+  await enterOffice(page);
+
+  await page.locator("canvas").first().click({ position: { x: 660, y: 280 } });
+  await expect(page.getByRole("heading", { name: /training room/i })).toBeVisible();
+
+  const input = page.getByLabel("openclaw input");
+  await input.fill("安装 skill：日报总结");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(page.getByText(/已安装训练技能《日报总结》/)).toBeVisible();
+
+  const installedSection = page.getByRole("heading", { name: "Installed Skills" }).locator("xpath=..");
+  await expect(installedSection.getByText("日报总结", { exact: true })).toBeVisible();
+});

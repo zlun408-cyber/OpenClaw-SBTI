@@ -154,3 +154,23 @@ test("meeting tasks can be claimed, marked ready, and submitted", () => {
   expect(useAppStore.getState().activeMeetingTaskId).toBeNull();
   expect(useAppStore.getState().character.state).toBe("idle");
 });
+
+
+test("training skills can be installed and marked with fallback channel", () => {
+  const store = useAppStore.getState();
+  const createdSkill = store.createTrainingSkill({
+    name: "日志分析",
+    description: "来自聊天",
+    source: "chat"
+  });
+
+  store.beginTrainingSkillInstall(createdSkill.id);
+  expect(useAppStore.getState().trainingSkills.find((skill) => skill.id === createdSkill.id)?.status).toBe("installing");
+  expect(useAppStore.getState().character.state).toBe("train");
+
+  store.completeTrainingSkillInstall(createdSkill.id, "local");
+  const installedSkill = useAppStore.getState().trainingSkills.find((skill) => skill.id === createdSkill.id);
+  expect(installedSkill?.status).toBe("installed");
+  expect(installedSkill?.installChannel).toBe("local");
+  expect(useAppStore.getState().character.state).toBe("idle");
+});

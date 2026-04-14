@@ -6,13 +6,20 @@ import type {
   MeetingTask,
   MeetingTaskSource,
   QuizResult,
-  RoomId
+  RoomId,
+  TrainingSkill,
+  TrainingSkillInstallChannel,
+  TrainingSkillSource
 } from "../types/domain";
 import { DEFAULT_CHARACTER_PROFILE } from "../types/domain";
 import {
   createDefaultMeetingTasks,
   createMeetingTaskRecord
 } from "../features/office/tasks/meetingTasks";
+import {
+  createDefaultTrainingSkills,
+  createTrainingSkillRecord
+} from "../features/office/training/trainingSkills";
 
 export type AppState = {
   phase: AppPhase;
@@ -21,6 +28,7 @@ export type AppState = {
   character: CharacterProfile;
   meetingTasks: MeetingTask[];
   activeMeetingTaskId: string | null;
+  trainingSkills: TrainingSkill[];
   startQuiz: () => void;
   completeQuiz: (result: QuizResult) => void;
   enterAvatarPreview: () => void;
@@ -33,6 +41,13 @@ export type AppState = {
   claimMeetingTask: (taskId: string) => void;
   markMeetingTaskReady: (taskId: string) => void;
   submitMeetingTask: (taskId: string, resultText: string) => void;
+  createTrainingSkill: (input: {
+    name: string;
+    description: string;
+    source: TrainingSkillSource;
+  }) => TrainingSkill;
+  beginTrainingSkillInstall: (skillId: string) => void;
+  completeTrainingSkillInstall: (skillId: string, channel: TrainingSkillInstallChannel) => void;
 };
 
 export const createInitialAppState = (): Omit<
@@ -45,13 +60,17 @@ export const createInitialAppState = (): Omit<
   | "claimMeetingTask"
   | "markMeetingTaskReady"
   | "submitMeetingTask"
+  | "createTrainingSkill"
+  | "beginTrainingSkillInstall"
+  | "completeTrainingSkillInstall"
 > => ({
   phase: "intro",
   currentRoomId: null,
   result: null,
   character: { ...DEFAULT_CHARACTER_PROFILE },
   meetingTasks: createDefaultMeetingTasks(),
-  activeMeetingTaskId: null
+  activeMeetingTaskId: null,
+  trainingSkills: createDefaultTrainingSkills()
 });
 
 export const useAppStore = create<AppState>((set) => ({
@@ -63,7 +82,8 @@ export const useAppStore = create<AppState>((set) => ({
       result: null,
       character: { ...DEFAULT_CHARACTER_PROFILE },
       meetingTasks: createDefaultMeetingTasks(),
-      activeMeetingTaskId: null
+      activeMeetingTaskId: null,
+      trainingSkills: createDefaultTrainingSkills()
     }));
   },
   completeQuiz(result) {
@@ -169,6 +189,47 @@ export const useAppStore = create<AppState>((set) => ({
               updatedAt: new Date().toISOString()
             }
           : task
+      )
+    }));
+  },
+  createTrainingSkill(input) {
+    const nextSkill = createTrainingSkillRecord(input);
+    set((state) => ({
+      ...state,
+      trainingSkills: [nextSkill, ...state.trainingSkills]
+    }));
+    return nextSkill;
+  },
+  beginTrainingSkillInstall(skillId) {
+    set((state) => ({
+      ...state,
+      character: {
+        ...state.character,
+        state: "train"
+      },
+      trainingSkills: state.trainingSkills.map((skill) =>
+        skill.id === skillId
+          ? { ...skill, status: "installing", updatedAt: new Date().toISOString() }
+          : skill
+      )
+    }));
+  },
+  completeTrainingSkillInstall(skillId, channel) {
+    set((state) => ({
+      ...state,
+      character: {
+        ...state.character,
+        state: "idle"
+      },
+      trainingSkills: state.trainingSkills.map((skill) =>
+        skill.id === skillId
+          ? {
+              ...skill,
+              status: "installed",
+              installChannel: channel,
+              updatedAt: new Date().toISOString()
+            }
+          : skill
       )
     }));
   }

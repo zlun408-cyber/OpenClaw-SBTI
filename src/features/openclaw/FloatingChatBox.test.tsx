@@ -92,6 +92,29 @@ test("creates a meeting task from chat-first task requests", async () => {
 });
 
 
+test("creates and installs a training skill from chat inside the training room", async () => {
+  const adapter: OpenClawAdapter = {
+    buildRequest: (input, context) => ({
+      message: input,
+      session: "main",
+      context: buildContextSnapshot(context)
+    }),
+    sendMessage: vi.fn(async () => ({ text: "已安装 skill", source: "webchat" as const }))
+  };
+
+  useAppStore.setState((state) => ({ ...state, currentRoomId: "training" }));
+  render(<FloatingChatBox adapter={adapter} />);
+
+  fireEvent.change(screen.getByLabelText(/openclaw input/i), {
+    target: { value: "安装 skill：日报总结" }
+  });
+  fireEvent.submit(screen.getByLabelText(/openclaw composer/i));
+
+  expect(await screen.findByText(/已安装训练技能《日报总结》/)).toBeInTheDocument();
+  expect(useAppStore.getState().trainingSkills.some((skill) => skill.name === "日报总结")).toBe(true);
+});
+
+
 test("shows a fallback message when the adapter throws", async () => {
   const adapter: OpenClawAdapter = {
     buildRequest: (input, context) => ({
