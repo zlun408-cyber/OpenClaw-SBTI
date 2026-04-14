@@ -60,7 +60,8 @@ const boxStyle = {
   boxShadow: "0 24px 80px rgba(0, 0, 0, 0.42)",
   color: "#F8F2E8",
   zIndex: 40,
-  backdropFilter: "blur(14px)"
+  backdropFilter: "blur(14px)",
+  pointerEvents: "none"
 } satisfies React.CSSProperties;
 
 const subtleTextStyle = {
@@ -84,7 +85,8 @@ const inputStyle = {
   background: "rgba(17, 24, 39, 0.9)",
   color: "#FFF8E8",
   padding: "12px 14px",
-  outline: "none"
+  outline: "none",
+  pointerEvents: "auto"
 } satisfies React.CSSProperties;
 
 const buttonStyle = {
@@ -93,13 +95,15 @@ const buttonStyle = {
   background: "linear-gradient(180deg, #6E5431 0%, #4A351D 100%)",
   color: "#FFF5DD",
   padding: "10px 14px",
-  cursor: "pointer"
+  cursor: "pointer",
+  pointerEvents: "auto"
 } satisfies React.CSSProperties;
 
 const linkStyle = {
   color: "#F7D48B",
   textDecoration: "none",
-  fontSize: "12px"
+  fontSize: "12px",
+  pointerEvents: "auto"
 } satisfies React.CSSProperties;
 
 const createInitialMessage = (roomLabel: string | null, characterName: string): ChatMessage => ({
