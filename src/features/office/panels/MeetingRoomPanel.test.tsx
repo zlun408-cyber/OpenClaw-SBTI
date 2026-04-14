@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, test } from "vitest";
 
 import { MeetingRoomPanel } from "./MeetingRoomPanel";
@@ -19,7 +19,7 @@ beforeEach(() => {
   });
 });
 
-test("renders seed and chat tasks in grouped lanes", () => {
+test("renders meeting hotspots and grouped tasks", () => {
   useAppStore.getState().createMeetingTask({
     title: "整理客户反馈",
     description: "来自聊天",
@@ -29,8 +29,21 @@ test("renders seed and chat tasks in grouped lanes", () => {
   render(<MeetingRoomPanel />);
 
   expect(screen.getByRole("heading", { name: /meeting room/i })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /会议工位 任务发布台/i })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /会议工位 执行看板/i })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /会议工位 提交席/i })).toBeInTheDocument();
   expect(screen.getAllByText(/seed tasks/i).length).toBeGreaterThan(0);
   expect(screen.getByText("整理客户反馈")).toBeInTheDocument();
+});
+
+test("switches focus when selecting the submission station", () => {
+  render(<MeetingRoomPanel />);
+
+  fireEvent.click(screen.getByRole("button", { name: /会议工位 提交席/i }));
+
+  expect(screen.getByText(/已聚焦会议工位：提交席/i)).toBeInTheDocument();
+  const readyLane = screen.getByLabelText(/ready_to_submit-lane/i);
+  expect(within(readyLane).getByRole("heading", { name: /ready to submit/i })).toBeInTheDocument();
 });
 
 test("allows claiming and submitting a task result", () => {

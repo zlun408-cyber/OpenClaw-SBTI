@@ -21,7 +21,7 @@ test("wasd movement can reach the meeting room", async ({ page }) => {
   await page.keyboard.up("w");
 
   await expect(page.getByRole("heading", { name: /meeting room/i })).toBeVisible();
-  await expect(page.getByText(/Chat-first task control console/i)).toBeVisible();
+  await expect(page.getByText(/scene hotspots/i)).toBeVisible();
 });
 
 
@@ -63,4 +63,20 @@ test("clicking an HR workstation can focus the memory editor", async ({ page }) 
   await page.getByRole("button", { name: /人事工位 Memory 档案柜/i }).click();
   await expect(page.getByText(/已聚焦档案柜：memory.md/)).toBeVisible();
   await expect(page.getByLabel("memory.md editor")).toBeVisible();
+});
+
+
+test("clicking a meeting workstation can focus the submission lane", async ({ page }) => {
+  await enterOffice(page);
+
+  await page.locator("canvas").first().click({ position: { x: 480, y: 320 } });
+  await page.keyboard.down("w");
+  await page.waitForTimeout(650);
+  await page.keyboard.up("w");
+
+  await expect(page.getByRole("heading", { name: /meeting room/i })).toBeVisible();
+  await page.getByRole("button", { name: /会议工位 提交席/i }).click();
+
+  await expect(page.getByText(/已聚焦会议工位：提交席/)).toBeVisible();
+  await expect(page.getByLabel("ready_to_submit-lane").getByRole("heading", { name: /ready to submit/i })).toBeVisible();
 });
