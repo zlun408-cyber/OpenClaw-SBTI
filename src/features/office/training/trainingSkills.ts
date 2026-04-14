@@ -22,6 +22,34 @@ const presetSkillBlueprints: Array<{
   { name: "查日志", description: "从日志中提取异常与线索。" }
 ];
 
+export type TrainingWorkstationId = "scribe" | "terminal" | "archive";
+
+export const TRAINING_WORKSTATIONS: Array<{
+  id: TrainingWorkstationId;
+  name: string;
+  summary: string;
+  skillNames: string[];
+}> = [
+  {
+    id: "scribe",
+    name: "文书工坊",
+    summary: "偏文档整理、总结输出与结构化表达。",
+    skillNames: ["会议纪要整理", "周报生成", "任务清单生成"]
+  },
+  {
+    id: "terminal",
+    name: "执行终端",
+    summary: "偏本地执行、调试与工程动作。",
+    skillNames: ["读文件", "跑测试", "查日志"]
+  },
+  {
+    id: "archive",
+    name: "洞察档案台",
+    summary: "偏研究、分析与外部信息提炼。",
+    skillNames: ["竞品分析"]
+  }
+];
+
 export const TRAINING_SKILL_STATUS_LABELS: Record<TrainingSkillStatus, string> = {
   available: "Available",
   installing: "Installing",
@@ -71,4 +99,16 @@ export function groupTrainingSkills(skills: readonly TrainingSkill[]) {
     available: skills.filter((skill) => skill.status === "available" || skill.status === "failed"),
     installed: skills.filter((skill) => skill.status === "installed" || skill.status === "installing")
   };
+}
+
+export function filterTrainingSkillsByWorkstation(
+  skills: readonly TrainingSkill[],
+  workstationId: TrainingWorkstationId
+) {
+  const workstation = TRAINING_WORKSTATIONS.find((item) => item.id === workstationId);
+  if (!workstation) {
+    return skills;
+  }
+
+  return skills.filter((skill) => workstation.skillNames.includes(skill.name));
 }
