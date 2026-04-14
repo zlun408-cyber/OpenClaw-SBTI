@@ -59,6 +59,18 @@ export type TrainingSkill = {
   updatedAt: string;
 };
 
+export type RestActivityType = "tea" | "sleep" | "dance";
+export type RestActivitySource = "panel" | "chat";
+
+export type RestActivity = {
+  id: string;
+  type: RestActivityType;
+  label: string;
+  source: RestActivitySource;
+  note: string;
+  createdAt: string;
+};
+
 type DeepReadonly<T> = T extends (...args: never[]) => unknown
   ? T
   : T extends object

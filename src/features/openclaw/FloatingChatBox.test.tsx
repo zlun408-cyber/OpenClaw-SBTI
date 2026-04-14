@@ -115,6 +115,30 @@ test("creates and installs a training skill from chat inside the training room",
 });
 
 
+test("switches rest activity from chat inside the rest area", async () => {
+  const adapter: OpenClawAdapter = {
+    buildRequest: (input, context) => ({
+      message: input,
+      session: "main",
+      context: buildContextSnapshot(context)
+    }),
+    sendMessage: vi.fn(async () => ({ text: "不应该走到这里", source: "mock" as const }))
+  };
+
+  useAppStore.setState((state) => ({ ...state, currentRoomId: "rest" }));
+  render(<FloatingChatBox adapter={adapter} />);
+
+  fireEvent.change(screen.getByLabelText(/openclaw input/i), {
+    target: { value: "跳舞放松一下" }
+  });
+  fireEvent.submit(screen.getByLabelText(/openclaw composer/i));
+
+  expect(await screen.findByText(/已切换到跳舞状态/)).toBeInTheDocument();
+  expect(useAppStore.getState().character.state).toBe("dance");
+  expect(adapter.sendMessage).not.toHaveBeenCalled();
+});
+
+
 test("shows a fallback message when the adapter throws", async () => {
   const adapter: OpenClawAdapter = {
     buildRequest: (input, context) => ({

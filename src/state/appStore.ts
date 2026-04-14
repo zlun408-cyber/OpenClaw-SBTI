@@ -9,7 +9,10 @@ import type {
   RoomId,
   TrainingSkill,
   TrainingSkillInstallChannel,
-  TrainingSkillSource
+  TrainingSkillSource,
+  RestActivity,
+  RestActivitySource,
+  RestActivityType
 } from "../types/domain";
 import { DEFAULT_CHARACTER_PROFILE } from "../types/domain";
 import {
@@ -20,6 +23,10 @@ import {
   createDefaultTrainingSkills,
   createTrainingSkillRecord
 } from "../features/office/training/trainingSkills";
+import {
+  REST_ACTIVITY_STATE_MAP,
+  createRestActivityRecord
+} from "../features/office/rest/restActivities";
 
 export type AppState = {
   phase: AppPhase;
@@ -29,6 +36,7 @@ export type AppState = {
   meetingTasks: MeetingTask[];
   activeMeetingTaskId: string | null;
   trainingSkills: TrainingSkill[];
+  restActivities: RestActivity[];
   startQuiz: () => void;
   completeQuiz: (result: QuizResult) => void;
   enterAvatarPreview: () => void;
@@ -48,6 +56,8 @@ export type AppState = {
   }) => TrainingSkill;
   beginTrainingSkillInstall: (skillId: string) => void;
   completeTrainingSkillInstall: (skillId: string, channel: TrainingSkillInstallChannel) => void;
+  beginRestActivity: (activity: RestActivityType, source: RestActivitySource, note?: string) => RestActivity;
+  clearRestState: () => void;
 };
 
 export const createInitialAppState = (): Omit<
@@ -63,6 +73,8 @@ export const createInitialAppState = (): Omit<
   | "createTrainingSkill"
   | "beginTrainingSkillInstall"
   | "completeTrainingSkillInstall"
+  | "beginRestActivity"
+  | "clearRestState"
 > => ({
   phase: "intro",
   currentRoomId: null,
@@ -70,7 +82,8 @@ export const createInitialAppState = (): Omit<
   character: { ...DEFAULT_CHARACTER_PROFILE },
   meetingTasks: createDefaultMeetingTasks(),
   activeMeetingTaskId: null,
-  trainingSkills: createDefaultTrainingSkills()
+  trainingSkills: createDefaultTrainingSkills(),
+  restActivities: []
 });
 
 export const useAppStore = create<AppState>((set) => ({
@@ -83,7 +96,8 @@ export const useAppStore = create<AppState>((set) => ({
       character: { ...DEFAULT_CHARACTER_PROFILE },
       meetingTasks: createDefaultMeetingTasks(),
       activeMeetingTaskId: null,
-      trainingSkills: createDefaultTrainingSkills()
+      trainingSkills: createDefaultTrainingSkills(),
+      restActivities: []
     }));
   },
   completeQuiz(result) {
@@ -231,6 +245,27 @@ export const useAppStore = create<AppState>((set) => ({
             }
           : skill
       )
+    }));
+  },
+  beginRestActivity(activity, source, note) {
+    const nextActivity = createRestActivityRecord({ type: activity, source, note });
+    set((state) => ({
+      ...state,
+      character: {
+        ...state.character,
+        state: REST_ACTIVITY_STATE_MAP[activity]
+      },
+      restActivities: [nextActivity, ...state.restActivities].slice(0, 6)
+    }));
+    return nextActivity;
+  },
+  clearRestState() {
+    set((state) => ({
+      ...state,
+      character: {
+        ...state.character,
+        state: "idle"
+      }
     }));
   }
 }));

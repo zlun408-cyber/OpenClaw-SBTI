@@ -2,11 +2,12 @@ import { useMemo, useState } from "react";
 
 import { parseMeetingTaskIntent } from "./meetingTaskIntent";
 import { parseTrainingSkillIntent } from "./trainingSkillIntent";
+import { parseRestIntent } from "./restIntent";
 import { defaultOpenClawAdapter } from "./defaultAdapter";
 import { useAppStore } from "../../state/appStore";
 import { selectCharacterLabel, selectCurrentRoomContext } from "../../state/selectors";
 import type { OpenClawAdapter } from "./OpenClawAdapter";
-import type { RoomId } from "../../types/domain";
+import type { RestActivityType, RoomId } from "../../types/domain";
 
 type FloatingChatBoxProps = {
   adapter?: OpenClawAdapter;
@@ -25,6 +26,12 @@ const PLACEHOLDERS: Record<RoomId | "default", string> = {
   training: "安装 skill 或查看培训方案",
   rest: "安排休息或轻松聊聊",
   default: "和 OpenClaw 对话"
+};
+
+const REST_ACTIVITY_REPLY_LABELS: Record<RestActivityType, string> = {
+  tea: "喝茶",
+  sleep: "睡觉",
+  dance: "跳舞"
 };
 
 const ROOM_HINTS: Record<RoomId | "default", string> = {
@@ -158,6 +165,22 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
           id: `assistant-${Date.now()}`,
           role: "assistant",
           text: `已创建会议任务《${createdTask.title}》，已同步到会议室任务板。`
+        }
+      ]);
+      setIsSending(false);
+      return;
+    }
+
+    const restIntent = parseRestIntent(input, currentRoomId);
+
+    if (restIntent) {
+      useAppStore.getState().beginRestActivity(restIntent.activity, "chat", "来自休息间对话");
+      setMessages((currentMessages) => [
+        ...currentMessages,
+        {
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          text: `已切换到${REST_ACTIVITY_REPLY_LABELS[restIntent.activity]}状态，数字员工正在休息间放松。`
         }
       ]);
       setIsSending(false);

@@ -54,3 +54,18 @@ test("training-room chat can install a new skill", async ({ page }) => {
   const installedSection = page.getByRole("heading", { name: "Installed Skills" }).locator("xpath=..");
   await expect(installedSection.getByText("日报总结", { exact: true })).toBeVisible();
 });
+
+
+test("rest-room chat can switch the digital employee into dance mode", async ({ page }) => {
+  await enterOffice(page);
+
+  await clickOfficeCanvas(page, { x: 740, y: 500 });
+  await expect(page.getByRole("heading", { name: /rest area/i })).toBeVisible();
+
+  const input = page.getByLabel("openclaw input");
+  await input.fill("跳舞放松一下");
+  await page.getByRole("button", { name: "发送" }).click();
+
+  await expect(page.getByText(/已切换到跳舞状态/)).toBeVisible();
+  await expect(page.getByText("Dancing")).toBeVisible();
+});

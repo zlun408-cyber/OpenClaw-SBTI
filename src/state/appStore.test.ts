@@ -174,3 +174,16 @@ test("training skills can be installed and marked with fallback channel", () => 
   expect(installedSkill?.installChannel).toBe("local");
   expect(useAppStore.getState().character.state).toBe("idle");
 });
+
+
+test("rest activities can update character state and return to idle", () => {
+  const store = useAppStore.getState();
+  const activity = store.beginRestActivity("sleep", "panel", "午休一下");
+
+  expect(activity.type).toBe("sleep");
+  expect(useAppStore.getState().character.state).toBe("sleep");
+  expect(useAppStore.getState().restActivities[0]?.label).toBe("睡觉");
+
+  store.clearRestState();
+  expect(useAppStore.getState().character.state).toBe("idle");
+});
