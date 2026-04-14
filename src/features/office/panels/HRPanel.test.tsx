@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { expect, test, vi } from "vitest";
 
 import { HRPanel } from "./HRPanel";
@@ -23,11 +23,24 @@ const createAdapter = (source: "webchat" | "fallback") : OpenClawAdapter => ({
   }))
 });
 
-test("renders dual editors for soul.md and memory.md", () => {
+test("renders HR hotspots and dual editors", () => {
   render(<HRPanel adapter={createAdapter("webchat")} />);
 
+  expect(screen.getByRole("button", { name: /人事工位 Soul 台/i })).toBeInTheDocument();
+  expect(screen.getByRole("button", { name: /人事工位 Memory 档案柜/i })).toBeInTheDocument();
   expect(screen.getByLabelText(/soul.md editor/i)).toBeInTheDocument();
   expect(screen.getByLabelText(/memory.md editor/i)).toBeInTheDocument();
+});
+
+test("switches focus when selecting the memory cabinet hotspot", () => {
+  render(<HRPanel adapter={createAdapter("webchat")} />);
+
+  fireEvent.click(screen.getByRole("button", { name: /人事工位 Memory 档案柜/i }));
+
+  expect(screen.getByText(/已聚焦档案柜：memory.md/i)).toBeInTheDocument();
+  const memoryCard = screen.getByRole("heading", { name: /memory.md/i }).closest("article");
+  expect(memoryCard).not.toBeNull();
+  expect(within(memoryCard as HTMLElement).getByLabelText(/memory.md editor/i)).toBeInTheDocument();
 });
 
 test("shows OpenClaw success state when remote sync succeeds", async () => {

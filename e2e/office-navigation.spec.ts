@@ -52,3 +52,15 @@ test("clicking a training workstation can focus the matching skill set", async (
   await expect(availableSection.getByRole("button", { name: /安装 skill 跑测试/i })).toBeVisible();
   await expect(availableSection.getByText("读文件", { exact: true })).toBeVisible();
 });
+
+
+test("clicking an HR workstation can focus the memory editor", async ({ page }) => {
+  await enterOffice(page);
+
+  await clickOfficeCanvas(page, { x: 300, y: 280 });
+  await expect(page.getByRole("heading", { name: /hr office/i })).toBeVisible();
+
+  await page.getByRole("button", { name: /人事工位 Memory 档案柜/i }).click();
+  await expect(page.getByText(/已聚焦档案柜：memory.md/)).toBeVisible();
+  await expect(page.getByLabel("memory.md editor")).toBeVisible();
+});
