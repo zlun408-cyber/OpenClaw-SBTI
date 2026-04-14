@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 
 import { parseMeetingTaskIntent } from "./meetingTaskIntent";
-import { createWebchatAdapter } from "./WebchatAdapter";
+import { defaultOpenClawAdapter } from "./defaultAdapter";
 import { useAppStore } from "../../state/appStore";
 import { selectCharacterLabel, selectCurrentRoomContext } from "../../state/selectors";
 import type { OpenClawAdapter } from "./OpenClawAdapter";
@@ -16,11 +16,6 @@ type ChatMessage = {
   role: "assistant" | "user";
   text: string;
 };
-
-const DEFAULT_ADAPTER = createWebchatAdapter({
-  baseUrl: import.meta.env.VITE_OPENCLAW_BASE_URL ?? "http://127.0.0.1:18789",
-  session: import.meta.env.VITE_OPENCLAW_SESSION ?? "main"
-});
 
 const PLACEHOLDERS: Record<RoomId | "default", string> = {
   office: "和 OpenClaw 对话",
@@ -111,7 +106,7 @@ const resolvePlaceholder = (roomId: RoomId | null) =>
 const resolveRoomHint = (roomId: RoomId | null) =>
   (roomId ? ROOM_HINTS[roomId] : ROOM_HINTS.default) ?? ROOM_HINTS.default;
 
-export function FloatingChatBox({ adapter = DEFAULT_ADAPTER }: FloatingChatBoxProps) {
+export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingChatBoxProps) {
   const roomContext = useAppStore(selectCurrentRoomContext);
   const characterName = useAppStore(selectCharacterLabel);
   const currentRoomId = useAppStore((state) => state.currentRoomId);

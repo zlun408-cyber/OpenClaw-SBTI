@@ -23,7 +23,7 @@ test("shows the HR panel when the current room is hr", () => {
 
   render(<RoomPanelHost />);
 
-  expect(screen.getByText(/soul/i)).toBeInTheDocument();
+  expect(screen.getByLabelText(/soul.md editor/i)).toBeInTheDocument();
 });
 
 test("shows the meeting panel when the current room is meeting", () => {
