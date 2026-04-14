@@ -19,22 +19,29 @@ beforeEach(() => {
   });
 });
 
-test('renders rest actions and can trigger dance from the panel', () => {
+test('renders furniture hotspots for the rest area scene', () => {
   render(<RestPanel />);
 
   expect(screen.getByRole('heading', { name: /rest area/i })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: /休息动作 跳舞/i }));
+  expect(screen.getByRole('button', { name: /家具 茶案/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /家具 沙发床/i })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /家具 音乐角/i })).toBeInTheDocument();
+});
 
-  expect(screen.getByText(/已切换到跳舞状态/)).toBeInTheDocument();
-  expect(screen.getByText(/当前状态：/)).toBeInTheDocument();
-  expect(screen.getByText(/跳舞 \/ dance/)).toBeInTheDocument();
+test('can trigger dance by clicking the music corner hotspot', () => {
+  render(<RestPanel />);
+
+  fireEvent.click(screen.getByRole('button', { name: /家具 音乐角/i }));
+
+  expect(screen.getByText(/已在音乐角切换到跳舞状态/)).toBeInTheDocument();
+  expect(screen.getByText('dance')).toBeInTheDocument();
   expect(useAppStore.getState().character.state).toBe('dance');
 });
 
 test('can return to idle after resting', () => {
   render(<RestPanel />);
 
-  fireEvent.click(screen.getByRole('button', { name: /休息动作 睡觉/i }));
+  fireEvent.click(screen.getByRole('button', { name: /家具 沙发床/i }));
   fireEvent.click(screen.getByRole('button', { name: /结束休息/i }));
 
   expect(screen.getByText(/已结束休息，返回待命/)).toBeInTheDocument();

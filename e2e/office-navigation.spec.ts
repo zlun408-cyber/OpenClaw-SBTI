@@ -24,3 +24,16 @@ test("wasd movement can reach the meeting room", async ({ page }) => {
   await expect(page.getByText(/Chat-first task control console/i)).toBeVisible();
 });
 
+
+
+test("clicking rest-room furniture can switch the employee into sleep mode", async ({ page }) => {
+  await enterOffice(page);
+
+  await clickOfficeCanvas(page, { x: 740, y: 500 });
+  await expect(page.getByRole("heading", { name: /rest area/i })).toBeVisible();
+
+  await page.getByRole("button", { name: /家具 沙发床/i }).click();
+
+  await expect(page.getByText(/已在沙发床切换到睡觉状态/)).toBeVisible();
+  await expect(page.getByText("Sleeping")).toBeVisible();
+});
