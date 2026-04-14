@@ -4,7 +4,14 @@ import { roomTriggers } from "../data/roomTriggers";
 import { mapConfig } from "../data/mapConfig";
 import { MovementSystem } from "../systems/MovementSystem";
 import { RoomTriggerSystem } from "../systems/RoomTriggerSystem";
+import { useAppStore } from "../../state/appStore";
 import type { RoomId } from "../../types/domain";
+import {
+  resolveAvatarFacing,
+  resolveAvatarNameplate,
+  resolveAvatarPresentation,
+  type AvatarFacing
+} from "./officeAvatarPresentation";
 
 const ROOM_WIDTH = 158;
 const ROOM_HEIGHT = 96;
@@ -34,11 +41,24 @@ export class OfficeScene extends Phaser.Scene {
   private readonly roomTriggerSystem = new RoomTriggerSystem(roomTriggers);
 
   private player?: Phaser.GameObjects.Arc;
+  private playerAura?: Phaser.GameObjects.Arc;
   private playerGlow?: Phaser.GameObjects.Arc;
+  private playerShadow?: Phaser.GameObjects.Ellipse;
+  private playerContainer?: Phaser.GameObjects.Container;
+  private playerMantle?: Phaser.GameObjects.Ellipse;
+  private playerCore?: Phaser.GameObjects.Ellipse;
+  private playerHead?: Phaser.GameObjects.Arc;
+  private playerVisor?: Phaser.GameObjects.Rectangle;
+  private playerSigil?: Phaser.GameObjects.Arc;
+  private playerStatusBadge?: Phaser.GameObjects.Text;
+  private playerEmoteText?: Phaser.GameObjects.Text;
+  private playerNameplate?: Phaser.GameObjects.Text;
   private destinationMarker?: Phaser.GameObjects.Arc;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd?: Record<"W" | "A" | "S" | "D", Phaser.Input.Keyboard.Key>;
   private readonly playableArea = this.createPlayableArea();
+  private activeRoomId: RoomId | null = "office";
+  private avatarFacing: AvatarFacing = "center";
 
   constructor() {
     super(OfficeScene.KEY);
@@ -54,21 +74,77 @@ export class OfficeScene extends Phaser.Scene {
     this.renderConnectionPaths(centerX, centerY);
     this.renderRooms(centerX, centerY);
 
+    const startX = centerX + mapConfig.rooms.office.x;
+    const startY = centerY + mapConfig.rooms.office.y;
+
+    this.playerShadow = this.add.ellipse(startX, startY + 22, 36, 16, 0x000000, 0.26);
+    this.playerShadow.setDepth(10);
+
     this.playerGlow = this.add.circle(
-      centerX + mapConfig.rooms.office.x,
-      centerY + mapConfig.rooms.office.y,
+      startX,
+      startY,
       26,
       0xf4d08f,
       0.14
     );
+    this.playerGlow.setDepth(11);
+
+    this.playerAura = this.add.circle(startX, startY, 20, 0x8fd9ff, 0.14);
+    this.playerAura.setStrokeStyle(2, 0xd7f4ff, 0.38).setDepth(12);
 
     this.player = this.add.circle(
-      centerX + mapConfig.rooms.office.x,
-      centerY + mapConfig.rooms.office.y,
-      14,
-      0x8fd9ff
+      startX,
+      startY,
+      10,
+      0x8fd9ff,
+      0
     );
-    this.player.setStrokeStyle(3, 0xeaf6ff, 0.85);
+    this.player.setDepth(13);
+
+    this.playerMantle = this.add.ellipse(0, 12, 30, 38, 0x223345, 1);
+    this.playerCore = this.add.ellipse(0, 10, 18, 24, 0x567f8f, 1);
+    this.playerHead = this.add.circle(0, -8, 10, 0xf2ddbf, 1);
+    this.playerVisor = this.add.rectangle(0, -8, 12, 4, 0xdaf6ff, 0.92);
+    this.playerSigil = this.add.circle(0, 8, 4, 0xf4d08f, 0.95);
+
+    this.playerContainer = this.add.container(startX, startY, [
+      this.playerMantle,
+      this.playerCore,
+      this.playerHead,
+      this.playerVisor,
+      this.playerSigil
+    ]);
+    this.playerContainer.setDepth(14);
+
+    this.playerStatusBadge = this.add
+      .text(startX, startY - 56, "On Watch", {
+        color: "#f7ebcf",
+        fontFamily: "sans-serif",
+        fontSize: "11px",
+        backgroundColor: "rgba(10,16,28,0.78)",
+        padding: { x: 10, y: 4 }
+      })
+      .setOrigin(0.5)
+      .setDepth(15);
+
+    this.playerEmoteText = this.add
+      .text(startX, startY - 34, "Sync", {
+        color: "#d7f4ff",
+        fontFamily: "sans-serif",
+        fontSize: "12px",
+        fontStyle: "700"
+      })
+      .setOrigin(0.5)
+      .setDepth(15);
+
+    this.playerNameplate = this.add
+      .text(startX, startY + 42, "Digital Employee", {
+        color: "#e7dbc1",
+        fontFamily: "sans-serif",
+        fontSize: "12px"
+      })
+      .setOrigin(0.5)
+      .setDepth(15);
 
     this.destinationMarker = this.add.circle(centerX, centerY, 10, 0xf4d08f, 0.12);
     this.destinationMarker.setStrokeStyle(2, 0xf4d08f, 0.42).setVisible(false);
@@ -95,10 +171,11 @@ export class OfficeScene extends Phaser.Scene {
       this.movement.startAutoMove(next);
     });
 
+    this.syncAvatarPresentation(0, { x: 0, y: 0 });
     this.emitRoomChangedIfNeeded();
   }
 
-  update(_time: number, deltaMs: number) {
+  update(time: number, deltaMs: number) {
     if (!this.player) {
       return;
     }
@@ -111,9 +188,24 @@ export class OfficeScene extends Phaser.Scene {
     );
 
     this.player.setPosition(nextPosition.x, nextPosition.y);
-    this.playerGlow?.setPosition(nextPosition.x, nextPosition.y);
+    const movementDelta = {
+      x: nextPosition.x - previousPosition.x,
+      y: nextPosition.y - previousPosition.y
+    };
+    const movedDistance = Phaser.Math.Distance.Between(
+      previousPosition.x,
+      previousPosition.y,
+      nextPosition.x,
+      nextPosition.y
+    );
 
-    if (Phaser.Math.Distance.Between(previousPosition.x, previousPosition.y, nextPosition.x, nextPosition.y) < 0.2) {
+    if (movedDistance >= 0.2) {
+      this.avatarFacing = resolveAvatarFacing(movementDelta);
+    }
+
+    this.syncAvatarPresentation(time, movementDelta);
+
+    if (movedDistance < 0.2) {
       this.destinationMarker?.setVisible(false);
     }
 
@@ -188,6 +280,81 @@ export class OfficeScene extends Phaser.Scene {
     });
   }
 
+  private syncAvatarPresentation(time: number, movementDelta: Point) {
+    if (
+      !this.player ||
+      !this.playerGlow ||
+      !this.playerAura ||
+      !this.playerShadow ||
+      !this.playerContainer ||
+      !this.playerMantle ||
+      !this.playerCore ||
+      !this.playerVisor ||
+      !this.playerSigil ||
+      !this.playerStatusBadge ||
+      !this.playerEmoteText ||
+      !this.playerNameplate
+    ) {
+      return;
+    }
+
+    const appState = useAppStore.getState();
+    const isMoving = Math.abs(movementDelta.x) > 0.2 || Math.abs(movementDelta.y) > 0.2;
+    const effectiveState = isMoving ? "walk" : appState.character.state;
+    const presentation = resolveAvatarPresentation({
+      roomId: this.activeRoomId,
+      state: effectiveState
+    });
+    const bobOffset = Math.sin(time / 240) * (effectiveState === "sleep" ? 1.4 : 2.8);
+    const pulse = 1 + Math.sin(time / 300) * 0.04;
+    const dancePulse = effectiveState === "dance" ? Math.sin(time / 120) * 0.1 : 0;
+    const auraScale = pulse + dancePulse;
+    const bodyScale = 1 + dancePulse * 0.5;
+    const visorOffsetX = this.avatarFacing === "left" ? -4 : this.avatarFacing === "right" ? 4 : 0;
+    const bodyRotation = this.avatarFacing === "left" ? -0.08 : this.avatarFacing === "right" ? 0.08 : 0;
+    const anchorX = this.player.x;
+    const anchorY = this.player.y;
+
+    this.playerShadow
+      .setPosition(anchorX, anchorY + 24)
+      .setScale(1 + dancePulse * 0.35, 1 - Math.abs(dancePulse) * 0.15);
+
+    this.playerGlow
+      .setPosition(anchorX, anchorY + bobOffset * 0.2)
+      .setFillStyle(presentation.auraColor, presentation.auraAlpha)
+      .setScale(auraScale * 1.1);
+
+    this.playerAura
+      .setPosition(anchorX, anchorY + bobOffset * 0.15)
+      .setFillStyle(presentation.accentColor, 0.12)
+      .setStrokeStyle(2, presentation.accentColor, 0.42)
+      .setScale(auraScale);
+
+    this.playerContainer
+      .setPosition(anchorX, anchorY + bobOffset)
+      .setScale(bodyScale)
+      .setRotation(bodyRotation);
+
+    this.playerMantle.setFillStyle(presentation.mantleColor, 1);
+    this.playerCore.setFillStyle(presentation.bodyColor, 1);
+    this.playerVisor.setFillStyle(presentation.accentColor, 0.92).setPosition(visorOffsetX, -8);
+    this.playerSigil.setFillStyle(presentation.accentColor, 0.95);
+
+    this.playerStatusBadge
+      .setPosition(anchorX, anchorY - 58 + bobOffset * 0.2)
+      .setText(presentation.statusLabel)
+      .setColor("#f7ebcf");
+
+    this.playerEmoteText
+      .setPosition(anchorX, anchorY - 36 + bobOffset * 0.15)
+      .setText(presentation.emoteLabel)
+      .setColor(Phaser.Display.Color.IntegerToColor(presentation.accentColor).rgba);
+
+    this.playerNameplate
+      .setPosition(anchorX, anchorY + 42 + bobOffset * 0.1)
+      .setText(resolveAvatarNameplate(appState.character.customName, appState.character.title));
+  }
+
   private readKeyboardInput() {
     return {
       left: Boolean(this.cursors?.left.isDown) || Boolean(this.wasd?.A.isDown),
@@ -212,6 +379,7 @@ export class OfficeScene extends Phaser.Scene {
       return;
     }
 
+    this.activeRoomId = event.roomId;
     this.game.events.emit("ROOM_CHANGED", {
       type: "ROOM_CHANGED",
       roomId: event.roomId

@@ -29,6 +29,7 @@ test("meeting-room chat can create a task card without leaving the room", async 
   await page.keyboard.down("w");
   await page.waitForTimeout(650);
   await page.keyboard.up("w");
+  await expect(page.getByRole("heading", { name: /meeting room/i })).toBeVisible();
 
   const input = page.getByLabel("openclaw input");
   await input.fill("新增任务：整理今天客户反馈");
