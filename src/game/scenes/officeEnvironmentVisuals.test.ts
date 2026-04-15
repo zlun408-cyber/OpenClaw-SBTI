@@ -34,6 +34,31 @@ describe("office environment visuals", () => {
     expect(OFFICE_ENVIRONMENT_LAYERS.foregroundOverlays.length).toBeGreaterThanOrEqual(3);
   });
 
+  test("uses room-local offsets and world-space environment coordinates", () => {
+    roomIds.forEach((roomId) => {
+      const visual = getOfficeRoomVisual(roomId);
+
+      visual.equipment.forEach((equipment) => {
+        expect(equipment.offsetX).toBeTypeOf("number");
+        expect(equipment.offsetY).toBeTypeOf("number");
+        expect(equipment).not.toHaveProperty("x");
+        expect(equipment).not.toHaveProperty("y");
+      });
+
+      visual.signalNodes.forEach((signalNode) => {
+        expect(signalNode.offsetX).toBeTypeOf("number");
+        expect(signalNode.offsetY).toBeTypeOf("number");
+        expect(signalNode).not.toHaveProperty("x");
+        expect(signalNode).not.toHaveProperty("y");
+      });
+    });
+
+    OFFICE_ENVIRONMENT_LAYERS.ambientGlows.forEach((glow) => {
+      expect(glow.x).toBeTypeOf("number");
+      expect(glow.y).toBeTypeOf("number");
+    });
+  });
+
   test("keeps environment depths behind the avatar and labels", () => {
     expect(OFFICE_VISUAL_DEPTHS.backdrop).toBeLessThan(OFFICE_VISUAL_DEPTHS.rooms);
     expect(OFFICE_VISUAL_DEPTHS.rooms).toBeLessThan(OFFICE_VISUAL_DEPTHS.avatarShadow);

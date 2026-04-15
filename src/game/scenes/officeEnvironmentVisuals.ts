@@ -4,16 +4,16 @@ export type OfficeRoomEquipment = {
   id: string;
   kind: "console" | "screen" | "pillar" | "terminal" | "pod" | "beacon";
   label: string;
-  x: number;
-  y: number;
+  offsetX: number;
+  offsetY: number;
   width: number;
   height: number;
   alpha: number;
 };
 
 export type OfficeSignalNode = {
-  x: number;
-  y: number;
+  offsetX: number;
+  offsetY: number;
   radius: number;
   alpha: number;
 };
@@ -29,6 +29,7 @@ export type OfficeRoomVisual = {
 };
 
 type OfficeAmbientGlow = {
+  // Scene/world coordinates used directly by OfficeScene environment layers.
   x: number;
   y: number;
   radius: number;
@@ -46,11 +47,13 @@ type OfficeSignalPath = {
   id: string;
   color: number;
   alpha: number;
+  // Scene/world coordinates used directly by OfficeScene environment layers.
   points: Array<{ x: number; y: number }>;
 };
 
 type OfficeParticle = {
   id: string;
+  // Scene/world coordinates used directly by OfficeScene environment layers.
   x: number;
   y: number;
   radius: number;
@@ -60,6 +63,7 @@ type OfficeParticle = {
 
 type OfficeForegroundOverlay = {
   id: string;
+  // Scene/world coordinates used directly by OfficeScene environment layers.
   x: number;
   y: number;
   width: number;
@@ -90,13 +94,13 @@ export const OFFICE_ROOM_VISUALS: Record<RoomId, OfficeRoomVisual> = {
     accent: 0x69d6ff,
     shadow: 0x06131c,
     equipment: [
-      { id: "office-control-ring", kind: "console", label: "Control Ring", x: 0, y: 16, width: 54, height: 22, alpha: 0.36 },
-      { id: "office-status-wall", kind: "screen", label: "Status Wall", x: -44, y: -24, width: 42, height: 12, alpha: 0.32 },
-      { id: "office-sync-beacon", kind: "beacon", label: "Sync Beacon", x: 46, y: -18, width: 18, height: 18, alpha: 0.42 }
+      { id: "office-control-ring", kind: "console", label: "Control Ring", offsetX: 0, offsetY: 16, width: 54, height: 22, alpha: 0.36 },
+      { id: "office-status-wall", kind: "screen", label: "Status Wall", offsetX: -44, offsetY: -24, width: 42, height: 12, alpha: 0.32 },
+      { id: "office-sync-beacon", kind: "beacon", label: "Sync Beacon", offsetX: 46, offsetY: -18, width: 18, height: 18, alpha: 0.42 }
     ],
     signalNodes: [
-      { x: -54, y: 32, radius: 3, alpha: 0.44 },
-      { x: 58, y: -28, radius: 4, alpha: 0.34 }
+      { offsetX: -54, offsetY: 32, radius: 3, alpha: 0.44 },
+      { offsetX: 58, offsetY: -28, radius: 4, alpha: 0.34 }
     ]
   },
   meeting: {
@@ -106,13 +110,13 @@ export const OFFICE_ROOM_VISUALS: Record<RoomId, OfficeRoomVisual> = {
     accent: 0xf0ca87,
     shadow: 0x0b111c,
     equipment: [
-      { id: "meeting-board", kind: "screen", label: "Mission Board", x: 0, y: -30, width: 92, height: 16, alpha: 0.34 },
-      { id: "meeting-table", kind: "console", label: "Dispatch Table", x: 0, y: 18, width: 76, height: 20, alpha: 0.34 },
-      { id: "meeting-submit-light", kind: "beacon", label: "Submit Light", x: 56, y: -2, width: 12, height: 28, alpha: 0.38 }
+      { id: "meeting-board", kind: "screen", label: "Mission Board", offsetX: 0, offsetY: -30, width: 92, height: 16, alpha: 0.34 },
+      { id: "meeting-table", kind: "console", label: "Dispatch Table", offsetX: 0, offsetY: 18, width: 76, height: 20, alpha: 0.34 },
+      { id: "meeting-submit-light", kind: "beacon", label: "Submit Light", offsetX: 56, offsetY: -2, width: 12, height: 28, alpha: 0.38 }
     ],
     signalNodes: [
-      { x: -56, y: -26, radius: 3, alpha: 0.36 },
-      { x: 54, y: 30, radius: 4, alpha: 0.42 }
+      { offsetX: -56, offsetY: -26, radius: 3, alpha: 0.36 },
+      { offsetX: 54, offsetY: 30, radius: 4, alpha: 0.42 }
     ]
   },
   hr: {
@@ -122,13 +126,13 @@ export const OFFICE_ROOM_VISUALS: Record<RoomId, OfficeRoomVisual> = {
     accent: 0xd3b2f3,
     shadow: 0x100c1b,
     equipment: [
-      { id: "hr-soul-pillar", kind: "pillar", label: "Soul Pillar", x: -48, y: 4, width: 16, height: 54, alpha: 0.34 },
-      { id: "hr-memory-vault", kind: "pillar", label: "Memory Vault", x: 44, y: 2, width: 20, height: 58, alpha: 0.32 },
-      { id: "hr-scan-line", kind: "screen", label: "Identity Scan", x: 0, y: -30, width: 84, height: 10, alpha: 0.3 }
+      { id: "hr-soul-pillar", kind: "pillar", label: "Soul Pillar", offsetX: -48, offsetY: 4, width: 16, height: 54, alpha: 0.34 },
+      { id: "hr-memory-vault", kind: "pillar", label: "Memory Vault", offsetX: 44, offsetY: 2, width: 20, height: 58, alpha: 0.32 },
+      { id: "hr-scan-line", kind: "screen", label: "Identity Scan", offsetX: 0, offsetY: -30, width: 84, height: 10, alpha: 0.3 }
     ],
     signalNodes: [
-      { x: -48, y: -26, radius: 3, alpha: 0.4 },
-      { x: 50, y: 28, radius: 3, alpha: 0.38 }
+      { offsetX: -48, offsetY: -26, radius: 3, alpha: 0.4 },
+      { offsetX: 50, offsetY: 28, radius: 3, alpha: 0.38 }
     ]
   },
   training: {
@@ -138,13 +142,13 @@ export const OFFICE_ROOM_VISUALS: Record<RoomId, OfficeRoomVisual> = {
     accent: 0x9fe3c4,
     shadow: 0x081713,
     equipment: [
-      { id: "training-skill-terminal", kind: "terminal", label: "Skill Terminal", x: -42, y: 12, width: 24, height: 36, alpha: 0.36 },
-      { id: "training-course-screen", kind: "screen", label: "Course Screen", x: 0, y: -28, width: 88, height: 14, alpha: 0.3 },
-      { id: "training-growth-pillar", kind: "pillar", label: "Growth Pillar", x: 48, y: 4, width: 18, height: 52, alpha: 0.34 }
+      { id: "training-skill-terminal", kind: "terminal", label: "Skill Terminal", offsetX: -42, offsetY: 12, width: 24, height: 36, alpha: 0.36 },
+      { id: "training-course-screen", kind: "screen", label: "Course Screen", offsetX: 0, offsetY: -28, width: 88, height: 14, alpha: 0.3 },
+      { id: "training-growth-pillar", kind: "pillar", label: "Growth Pillar", offsetX: 48, offsetY: 4, width: 18, height: 52, alpha: 0.34 }
     ],
     signalNodes: [
-      { x: -58, y: 24, radius: 3, alpha: 0.38 },
-      { x: 56, y: -22, radius: 4, alpha: 0.36 }
+      { offsetX: -58, offsetY: 24, radius: 3, alpha: 0.38 },
+      { offsetX: 56, offsetY: -22, radius: 4, alpha: 0.36 }
     ]
   },
   rest: {
@@ -154,13 +158,13 @@ export const OFFICE_ROOM_VISUALS: Record<RoomId, OfficeRoomVisual> = {
     accent: 0x8ed0ff,
     shadow: 0x0c1218,
     equipment: [
-      { id: "rest-recovery-pod", kind: "pod", label: "Recovery Pod", x: 0, y: 16, width: 46, height: 24, alpha: 0.36 },
-      { id: "rest-ambient-screen", kind: "screen", label: "Ambient Screen", x: -46, y: -20, width: 34, height: 12, alpha: 0.28 },
-      { id: "rest-breathing-beacon", kind: "beacon", label: "Breathing Beacon", x: 48, y: -12, width: 16, height: 16, alpha: 0.4 }
+      { id: "rest-recovery-pod", kind: "pod", label: "Recovery Pod", offsetX: 0, offsetY: 16, width: 46, height: 24, alpha: 0.36 },
+      { id: "rest-ambient-screen", kind: "screen", label: "Ambient Screen", offsetX: -46, offsetY: -20, width: 34, height: 12, alpha: 0.28 },
+      { id: "rest-breathing-beacon", kind: "beacon", label: "Breathing Beacon", offsetX: 48, offsetY: -12, width: 16, height: 16, alpha: 0.4 }
     ],
     signalNodes: [
-      { x: -52, y: 28, radius: 3, alpha: 0.32 },
-      { x: 54, y: -24, radius: 4, alpha: 0.3 }
+      { offsetX: -52, offsetY: 28, radius: 3, alpha: 0.32 },
+      { offsetX: 54, offsetY: -24, radius: 4, alpha: 0.3 }
     ]
   }
 };
