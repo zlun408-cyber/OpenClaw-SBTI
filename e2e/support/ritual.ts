@@ -1,20 +1,34 @@
 import { expect, type Page } from "@playwright/test";
 
-const QUIZ_OPTION_LABELS = [
-  "先定规则和边界，确保方向可控",
-  "倾听各方诉求，先求共识",
-  "优先交付，先把关键结果做出来"
-] as const;
+import { questions } from "../../src/features/quiz/questions";
 
-export async function completeRitualFlow(page: Page, customName = "Alex") {
+const CONTROL_QUIZ_OPTION_LABELS = questions.map((question) => {
+  const option = question.options.find((item) => item.axis === "control");
+  if (!option) {
+    throw new Error(`Missing control option for ${question.id}`);
+  }
+
+  return option.label;
+});
+
+export async function openGateAndStartTrial(page: Page) {
   await page.goto("/");
   await page.getByRole("button", { name: "穿越之门" }).click();
-  await page.getByRole("button", { name: "开始试炼" }).waitFor();
+  await expect(page.getByText(/石门状态：开启中/i)).toBeVisible();
+  await expect(page.getByText(/石门状态：已开启/i)).toBeVisible();
   await page.getByRole("button", { name: "开始试炼" }).click();
+  await page.waitForURL("**/quiz");
+}
 
-  for (const label of QUIZ_OPTION_LABELS) {
+export async function answerQuizForControlPersona(page: Page) {
+  for (const label of CONTROL_QUIZ_OPTION_LABELS) {
     await page.getByRole("button", { name: label }).click();
   }
+}
+
+export async function completeRitualFlow(page: Page, customName = "Alex") {
+  await openGateAndStartTrial(page);
+  await answerQuizForControlPersona(page);
 
   await page.waitForURL("**/avatar");
   await expect(page.getByLabel("角色姓名")).toBeVisible();
