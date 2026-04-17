@@ -38,3 +38,17 @@ test("reacts to store updates for name and task status", () => {
   expect(screen.getByText("Architect")).toBeInTheDocument();
   expect(screen.getByText("Training")).toBeInTheDocument();
 });
+
+test("renders as a room-aware digital employee terminal", () => {
+  useAppStore.setState((state) => ({
+    ...state,
+    currentRoomId: "training"
+  }));
+
+  render(<OfficeHUD />);
+
+  const hud = screen.getByLabelText("office-hud");
+  expect(hud).toHaveAttribute("data-office-theme", "digital-command-center");
+  expect(hud).toHaveAttribute("data-office-room", "training");
+  expect(screen.getByText(/digital employee/i)).toBeInTheDocument();
+});

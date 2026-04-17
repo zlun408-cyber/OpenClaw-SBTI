@@ -1,6 +1,7 @@
 import { useAppStore } from "../../state/appStore";
 import { selectCharacterLabel, selectCurrentRoomContext } from "../../state/selectors";
 import type { CharacterState } from "../../types/domain";
+import { createGlassTerminalStyle, getOfficeRoomTheme, OFFICE_THEME } from "./officeTheme";
 
 const TASK_STATUS_LABELS: Record<CharacterState, string> = {
   idle: "Idle",
@@ -44,12 +45,34 @@ const chipStyle = {
 export function OfficeHUD() {
   const characterName = useAppStore(selectCharacterLabel);
   const roomContext = useAppStore(selectCurrentRoomContext);
+  const currentRoomId = useAppStore((state) => state.currentRoomId);
   const currentTaskStatus = useAppStore(
     (state) => TASK_STATUS_LABELS[state.character.state]
   );
+  const roomTheme = getOfficeRoomTheme(currentRoomId);
+  const themedHudStyle = {
+    ...createGlassTerminalStyle(currentRoomId, hudStyle),
+    border: `1px solid ${roomTheme.accent.rgba}`
+  } satisfies React.CSSProperties;
 
   return (
-    <aside aria-label="office-hud" style={hudStyle}>
+    <aside
+      aria-label="office-hud"
+      data-office-theme={OFFICE_THEME.id}
+      data-office-room={roomTheme.roomId}
+      style={themedHudStyle}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: "inherit",
+          backgroundImage: OFFICE_THEME.effects.scanline,
+          opacity: 0.14,
+          pointerEvents: "none"
+        }}
+      />
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "12px" }}>
         <div>
           <div style={{ color: "#F3DCB1", fontSize: "11px", letterSpacing: "0.18em", textTransform: "uppercase" }}>
