@@ -115,7 +115,7 @@ export function OfficeRoute() {
       data-office-theme={OFFICE_THEME.id}
       style={layoutStyle}
     >
-      <div aria-hidden="true" style={routeDataGridStyle} />
+      <div aria-hidden="true" data-testid="office-route-grid" style={routeDataGridStyle} />
       <div aria-label="office-scene-canvas-layer" style={canvasLayerStyle}>
         <div aria-label="office-observation-window" style={canvasFrameStyle}>
           <div style={ambientFrameStyle} />
