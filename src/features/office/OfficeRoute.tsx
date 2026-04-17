@@ -7,13 +7,24 @@ import { OfficeHUD } from "./OfficeHUD";
 import { RoomPanelHost } from "./RoomPanelHost";
 import { FloatingChatBox } from "../openclaw/FloatingChatBox";
 import type { RoomId } from "../../types/domain";
+import { OFFICE_THEME } from "./officeTheme";
 
 const layoutStyle = {
   position: "relative",
   minHeight: "100vh",
   overflow: "hidden",
-  background:
-    "radial-gradient(circle at 20% 18%, rgba(127, 96, 190, 0.18), transparent 24%), radial-gradient(circle at 78% 24%, rgba(72, 139, 198, 0.16), transparent 24%), linear-gradient(180deg, #090E18 0%, #0D1524 42%, #0A0F18 100%)"
+  background: OFFICE_THEME.surface.page
+} satisfies React.CSSProperties;
+
+const routeDataGridStyle = {
+  position: "absolute",
+  inset: 0,
+  zIndex: 0,
+  pointerEvents: "none",
+  backgroundImage: OFFICE_THEME.effects.dataGrid,
+  backgroundSize: "44px 44px",
+  opacity: 0.42,
+  maskImage: "radial-gradient(circle at 50% 28%, rgba(0,0,0,0.85), transparent 72%)"
 } satisfies React.CSSProperties;
 
 const canvasLayerStyle = {
@@ -29,9 +40,9 @@ const canvasFrameStyle = {
   width: "fit-content",
   padding: "18px",
   borderRadius: "32px",
-  border: "1px solid rgba(247, 212, 139, 0.12)",
-  background: "linear-gradient(180deg, rgba(20, 27, 43, 0.72) 0%, rgba(10, 14, 24, 0.64) 100%)",
-  boxShadow: "0 40px 120px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255,255,255,0.05)"
+  border: OFFICE_THEME.border.glass,
+  background: OFFICE_THEME.surface.frame,
+  boxShadow: OFFICE_THEME.shadow.panel
 } satisfies React.CSSProperties;
 
 const overlayLayerStyle = {
@@ -54,8 +65,8 @@ const ambientFrameStyle = {
   position: "absolute",
   inset: "18px",
   borderRadius: "30px",
-  border: "1px solid rgba(255,255,255,0.06)",
-  boxShadow: "inset 0 0 120px rgba(138, 108, 72, 0.08)",
+  border: OFFICE_THEME.border.glass,
+  boxShadow: OFFICE_THEME.shadow.glow,
   pointerEvents: "none"
 } satisfies React.CSSProperties;
 
@@ -66,9 +77,9 @@ const titleRibbonStyle = {
   transform: "translateX(-50%)",
   padding: "10px 18px",
   borderRadius: "999px",
-  border: "1px solid rgba(247,212,139,0.18)",
-  background: "linear-gradient(180deg, rgba(31, 42, 67, 0.88) 0%, rgba(15, 21, 33, 0.82) 100%)",
-  color: "#F7E7C1",
+  border: OFFICE_THEME.border.glass,
+  background: OFFICE_THEME.surface.frame,
+  color: OFFICE_THEME.text.accent,
   fontSize: "12px",
   letterSpacing: "0.22em",
   textTransform: "uppercase",
@@ -98,9 +109,15 @@ export function OfficeRoute() {
   }
 
   return (
-    <section aria-label="office-scene-layout" data-testid="office-scene-layout" style={layoutStyle}>
+    <section
+      aria-label="office-scene-layout"
+      data-testid="office-scene-layout"
+      data-office-theme={OFFICE_THEME.id}
+      style={layoutStyle}
+    >
+      <div aria-hidden="true" style={routeDataGridStyle} />
       <div aria-label="office-scene-canvas-layer" style={canvasLayerStyle}>
-        <div style={canvasFrameStyle}>
+        <div aria-label="office-observation-window" style={canvasFrameStyle}>
           <div style={ambientFrameStyle} />
           <div style={titleRibbonStyle}>SBTI Digital Office</div>
           <GameCanvas onRoomChanged={handleRoomChanged} />

@@ -72,3 +72,14 @@ test("mounts the office scene canvas and overlay UI together", async () => {
     expect(screen.getByRole("heading", { name: /hr office/i })).toBeInTheDocument();
   });
 });
+
+test("renders the office route with unified digital command center chrome", () => {
+  bridgeState.emittedRoomId = "office";
+
+  render(createElement(OfficeRoute));
+
+  const layout = screen.getByTestId("office-scene-layout");
+  expect(layout).toHaveAttribute("data-office-theme", "digital-command-center");
+  expect(screen.getByLabelText("office-observation-window")).toBeInTheDocument();
+  expect(screen.getByText("SBTI Digital Office")).toBeInTheDocument();
+});
