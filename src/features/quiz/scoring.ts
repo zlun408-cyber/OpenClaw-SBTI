@@ -1,25 +1,21 @@
+import type { QuizResult } from "../../types/domain";
+import { getPersonalityDefinition } from "./personalityCatalog";
 import { questions, type QuizAxis } from "./questions";
-import type { QuizResultType } from "../../types/domain";
 
 export type QuizAnswer = {
   questionId: string;
   value: string;
 };
 
-export type QuizScoreResult = {
-  resultType: QuizResultType;
-  title: string;
-};
-
-type ResultMeta = QuizScoreResult & { axis: QuizAxis };
-
-const RESULT_META: readonly ResultMeta[] = [
-  { axis: "control", resultType: "CTRL", title: "控制者" },
-  { axis: "execution", resultType: "EXEC", title: "执行者" },
-  { axis: "harmony", resultType: "HARM", title: "协调者" }
-] as const;
+export type QuizScoreResult = QuizResult;
 
 const TIE_BREAK_PRIORITY: readonly QuizAxis[] = ["control", "execution", "harmony"];
+
+const AXIS_RESULT_MAP = {
+  control: "CTRL",
+  execution: "GOGO",
+  harmony: "MUM"
+} as const;
 
 export function scoreQuiz(answers: QuizAnswer[]): QuizScoreResult {
   const answersByQuestionId = new Map<string, string>();
@@ -57,10 +53,6 @@ export function scoreQuiz(answers: QuizAnswer[]): QuizScoreResult {
   const topScore = Math.max(...TIE_BREAK_PRIORITY.map((axis) => axisScore[axis]));
   const winningAxis =
     TIE_BREAK_PRIORITY.find((axis) => axisScore[axis] === topScore) ?? TIE_BREAK_PRIORITY[0];
-  const result = RESULT_META.find((item) => item.axis === winningAxis) ?? RESULT_META[0];
 
-  return {
-    resultType: result.resultType,
-    title: result.title
-  };
+  return { ...getPersonalityDefinition(AXIS_RESULT_MAP[winningAxis]) };
 }
