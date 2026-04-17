@@ -25,7 +25,7 @@ test("floating chat stays visible and adapts to room context", async ({ page }) 
 test("meeting-room chat can create a task card without leaving the room", async ({ page }) => {
   await enterOffice(page);
 
-  await page.locator("canvas").first().click({ position: { x: 480, y: 320 } });
+  await clickOfficeCanvas(page, { x: 480, y: 320 });
   await page.keyboard.down("w");
   await page.waitForTimeout(650);
   await page.keyboard.up("w");
@@ -43,7 +43,7 @@ test("meeting-room chat can create a task card without leaving the room", async 
 test("training-room chat can install a new skill", async ({ page }) => {
   await enterOffice(page);
 
-  await page.locator("canvas").first().click({ position: { x: 660, y: 280 } });
+  await clickOfficeCanvas(page, { x: 660, y: 280 });
   await expect(page.getByRole("heading", { name: /training room/i })).toBeVisible();
 
   const input = page.getByLabel("openclaw input");

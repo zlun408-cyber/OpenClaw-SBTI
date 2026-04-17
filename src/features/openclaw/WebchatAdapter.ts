@@ -19,6 +19,7 @@ type Transport = (
     method: string;
     headers: Record<string, string>;
     body: string;
+    signal?: AbortSignal;
   }
 ) => Promise<TransportResponse>;
 
@@ -27,10 +28,12 @@ type CreateWebchatAdapterConfig = {
   session?: string;
   endpoint?: string;
   transport?: Transport;
+  requestTimeoutMs?: number;
 };
 
 const DEFAULT_SESSION = "main";
 const DEFAULT_ENDPOINT = "/api/chat";
+const DEFAULT_REQUEST_TIMEOUT_MS = 4_000;
 
 const stripTrailingSlash = (value: string) => value.replace(/\/+$/, "");
 
@@ -91,7 +94,8 @@ export function createWebchatAdapter({
   baseUrl,
   session = DEFAULT_SESSION,
   endpoint = DEFAULT_ENDPOINT,
-  transport = createFetchTransport() ?? undefined
+  transport = createFetchTransport() ?? undefined,
+  requestTimeoutMs = DEFAULT_REQUEST_TIMEOUT_MS
 }: CreateWebchatAdapterConfig): OpenClawAdapter {
   const normalizedBaseUrl = stripTrailingSlash(baseUrl);
   const buildRequest = (input: string, context?: OpenClawContext): OpenClawRequest => ({
@@ -114,12 +118,27 @@ export function createWebchatAdapter({
       }
 
       try {
-        const response = await transport(`${normalizedBaseUrl}${endpoint}`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify(request)
+        const controller = typeof AbortController === "function" ? new AbortController() : null;
+        const timeoutHandle = window.setTimeout(() => {
+          controller?.abort();
+        }, requestTimeoutMs);
+
+        const response = await Promise.race([
+          transport(`${normalizedBaseUrl}${endpoint}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(request),
+            signal: controller?.signal
+          }),
+          new Promise<TransportResponse>((_, reject) => {
+            window.setTimeout(() => {
+              reject(new Error("request timeout"));
+            }, requestTimeoutMs);
+          })
+        ]).finally(() => {
+          window.clearTimeout(timeoutHandle);
         });
 
         if (!response.ok) {

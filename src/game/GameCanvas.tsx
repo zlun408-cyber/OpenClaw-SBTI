@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import type { RoomId } from "../types/domain";
 
@@ -15,6 +15,7 @@ export function GameCanvas({ onRoomChanged }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const destroyRef = useRef<(() => void) | null>(null);
   const onRoomChangedRef = useRef(onRoomChanged);
+  const [isReady, setIsReady] = useState(import.meta.env.MODE === "test");
 
   useEffect(() => {
     onRoomChangedRef.current = onRoomChanged;
@@ -26,6 +27,7 @@ export function GameCanvas({ onRoomChanged }: GameCanvasProps) {
     }
 
     let cancelled = false;
+    setIsReady(false);
 
     void (async () => {
       const [{ default: Phaser }, { BootScene }, { PreloadScene }, { OfficeScene }] = await Promise.all([
@@ -49,12 +51,34 @@ export function GameCanvas({ onRoomChanged }: GameCanvasProps) {
       };
 
       const game = new Phaser.Game(config);
+      const checkReady = () => {
+        if (cancelled || !containerRef.current) {
+          return;
+        }
+
+        if (containerRef.current.querySelector("canvas")) {
+          setIsReady(true);
+        }
+      };
+
+      checkReady();
+
+      const canvasObserver = new MutationObserver(() => {
+        checkReady();
+      });
+
+      canvasObserver.observe(containerRef.current, {
+        childList: true,
+        subtree: true
+      });
+
       const handleRoomEntered = (event: RoomEnteredEvent) => {
         onRoomChangedRef.current?.(event.roomId);
       };
 
       game.events.on("ROOM_CHANGED", handleRoomEntered);
       destroyRef.current = () => {
+        canvasObserver.disconnect();
         game.events.off("ROOM_CHANGED", handleRoomEntered);
         game.destroy(true);
       };
@@ -62,10 +86,22 @@ export function GameCanvas({ onRoomChanged }: GameCanvasProps) {
 
     return () => {
       cancelled = true;
+      setIsReady(import.meta.env.MODE === "test");
       destroyRef.current?.();
       destroyRef.current = null;
     };
   }, []);
 
-  return <div data-testid="game-canvas" ref={containerRef} />;
+  return (
+    <div
+      aria-busy={!isReady}
+      data-game-ready={isReady ? "true" : "false"}
+      data-testid="game-canvas"
+      ref={containerRef}
+      style={{
+        width: "960px",
+        height: "640px"
+      }}
+    />
+  );
 }

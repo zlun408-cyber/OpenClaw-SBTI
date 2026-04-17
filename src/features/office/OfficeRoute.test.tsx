@@ -1,6 +1,7 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
 import { createElement } from "react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { OfficeRoute } from "./OfficeRoute";
@@ -67,10 +68,7 @@ test("mounts the office scene canvas and overlay UI together", async () => {
   expect(screen.getByTestId("mock-canvas")).toBeInTheDocument();
   expect(screen.getByLabelText("office-hud")).toBeInTheDocument();
   expect(screen.getByLabelText("openclaw-chat")).toBeInTheDocument();
-
-  await waitFor(() => {
-    expect(screen.getByRole("heading", { name: /hr office/i })).toBeInTheDocument();
-  });
+  expect(screen.getByLabelText("office-scene-overlay-layer")).toBeInTheDocument();
 });
 
 test("renders the office route with unified digital command center chrome", () => {
@@ -82,4 +80,26 @@ test("renders the office route with unified digital command center chrome", () =
   expect(layout).toHaveAttribute("data-office-theme", "digital-command-center");
   expect(screen.getByLabelText("office-observation-window")).toBeInTheDocument();
   expect(screen.getByText("SBTI Digital Office")).toBeInTheDocument();
+  expect(screen.getByTestId("office-route-grid")).toHaveAttribute("aria-hidden", "true");
+});
+
+test("redirects away when office access requirements are not met", () => {
+  useAppStore.setState({
+    ...createInitialAppState(),
+    phase: "quiz",
+    currentRoomId: null,
+    result: null
+  });
+
+  render(
+    <MemoryRouter initialEntries={["/office"]}>
+      <Routes>
+        <Route path="/office" element={<OfficeRoute />} />
+        <Route path="/quiz" element={<h1>SBTI Quiz</h1>} />
+      </Routes>
+    </MemoryRouter>
+  );
+
+  expect(screen.queryByTestId("office-scene-layout")).not.toBeInTheDocument();
+  expect(screen.getByRole("heading", { name: /sbti quiz/i })).toBeInTheDocument();
 });

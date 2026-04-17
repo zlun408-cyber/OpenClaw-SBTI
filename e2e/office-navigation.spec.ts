@@ -15,7 +15,7 @@ test("click-to-move can open the HR room panel", async ({ page }) => {
 test("wasd movement can reach the meeting room", async ({ page }) => {
   await enterOffice(page);
 
-  await page.locator("canvas").first().click({ position: { x: 480, y: 320 } });
+  await clickOfficeCanvas(page, { x: 480, y: 320 });
   await page.keyboard.down("w");
   await page.waitForTimeout(650);
   await page.keyboard.up("w");
@@ -69,7 +69,7 @@ test("clicking an HR workstation can focus the memory editor", async ({ page }) 
 test("clicking a meeting workstation can focus the submission lane", async ({ page }) => {
   await enterOffice(page);
 
-  await page.locator("canvas").first().click({ position: { x: 480, y: 320 } });
+  await clickOfficeCanvas(page, { x: 480, y: 320 });
   await page.keyboard.down("w");
   await page.waitForTimeout(650);
   await page.keyboard.up("w");
