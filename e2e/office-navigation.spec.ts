@@ -2,6 +2,20 @@ import { expect, test } from "@playwright/test";
 
 import { clickOfficeCanvas, enterOffice } from "./support/ritual";
 
+test("office route exposes unified digital office chrome", async ({ page }) => {
+  await enterOffice(page);
+
+  await expect(page.getByTestId("office-scene-layout")).toHaveAttribute(
+    "data-office-theme",
+    "digital-command-center"
+  );
+  await expect(page.getByLabel("office-observation-window")).toBeVisible();
+  await expect(page.getByLabel("openclaw-chat")).toHaveAttribute(
+    "data-office-theme",
+    "digital-command-center"
+  );
+});
+
 test("click-to-move can open the HR room panel", async ({ page }) => {
   await enterOffice(page);
 
