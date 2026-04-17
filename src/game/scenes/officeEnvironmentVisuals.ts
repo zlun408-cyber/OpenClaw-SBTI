@@ -47,6 +47,8 @@ type OfficeSignalPath = {
   id: string;
   color: number;
   alpha: number;
+  pulseOffset: number;
+  pulseSpeed: number;
   // Scene/world coordinates used directly by OfficeScene environment layers.
   points: Array<{ x: number; y: number }>;
 };
@@ -187,20 +189,48 @@ export const OFFICE_ENVIRONMENT_LAYERS: {
     { x: 236, y: 248, radius: 132, color: 0x9fe3c4, alpha: 0.08 }
   ],
   signalPaths: [
-    { id: "north-link", color: 0x69d6ff, alpha: 0.24, points: [{ x: 88, y: 116 }, { x: 188, y: 116 }, { x: 236, y: 84 }] },
-    { id: "west-link", color: 0xd3b2f3, alpha: 0.2, points: [{ x: 84, y: 180 }, { x: 162, y: 180 }, { x: 188, y: 140 }] },
-    { id: "east-link", color: 0xf0ca87, alpha: 0.22, points: [{ x: 236, y: 84 }, { x: 308, y: 84 }, { x: 336, y: 148 }] },
-    { id: "south-link", color: 0x9fe3c4, alpha: 0.22, points: [{ x: 188, y: 140 }, { x: 188, y: 228 }, { x: 260, y: 228 }] }
+    {
+      id: "north-link",
+      color: 0x69d6ff,
+      alpha: 0.24,
+      pulseOffset: 0.08,
+      pulseSpeed: 0.42,
+      points: [{ x: 88, y: 116 }, { x: 188, y: 116 }, { x: 236, y: 84 }]
+    },
+    {
+      id: "west-link",
+      color: 0xd3b2f3,
+      alpha: 0.2,
+      pulseOffset: 0.36,
+      pulseSpeed: 0.34,
+      points: [{ x: 84, y: 180 }, { x: 162, y: 180 }, { x: 188, y: 140 }]
+    },
+    {
+      id: "east-link",
+      color: 0xf0ca87,
+      alpha: 0.22,
+      pulseOffset: 0.62,
+      pulseSpeed: 0.48,
+      points: [{ x: 236, y: 84 }, { x: 308, y: 84 }, { x: 336, y: 148 }]
+    },
+    {
+      id: "south-link",
+      color: 0x9fe3c4,
+      alpha: 0.22,
+      pulseOffset: 0.84,
+      pulseSpeed: 0.38,
+      points: [{ x: 188, y: 140 }, { x: 188, y: 228 }, { x: 260, y: 228 }]
+    }
   ],
   particles: [
-    { id: "particle-1", x: 66, y: 60, radius: 1, alpha: 0.3, color: 0x69d6ff },
-    { id: "particle-2", x: 120, y: 88, radius: 2, alpha: 0.24, color: 0xf0ca87 },
-    { id: "particle-3", x: 180, y: 42, radius: 1, alpha: 0.28, color: 0xd3b2f3 },
-    { id: "particle-4", x: 248, y: 74, radius: 2, alpha: 0.26, color: 0x9fe3c4 },
-    { id: "particle-5", x: 304, y: 98, radius: 1, alpha: 0.22, color: 0x69d6ff },
-    { id: "particle-6", x: 348, y: 136, radius: 2, alpha: 0.25, color: 0xf0ca87 },
-    { id: "particle-7", x: 222, y: 198, radius: 1, alpha: 0.24, color: 0x9fe3c4 },
-    { id: "particle-8", x: 128, y: 244, radius: 2, alpha: 0.2, color: 0xd3b2f3 }
+    { id: "ambient-particle-1", x: 66, y: 60, radius: 1, alpha: 0.3, color: 0x69d6ff },
+    { id: "ambient-particle-2", x: 120, y: 88, radius: 2, alpha: 0.24, color: 0xf0ca87 },
+    { id: "ambient-particle-3", x: 180, y: 42, radius: 1, alpha: 0.28, color: 0xd3b2f3 },
+    { id: "ambient-particle-4", x: 248, y: 74, radius: 2, alpha: 0.26, color: 0x9fe3c4 },
+    { id: "ambient-particle-5", x: 304, y: 98, radius: 1, alpha: 0.22, color: 0x69d6ff },
+    { id: "ambient-particle-6", x: 348, y: 136, radius: 2, alpha: 0.25, color: 0xf0ca87 },
+    { id: "ambient-particle-7", x: 222, y: 198, radius: 1, alpha: 0.24, color: 0x9fe3c4 },
+    { id: "ambient-particle-8", x: 128, y: 244, radius: 2, alpha: 0.2, color: 0xd3b2f3 }
   ],
   foregroundOverlays: [
     { id: "top-glass", x: 0, y: 0, width: 420, height: 28, alpha: 0.08, color: 0xd7f1ff },

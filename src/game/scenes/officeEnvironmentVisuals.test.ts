@@ -59,6 +59,19 @@ describe("office environment visuals", () => {
     });
   });
 
+  test("signal paths and particles include animation metadata", () => {
+    OFFICE_ENVIRONMENT_LAYERS.signalPaths.forEach((path) => {
+      expect(path.pulseOffset).toBeGreaterThanOrEqual(0);
+      expect(path.pulseOffset).toBeLessThanOrEqual(1);
+      expect(path.pulseSpeed).toBeGreaterThan(0);
+    });
+
+    OFFICE_ENVIRONMENT_LAYERS.particles.forEach((particle) => {
+      expect(particle.id).toMatch(/^ambient-particle-/);
+      expect(particle.alpha).toBeGreaterThan(0);
+    });
+  });
+
   test("keeps environment depths behind the avatar and labels", () => {
     expect(OFFICE_VISUAL_DEPTHS.backdrop).toBeLessThan(OFFICE_VISUAL_DEPTHS.rooms);
     expect(OFFICE_VISUAL_DEPTHS.rooms).toBeLessThan(OFFICE_VISUAL_DEPTHS.avatarShadow);

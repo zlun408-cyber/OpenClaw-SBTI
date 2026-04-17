@@ -12,17 +12,14 @@ import {
   resolveAvatarPresentation,
   type AvatarFacing
 } from "./officeAvatarPresentation";
+import {
+  getOfficeRoomVisual,
+  OFFICE_ENVIRONMENT_LAYERS,
+  OFFICE_VISUAL_DEPTHS
+} from "./officeEnvironmentVisuals";
 
 const ROOM_WIDTH = 158;
 const ROOM_HEIGHT = 96;
-
-const ROOM_VISUALS: Record<RoomId, { label: string; fill: number; accent: number; subtitle: string }> = {
-  office: { label: "主办公室", fill: 0x27404a, accent: 0x8cc2b3, subtitle: "观察 / 协同 / 控制台" },
-  meeting: { label: "会议室", fill: 0x43342a, accent: 0xf0ca87, subtitle: "发布 / 推进 / 提交" },
-  hr: { label: "人事部", fill: 0x3e2d4f, accent: 0xd3b2f3, subtitle: "Soul / Memory" },
-  training: { label: "培训室", fill: 0x214841, accent: 0x9fe3c4, subtitle: "Skill / Growth" },
-  rest: { label: "休息间", fill: 0x4b3221, accent: 0xf1c996, subtitle: "喝茶 / 睡觉 / 跳舞" }
-};
 
 type RoomEnteredEvent = {
   type: "ROOM_CHANGED";
@@ -32,6 +29,24 @@ type RoomEnteredEvent = {
 type Point = {
   x: number;
   y: number;
+};
+
+type AmbientSignal = {
+  baseX: number;
+  baseY: number;
+  baseAlpha: number;
+  driftRadius: number;
+  driftSpeed: number;
+  phaseOffset: number;
+  sprite: Phaser.GameObjects.Arc;
+};
+
+type PathPulse = {
+  baseAlpha: number;
+  pulseOffset: number;
+  pulseSpeed: number;
+  points: Array<{ x: number; y: number }>;
+  sprite: Phaser.GameObjects.Arc;
 };
 
 export class OfficeScene extends Phaser.Scene {
@@ -56,6 +71,8 @@ export class OfficeScene extends Phaser.Scene {
   private destinationMarker?: Phaser.GameObjects.Arc;
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys;
   private wasd?: Record<"W" | "A" | "S" | "D", Phaser.Input.Keyboard.Key>;
+  private ambientSignals: AmbientSignal[] = [];
+  private pathPulses: PathPulse[] = [];
   private readonly playableArea = this.createPlayableArea();
   private activeRoomId: RoomId | null = "office";
   private avatarFacing: AvatarFacing = "center";
@@ -73,12 +90,14 @@ export class OfficeScene extends Phaser.Scene {
     this.renderBackdrop(centerX, centerY);
     this.renderConnectionPaths(centerX, centerY);
     this.renderRooms(centerX, centerY);
+    this.renderAmbientSignals();
+    this.renderForegroundOverlays();
 
     const startX = centerX + mapConfig.rooms.office.x;
     const startY = centerY + mapConfig.rooms.office.y;
 
     this.playerShadow = this.add.ellipse(startX, startY + 22, 36, 16, 0x000000, 0.26);
-    this.playerShadow.setDepth(10);
+    this.playerShadow.setDepth(OFFICE_VISUAL_DEPTHS.avatarShadow);
 
     this.playerGlow = this.add.circle(
       startX,
@@ -87,10 +106,10 @@ export class OfficeScene extends Phaser.Scene {
       0xf4d08f,
       0.14
     );
-    this.playerGlow.setDepth(11);
+    this.playerGlow.setDepth(OFFICE_VISUAL_DEPTHS.avatarGlow);
 
     this.playerAura = this.add.circle(startX, startY, 20, 0x8fd9ff, 0.14);
-    this.playerAura.setStrokeStyle(2, 0xd7f4ff, 0.38).setDepth(12);
+    this.playerAura.setStrokeStyle(2, 0xd7f4ff, 0.38).setDepth(OFFICE_VISUAL_DEPTHS.avatarAura);
 
     this.player = this.add.circle(
       startX,
@@ -99,7 +118,7 @@ export class OfficeScene extends Phaser.Scene {
       0x8fd9ff,
       0
     );
-    this.player.setDepth(13);
+    this.player.setDepth(OFFICE_VISUAL_DEPTHS.avatarBody - 1);
 
     this.playerMantle = this.add.ellipse(0, 12, 30, 38, 0x223345, 1);
     this.playerCore = this.add.ellipse(0, 10, 18, 24, 0x567f8f, 1);
@@ -114,7 +133,7 @@ export class OfficeScene extends Phaser.Scene {
       this.playerVisor,
       this.playerSigil
     ]);
-    this.playerContainer.setDepth(14);
+    this.playerContainer.setDepth(OFFICE_VISUAL_DEPTHS.avatarBody);
 
     this.playerStatusBadge = this.add
       .text(startX, startY - 56, "On Watch", {
@@ -125,7 +144,7 @@ export class OfficeScene extends Phaser.Scene {
         padding: { x: 10, y: 4 }
       })
       .setOrigin(0.5)
-      .setDepth(15);
+      .setDepth(OFFICE_VISUAL_DEPTHS.avatarLabels);
 
     this.playerEmoteText = this.add
       .text(startX, startY - 34, "Sync", {
@@ -135,7 +154,7 @@ export class OfficeScene extends Phaser.Scene {
         fontStyle: "700"
       })
       .setOrigin(0.5)
-      .setDepth(15);
+      .setDepth(OFFICE_VISUAL_DEPTHS.avatarLabels);
 
     this.playerNameplate = this.add
       .text(startX, startY + 42, "Digital Employee", {
@@ -144,7 +163,7 @@ export class OfficeScene extends Phaser.Scene {
         fontSize: "12px"
       })
       .setOrigin(0.5)
-      .setDepth(15);
+      .setDepth(OFFICE_VISUAL_DEPTHS.avatarLabels);
 
     this.destinationMarker = this.add.circle(centerX, centerY, 10, 0xf4d08f, 0.12);
     this.destinationMarker.setStrokeStyle(2, 0xf4d08f, 0.42).setVisible(false);
@@ -180,6 +199,8 @@ export class OfficeScene extends Phaser.Scene {
       return;
     }
 
+    this.syncEnvironmentAnimation(time, deltaMs);
+
     this.movement.applyKeyboardInput(this.readKeyboardInput());
 
     const previousPosition = { x: this.player.x, y: this.player.y };
@@ -213,53 +234,80 @@ export class OfficeScene extends Phaser.Scene {
   }
 
   private renderBackdrop(centerX: number, centerY: number) {
-    this.add.rectangle(centerX, centerY, this.scale.width + 120, this.scale.height + 120, 0x0d1622);
+    this.add
+      .rectangle(centerX, centerY, this.scale.width + 120, this.scale.height + 120, 0x0d1622)
+      .setDepth(OFFICE_VISUAL_DEPTHS.backdrop);
 
     const grid = this.add.graphics();
-    grid.lineStyle(1, 0xffffff, 0.04);
-    for (let x = -40; x <= this.scale.width + 40; x += 48) {
+    grid.setDepth(OFFICE_VISUAL_DEPTHS.backdrop);
+    grid.lineStyle(1, OFFICE_ENVIRONMENT_LAYERS.grid.color, OFFICE_ENVIRONMENT_LAYERS.grid.alpha);
+    for (let x = -40; x <= this.scale.width + 40; x += OFFICE_ENVIRONMENT_LAYERS.grid.spacing) {
       grid.lineBetween(x, -20, x, this.scale.height + 20);
     }
-    for (let y = -20; y <= this.scale.height + 20; y += 48) {
+    for (let y = -20; y <= this.scale.height + 20; y += OFFICE_ENVIRONMENT_LAYERS.grid.spacing) {
       grid.lineBetween(-40, y, this.scale.width + 40, y);
     }
 
-    this.add.circle(centerX, centerY - 120, 220, 0x6b4da8, 0.06);
-    this.add.circle(centerX + 180, centerY - 80, 180, 0x2c88c7, 0.06);
-    this.add.circle(centerX - 220, centerY + 120, 200, 0xc98948, 0.05);
+    OFFICE_ENVIRONMENT_LAYERS.ambientGlows.forEach((glow) => {
+      this.add
+        .circle(glow.x, glow.y, glow.radius, glow.color, glow.alpha)
+        .setDepth(OFFICE_VISUAL_DEPTHS.backdrop);
+    });
   }
 
-  private renderConnectionPaths(centerX: number, centerY: number) {
-    const graphics = this.add.graphics();
-    graphics.lineStyle(10, 0x13202d, 0.8);
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX - 180, centerY - 40, centerX, centerY));
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX + 180, centerY - 40, centerX, centerY));
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX, centerY, centerX, centerY - 120));
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX + 120, centerY + 80, centerX + 260, centerY + 180));
+  private renderConnectionPaths(_centerX: number, _centerY: number) {
+    const railGraphics = this.add.graphics().setDepth(OFFICE_VISUAL_DEPTHS.signalPaths);
+    const accentGraphics = this.add.graphics().setDepth(OFFICE_VISUAL_DEPTHS.signalPaths + 0.1);
 
-    graphics.lineStyle(3, 0xf4d08f, 0.18);
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX - 180, centerY - 40, centerX, centerY));
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX + 180, centerY - 40, centerX, centerY));
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX, centerY, centerX, centerY - 120));
-    graphics.strokeLineShape(new Phaser.Geom.Line(centerX + 120, centerY + 80, centerX + 260, centerY + 180));
+    OFFICE_ENVIRONMENT_LAYERS.signalPaths.forEach((path) => {
+      railGraphics.lineStyle(10, 0x13202d, 0.82);
+      accentGraphics.lineStyle(3, path.color, path.alpha);
+
+      for (let index = 0; index < path.points.length - 1; index += 1) {
+        const start = path.points[index];
+        const end = path.points[index + 1];
+
+        railGraphics.strokeLineShape(new Phaser.Geom.Line(start.x, start.y, end.x, end.y));
+        accentGraphics.strokeLineShape(new Phaser.Geom.Line(start.x, start.y, end.x, end.y));
+      }
+
+      const pulse = this.add.circle(path.points[0].x, path.points[0].y, 5, path.color, 0.42);
+      pulse.setDepth(OFFICE_VISUAL_DEPTHS.dynamicSignals);
+      pulse.setBlendMode(Phaser.BlendModes.ADD);
+
+      this.pathPulses.push({
+        baseAlpha: 0.42,
+        pulseOffset: path.pulseOffset,
+        pulseSpeed: path.pulseSpeed,
+        points: path.points,
+        sprite: pulse
+      });
+    });
   }
 
   private renderRooms(centerX: number, centerY: number) {
     (Object.entries(mapConfig.rooms) as Array<[RoomId, { x: number; y: number }]>).forEach(([roomId, room]) => {
-      const visual = ROOM_VISUALS[roomId];
+      const visual = getOfficeRoomVisual(roomId);
       const x = centerX + room.x;
       const y = centerY + room.y;
 
-      this.add.rectangle(x, y + 12, ROOM_WIDTH + 12, ROOM_HEIGHT + 18, 0x000000, 0.18);
+      this.add
+        .rectangle(x, y + 12, ROOM_WIDTH + 12, ROOM_HEIGHT + 18, visual.shadow, 0.3)
+        .setDepth(OFFICE_VISUAL_DEPTHS.rooms);
 
       const frame = this.add.graphics();
+      frame.setDepth(OFFICE_VISUAL_DEPTHS.rooms);
       frame.fillStyle(visual.fill, 0.78);
       frame.fillRoundedRect(x - ROOM_WIDTH / 2, y - ROOM_HEIGHT / 2, ROOM_WIDTH, ROOM_HEIGHT, 20);
       frame.lineStyle(2, visual.accent, 0.42);
       frame.strokeRoundedRect(x - ROOM_WIDTH / 2, y - ROOM_HEIGHT / 2, ROOM_WIDTH, ROOM_HEIGHT, 20);
 
-      this.add.rectangle(x, y - ROOM_HEIGHT / 2 + 18, ROOM_WIDTH - 24, 16, visual.accent, 0.18);
-      this.add.circle(x - ROOM_WIDTH / 2 + 18, y - ROOM_HEIGHT / 2 + 18, 6, visual.accent, 0.35);
+      this.add
+        .rectangle(x, y - ROOM_HEIGHT / 2 + 18, ROOM_WIDTH - 24, 16, visual.accent, 0.18)
+        .setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment);
+      this.add
+        .circle(x - ROOM_WIDTH / 2 + 18, y - ROOM_HEIGHT / 2 + 18, 6, visual.accent, 0.35)
+        .setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment);
 
       this.add
         .text(x, y - 10, visual.label, {
@@ -268,7 +316,8 @@ export class OfficeScene extends Phaser.Scene {
           fontSize: "18px",
           fontStyle: "700"
         })
-        .setOrigin(0.5);
+        .setOrigin(0.5)
+        .setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment);
 
       this.add
         .text(x, y + 16, visual.subtitle, {
@@ -276,8 +325,147 @@ export class OfficeScene extends Phaser.Scene {
           fontFamily: "sans-serif",
           fontSize: "11px"
         })
-        .setOrigin(0.5);
+        .setOrigin(0.5)
+        .setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment);
+
+      visual.equipment.forEach((equipment) => {
+        const equipmentX = x + equipment.offsetX;
+        const equipmentY = y + equipment.offsetY;
+        const isRound = equipment.kind === "beacon" || equipment.kind === "pod";
+
+        const shape = isRound
+          ? this.add.ellipse(
+              equipmentX,
+              equipmentY,
+              equipment.width,
+              equipment.height,
+              visual.accent,
+              equipment.alpha
+            )
+          : this.add.rectangle(
+              equipmentX,
+              equipmentY,
+              equipment.width,
+              equipment.height,
+              visual.accent,
+              equipment.alpha
+            );
+
+        shape.setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment);
+
+        if (equipment.kind === "screen" || equipment.kind === "terminal") {
+          shape.setStrokeStyle(1, 0xd7f4ff, 0.3);
+        }
+      });
+
+      visual.signalNodes.forEach((signalNode, index) => {
+        const node = this.add.circle(
+          x + signalNode.offsetX,
+          y + signalNode.offsetY,
+          signalNode.radius,
+          visual.accent,
+          signalNode.alpha
+        );
+        node.setDepth(OFFICE_VISUAL_DEPTHS.dynamicSignals);
+        node.setBlendMode(Phaser.BlendModes.ADD);
+
+        this.ambientSignals.push({
+          baseX: x + signalNode.offsetX,
+          baseY: y + signalNode.offsetY,
+          baseAlpha: signalNode.alpha,
+          driftRadius: 2 + index,
+          driftSpeed: 0.45 + index * 0.08,
+          phaseOffset: index * 0.2 + room.x * 0.001,
+          sprite: node
+        });
+      });
     });
+  }
+
+  private renderAmbientSignals() {
+    OFFICE_ENVIRONMENT_LAYERS.particles.forEach((particle, index) => {
+      const sprite = this.add.circle(particle.x, particle.y, particle.radius, particle.color, particle.alpha);
+      sprite.setDepth(OFFICE_VISUAL_DEPTHS.dynamicSignals);
+      sprite.setBlendMode(Phaser.BlendModes.ADD);
+
+      this.ambientSignals.push({
+        baseX: particle.x,
+        baseY: particle.y,
+        baseAlpha: particle.alpha,
+        driftRadius: 4 + (index % 3),
+        driftSpeed: 0.2 + index * 0.03,
+        phaseOffset: index * 0.17,
+        sprite
+      });
+    });
+  }
+
+  private renderForegroundOverlays() {
+    OFFICE_ENVIRONMENT_LAYERS.foregroundOverlays.forEach((overlay) => {
+      this.add
+        .rectangle(
+          overlay.x + overlay.width / 2,
+          overlay.y + overlay.height / 2,
+          overlay.width,
+          overlay.height,
+          overlay.color,
+          overlay.alpha
+        )
+        .setDepth(OFFICE_VISUAL_DEPTHS.foreground);
+    });
+  }
+
+  private syncEnvironmentAnimation(time: number, _deltaMs: number) {
+    const seconds = time / 1000;
+
+    this.ambientSignals.forEach((signal) => {
+      const phase = seconds * signal.driftSpeed + signal.phaseOffset;
+      signal.sprite
+        .setPosition(
+          signal.baseX + Math.cos(phase) * signal.driftRadius,
+          signal.baseY + Math.sin(phase * 1.4) * signal.driftRadius * 0.6
+        )
+        .setAlpha(signal.baseAlpha + (Math.sin(phase * 2) + 1) * 0.08);
+    });
+
+    this.pathPulses.forEach((pulse) => {
+      const progress = (seconds * pulse.pulseSpeed + pulse.pulseOffset) % 1;
+      const point = this.resolvePathPoint(pulse.points, progress);
+      const shimmer = 0.28 + (Math.sin(seconds * 5 + pulse.pulseOffset * Math.PI * 2) + 1) * 0.1;
+
+      pulse.sprite
+        .setPosition(point.x, point.y)
+        .setScale(0.85 + shimmer)
+        .setAlpha(pulse.baseAlpha + shimmer * 0.35);
+    });
+  }
+
+  private resolvePathPoint(points: Array<{ x: number; y: number }>, progress: number): Point {
+    if (points.length <= 1) {
+      return points[0] ?? { x: 0, y: 0 };
+    }
+
+    const segments = points.slice(0, -1).map((start, index) => ({
+      start,
+      end: points[index + 1],
+      length: Phaser.Math.Distance.Between(start.x, start.y, points[index + 1].x, points[index + 1].y)
+    }));
+    const totalLength = segments.reduce((sum, segment) => sum + segment.length, 0);
+    let remaining = progress * totalLength;
+
+    for (const segment of segments) {
+      if (remaining <= segment.length) {
+        const t = segment.length === 0 ? 0 : remaining / segment.length;
+        return {
+          x: Phaser.Math.Linear(segment.start.x, segment.end.x, t),
+          y: Phaser.Math.Linear(segment.start.y, segment.end.y, t)
+        };
+      }
+
+      remaining -= segment.length;
+    }
+
+    return points[points.length - 1];
   }
 
   private syncAvatarPresentation(time: number, movementDelta: Point) {
