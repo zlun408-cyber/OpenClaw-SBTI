@@ -4,19 +4,36 @@ import { HRPanel } from "./panels/HRPanel";
 import { MeetingRoomPanel } from "./panels/MeetingRoomPanel";
 import { RestPanel } from "./panels/RestPanel";
 import { TrainingPanel } from "./panels/TrainingPanel";
+import { RoomPanelShell } from "./RoomPanelShell";
 
 export function RoomPanelHost() {
   const currentRoom = useAppStore((state) => state.currentRoomId);
 
   switch (currentRoom) {
     case "meeting":
-      return <MeetingRoomPanel />;
+      return (
+        <RoomPanelShell roomId="meeting">
+          <MeetingRoomPanel />
+        </RoomPanelShell>
+      );
     case "hr":
-      return <HRPanel />;
+      return (
+        <RoomPanelShell roomId="hr">
+          <HRPanel />
+        </RoomPanelShell>
+      );
     case "training":
-      return <TrainingPanel />;
+      return (
+        <RoomPanelShell roomId="training">
+          <TrainingPanel />
+        </RoomPanelShell>
+      );
     case "rest":
-      return <RestPanel />;
+      return (
+        <RoomPanelShell roomId="rest">
+          <RestPanel />
+        </RoomPanelShell>
+      );
     default:
       return null;
   }

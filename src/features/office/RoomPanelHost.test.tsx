@@ -36,6 +36,18 @@ test("shows the meeting panel when the current room is meeting", () => {
   ).toBeInTheDocument();
 });
 
+test("wraps active room panels in the shared terminal shell", () => {
+  useAppStore.setState({ currentRoomId: "meeting" });
+
+  render(<RoomPanelHost />);
+
+  const shell = screen.getByLabelText("office-room-terminal");
+  expect(shell).toHaveAttribute("data-office-room", "meeting");
+  expect(
+    screen.getByRole("heading", { name: /meeting room/i })
+  ).toBeInTheDocument();
+});
+
 test("shows the training panel when the current room is training", () => {
   useAppStore.setState({ currentRoomId: "training" });
 
