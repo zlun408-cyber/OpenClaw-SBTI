@@ -10,7 +10,8 @@ describe("resolveAvatarPresentation", () => {
   test("prefers explicit character state styling over room idle styling", () => {
     const presentation = resolveAvatarPresentation({
       roomId: "meeting",
-      state: "train"
+      state: "train",
+      resultType: null
     });
 
     expect(presentation.statusLabel).toBe("Training");
@@ -21,12 +22,30 @@ describe("resolveAvatarPresentation", () => {
   test("uses room flavor when the employee is idle", () => {
     const presentation = resolveAvatarPresentation({
       roomId: "rest",
-      state: "idle"
+      state: "idle",
+      resultType: null
     });
 
     expect(presentation.statusLabel).toBe("At Ease");
     expect(presentation.emoteLabel).toBe("Rest");
     expect(presentation.accentColor).toBe(0xf1c996);
+  });
+
+  test("tints the same room-state palette differently for each sbti type", () => {
+    const ctrlPresentation = resolveAvatarPresentation({
+      roomId: "office",
+      state: "idle",
+      resultType: "CTRL"
+    });
+    const execPresentation = resolveAvatarPresentation({
+      roomId: "office",
+      state: "idle",
+      resultType: "EXEC"
+    });
+
+    expect(ctrlPresentation.bodyColor).not.toBe(execPresentation.bodyColor);
+    expect(ctrlPresentation.mantleColor).not.toBe(execPresentation.mantleColor);
+    expect(ctrlPresentation.accentColor).not.toBe(execPresentation.accentColor);
   });
 });
 

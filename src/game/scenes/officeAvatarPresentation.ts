@@ -1,10 +1,12 @@
-import type { CharacterState, RoomId } from "../../types/domain";
+import type { CharacterState, QuizResultType, RoomId } from "../../types/domain";
+import { getCharacterConfig } from "../data/characterRegistry";
 
 export type AvatarFacing = "left" | "right" | "center";
 
 type AvatarPresentationInput = {
   roomId: RoomId | null;
   state: CharacterState;
+  resultType: QuizResultType | null;
 };
 
 type AvatarPalette = {
@@ -133,10 +135,42 @@ const STATE_PRESENTATIONS: Partial<Record<CharacterState, AvatarPalette>> = {
 
 export const resolveAvatarPresentation = ({
   roomId,
-  state
+  state,
+  resultType
 }: AvatarPresentationInput): AvatarPalette => {
   const resolvedRoomId = roomId ?? "office";
-  return STATE_PRESENTATIONS[state] ?? ROOM_IDLE_PRESENTATIONS[resolvedRoomId];
+  const basePresentation = STATE_PRESENTATIONS[state] ?? ROOM_IDLE_PRESENTATIONS[resolvedRoomId];
+
+  if (!resultType) {
+    return basePresentation;
+  }
+
+  const characterConfig = getCharacterConfig(resultType);
+  const tintKey =
+    characterConfig.states[state] ??
+    characterConfig.transparent ??
+    characterConfig.sourceUrl ??
+    `${characterConfig.type}:${characterConfig.title}`;
+  const tintSeed = hashString(tintKey);
+  const hasSpecificStateAsset = Boolean(characterConfig.states[state]);
+  const tintWeight = hasSpecificStateAsset ? 0.36 : 0.22;
+
+  return {
+    ...basePresentation,
+    auraColor: mixColor(basePresentation.auraColor, createColorFromSeed(tintSeed ^ 0x11aa33, 118, 224), tintWeight),
+    accentColor: mixColor(
+      basePresentation.accentColor,
+      createColorFromSeed(tintSeed ^ 0x3355aa, 126, 235),
+      tintWeight
+    ),
+    bodyColor: mixColor(basePresentation.bodyColor, createColorFromSeed(tintSeed ^ 0xaa5511, 82, 184), tintWeight),
+    mantleColor: mixColor(
+      basePresentation.mantleColor,
+      createColorFromSeed(tintSeed ^ 0x552244, 34, 116),
+      tintWeight
+    ),
+    auraAlpha: Math.min(basePresentation.auraAlpha + (hasSpecificStateAsset ? 0.02 : 0), 0.26)
+  };
 };
 
 export const resolveAvatarFacing = (movementDelta: { x: number; y: number }): AvatarFacing => {
@@ -151,3 +185,44 @@ export const resolveAvatarNameplate = (customName: string, title: string) => {
   const normalizedName = customName.trim();
   return normalizedName ? `${normalizedName} · ${title}` : title;
 };
+
+function hashString(value: string): number {
+  let hash = 0;
+
+  for (const char of value) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  }
+
+  return hash;
+}
+
+function createColorFromSeed(seed: number, min: number, max: number): number {
+  const span = max - min;
+  const createChannel = (shift: number) => min + (((seed >> shift) & 0xff) % (span + 1));
+
+  const red = createChannel(0);
+  const green = createChannel(8);
+  const blue = createChannel(16);
+
+  return (red << 16) | (green << 8) | blue;
+}
+
+function mixColor(baseColor: number, tintColor: number, weight: number): number {
+  const clampedWeight = Math.min(Math.max(weight, 0), 1);
+  const mixChannel = (baseChannel: number, tintChannel: number) =>
+    Math.round(baseChannel + (tintChannel - baseChannel) * clampedWeight);
+
+  const baseRed = (baseColor >> 16) & 0xff;
+  const baseGreen = (baseColor >> 8) & 0xff;
+  const baseBlue = baseColor & 0xff;
+
+  const tintRed = (tintColor >> 16) & 0xff;
+  const tintGreen = (tintColor >> 8) & 0xff;
+  const tintBlue = tintColor & 0xff;
+
+  return (
+    (mixChannel(baseRed, tintRed) << 16) |
+    (mixChannel(baseGreen, tintGreen) << 8) |
+    mixChannel(baseBlue, tintBlue)
+  );
+}

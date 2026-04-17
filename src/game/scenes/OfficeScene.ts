@@ -3,6 +3,7 @@ import Phaser from "phaser";
 import { roomTriggers } from "../data/roomTriggers";
 import { mapConfig } from "../data/mapConfig";
 import { MovementSystem } from "../systems/MovementSystem";
+import { AnimationSystem } from "../systems/AnimationSystem";
 import { RoomTriggerSystem } from "../systems/RoomTriggerSystem";
 import { useAppStore } from "../../state/appStore";
 import type { RoomId } from "../../types/domain";
@@ -52,6 +53,7 @@ type PathPulse = {
 export class OfficeScene extends Phaser.Scene {
   static readonly KEY = "OfficeScene";
 
+  private readonly animationSystem = new AnimationSystem();
   private readonly movement = new MovementSystem();
   private readonly roomTriggerSystem = new RoomTriggerSystem(roomTriggers);
 
@@ -506,13 +508,10 @@ export class OfficeScene extends Phaser.Scene {
     const effectiveState = isMoving ? "walk" : appState.character.state;
     const presentation = resolveAvatarPresentation({
       roomId: this.activeRoomId,
-      state: effectiveState
+      state: effectiveState,
+      resultType: appState.result?.resultType ?? null
     });
-    const bobOffset = Math.sin(time / 240) * (effectiveState === "sleep" ? 1.4 : 2.8);
-    const pulse = 1 + Math.sin(time / 300) * 0.04;
-    const dancePulse = effectiveState === "dance" ? Math.sin(time / 120) * 0.1 : 0;
-    const auraScale = pulse + dancePulse;
-    const bodyScale = 1 + dancePulse * 0.5;
+    const motion = this.animationSystem.resolveMotion(effectiveState, time);
     const visorOffsetX = this.avatarFacing === "left" ? -4 : this.avatarFacing === "right" ? 4 : 0;
     const bodyRotation = this.avatarFacing === "left" ? -0.08 : this.avatarFacing === "right" ? 0.08 : 0;
     const anchorX = this.player.x;
@@ -520,22 +519,22 @@ export class OfficeScene extends Phaser.Scene {
 
     this.playerShadow
       .setPosition(anchorX, anchorY + 24)
-      .setScale(1 + dancePulse * 0.35, 1 - Math.abs(dancePulse) * 0.15);
+      .setScale(motion.shadowScaleX, motion.shadowScaleY);
 
     this.playerGlow
-      .setPosition(anchorX, anchorY + bobOffset * 0.2)
+      .setPosition(anchorX, anchorY + motion.bobOffset * 0.2)
       .setFillStyle(presentation.auraColor, presentation.auraAlpha)
-      .setScale(auraScale * 1.1);
+      .setScale(motion.auraScale * 1.1);
 
     this.playerAura
-      .setPosition(anchorX, anchorY + bobOffset * 0.15)
+      .setPosition(anchorX, anchorY + motion.bobOffset * 0.15)
       .setFillStyle(presentation.accentColor, 0.12)
       .setStrokeStyle(2, presentation.accentColor, 0.42)
-      .setScale(auraScale);
+      .setScale(motion.auraScale);
 
     this.playerContainer
-      .setPosition(anchorX, anchorY + bobOffset)
-      .setScale(bodyScale)
+      .setPosition(anchorX, anchorY + motion.bobOffset)
+      .setScale(motion.bodyScale)
       .setRotation(bodyRotation);
 
     this.playerMantle.setFillStyle(presentation.mantleColor, 1);
@@ -544,17 +543,17 @@ export class OfficeScene extends Phaser.Scene {
     this.playerSigil.setFillStyle(presentation.accentColor, 0.95);
 
     this.playerStatusBadge
-      .setPosition(anchorX, anchorY - 58 + bobOffset * 0.2)
+      .setPosition(anchorX, anchorY - 58 + motion.bobOffset * 0.2)
       .setText(presentation.statusLabel)
       .setColor("#f7ebcf");
 
     this.playerEmoteText
-      .setPosition(anchorX, anchorY - 36 + bobOffset * 0.15)
+      .setPosition(anchorX, anchorY - 36 + motion.bobOffset * 0.15)
       .setText(presentation.emoteLabel)
       .setColor(Phaser.Display.Color.IntegerToColor(presentation.accentColor).rgba);
 
     this.playerNameplate
-      .setPosition(anchorX, anchorY + 42 + bobOffset * 0.1)
+      .setPosition(anchorX, anchorY + 42 + motion.bobOffset * 0.1)
       .setText(resolveAvatarNameplate(appState.character.customName, appState.character.title));
   }
 

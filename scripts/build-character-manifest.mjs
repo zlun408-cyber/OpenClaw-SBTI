@@ -5,8 +5,12 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const auditPath = path.resolve(__dirname, "../docs/assets/character-audit.md");
-const manifestPath = path.resolve(__dirname, "../src/assets/characters/manifest.json");
+const defaultAuditPath = path.resolve(__dirname, "../docs/assets/character-audit.md");
+const defaultManifestPath = path.resolve(__dirname, "../src/assets/characters/manifest.json");
+const defaultPublicRoot = path.resolve(__dirname, "../public");
+
+const TRANSPARENT_PNG_BASE64 =
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg==";
 
 const SUPPORTED_TYPES = ["CTRL", "EXEC", "HARM"];
 const REQUIRED_HEADERS = [
@@ -100,33 +104,72 @@ function parseNullable(value) {
   return normalized;
 }
 
-const auditMarkdown = fs.readFileSync(auditPath, "utf8");
-const rows = parseMarkdownTable(auditMarkdown);
+function ensureDirectory(directoryPath) {
+  fs.mkdirSync(directoryPath, { recursive: true });
+}
 
-const manifestByType = new Map(
-  rows.map((row) => [
-    row.Type,
-    {
-      type: row.Type,
-      title: row.Title,
-      sourceUrl: parseNullable(row["Source URL"]),
-      quality: parseNullable(row.Quality),
-      transparent: parseNullable(row.Transparent),
-      states: {
-        idle: parseNullable(row.Idle),
-        walk: parseNullable(row.Walk),
-        work: parseNullable(row.Work),
-        rest: parseNullable(row.Rest),
-        sleep: parseNullable(row.Sleep),
-        dance: parseNullable(row.Dance),
-        train: parseNullable(row.Train),
-        "task-submit": parseNullable(row["Task Submit"])
+export function buildCharacterManifest({
+  auditPath = defaultAuditPath,
+  manifestPath = defaultManifestPath,
+  publicRoot = defaultPublicRoot
+} = {}) {
+  const auditMarkdown = fs.readFileSync(auditPath, "utf8");
+  const rows = parseMarkdownTable(auditMarkdown);
+
+  const manifestByType = new Map(
+    rows.map((row) => [
+      row.Type,
+      {
+        type: row.Type,
+        title: row.Title,
+        sourceUrl: parseNullable(row["Source URL"]),
+        quality: parseNullable(row.Quality),
+        transparent: parseNullable(row.Transparent),
+        states: {
+          idle: parseNullable(row.Idle),
+          walk: parseNullable(row.Walk),
+          work: parseNullable(row.Work),
+          rest: parseNullable(row.Rest),
+          sleep: parseNullable(row.Sleep),
+          dance: parseNullable(row.Dance),
+          train: parseNullable(row.Train),
+          "task-submit": parseNullable(row["Task Submit"])
+        }
       }
-    }
-  ])
-);
+    ])
+  );
 
-const manifest = SUPPORTED_TYPES.map((type) => manifestByType.get(type));
+  const manifest = SUPPORTED_TYPES.map((type) => manifestByType.get(type));
 
-fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
-console.log(`Wrote ${manifest.length} character entries to ${manifestPath}`);
+  fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+
+  ensureDirectory(path.resolve(publicRoot, "assets/maps"));
+  ensureDirectory(path.resolve(publicRoot, "assets/ui"));
+
+  manifest.forEach((entry) => {
+    ensurePlaceholderAsset(entry.transparent, publicRoot);
+    Object.values(entry.states).forEach((assetPath) => {
+      ensurePlaceholderAsset(assetPath, publicRoot);
+    });
+  });
+
+  return { manifest, manifestPath };
+}
+
+function ensurePlaceholderAsset(assetPath, publicRoot) {
+  if (typeof assetPath !== "string" || !assetPath.startsWith("/assets/")) {
+    return;
+  }
+
+  const absoluteAssetPath = path.resolve(publicRoot, `.${assetPath}`);
+  ensureDirectory(path.dirname(absoluteAssetPath));
+
+  if (!fs.existsSync(absoluteAssetPath)) {
+    fs.writeFileSync(absoluteAssetPath, Buffer.from(TRANSPARENT_PNG_BASE64, "base64"));
+  }
+}
+
+if (process.argv[1] && path.resolve(process.argv[1]) === __filename) {
+  const { manifest, manifestPath } = buildCharacterManifest();
+  console.log(`Wrote ${manifest.length} character entries to ${manifestPath}`);
+}

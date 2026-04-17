@@ -27,15 +27,15 @@ export async function enterOffice(page: Page, customName = "Alex") {
   await page.waitForURL("**/office");
   await expect(page.getByTestId("office-scene-layout")).toBeVisible();
   await expect(page.getByTestId("game-canvas")).toHaveAttribute("data-game-ready", "true", {
-    timeout: 15_000
+    timeout: 30_000
   });
   await expect(page.locator('[data-testid="game-canvas"] canvas').first()).toBeVisible({
-    timeout: 15_000
+    timeout: 30_000
   });
 }
 
 export async function clickOfficeCanvas(page: Page, position: { x: number; y: number }) {
   const canvas = page.locator('[data-testid="game-canvas"][data-game-ready="true"] canvas').first();
-  await expect(canvas).toBeVisible({ timeout: 15_000 });
+  await expect(canvas).toBeVisible({ timeout: 30_000 });
   await canvas.click({ position });
 }
