@@ -12,11 +12,48 @@ export type CharacterState =
   | "train"
   | "task-submit";
 
-export type QuizResultType = "CTRL" | "EXEC" | "HARM";
+export type QuizResultType =
+  | "CTRL"
+  | "ATM-er"
+  | "Dior-s"
+  | "BOSS"
+  | "THAN-K"
+  | "OH-NO"
+  | "GOGO"
+  | "SEXY"
+  | "LOVE-R"
+  | "MUM"
+  | "FAKE"
+  | "OJBK"
+  | "MALO"
+  | "JOKE-R"
+  | "WOC!"
+  | "THIN-K"
+  | "SHIT"
+  | "ZZZZ"
+  | "POOR"
+  | "MONK"
+  | "IMSB"
+  | "SOLO"
+  | "FUCK"
+  | "DEAD"
+  | "IMFW"
+  | "HHHH"
+  | "DRUNK";
+
+export type QuizResultSummary = {
+  model: string;
+  keywords: string[];
+};
 
 export type QuizResult = {
   resultType: QuizResultType;
+  code: QuizResultType;
   title: string;
+  subtitle: string;
+  slogan: string;
+  description: string;
+  summary: QuizResultSummary;
 };
 
 export type CharacterProfile = {

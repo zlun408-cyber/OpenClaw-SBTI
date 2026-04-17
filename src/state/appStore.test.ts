@@ -7,13 +7,26 @@ import {
 } from "./selectors";
 import type { QuizResult } from "../types/domain";
 
+const fullCtrlResult: QuizResult = {
+  resultType: "CTRL",
+  code: "CTRL",
+  title: "拿捏者",
+  subtitle: "边界与掌控感驱动的拿捏型人格",
+  slogan: "怎么样，被我拿捏了吧？",
+  description: "倾向于通过规则、节奏和判断力掌控局面。",
+  summary: {
+    model: "秩序主导",
+    keywords: ["掌控", "边界", "决策"]
+  }
+};
+
 beforeEach(() => {
   useAppStore.setState(createInitialAppState());
 });
 
 test("can complete quiz into warp then enter avatar preview", () => {
   const store = useAppStore.getState();
-  store.completeQuiz({ resultType: "CTRL", title: "控制者" });
+  store.completeQuiz(fullCtrlResult);
 
   expect(useAppStore.getState().phase).toBe("warp");
 
@@ -23,7 +36,7 @@ test("can complete quiz into warp then enter avatar preview", () => {
 
 test("can enter office and persist trimmed custom name after preview", () => {
   const store = useAppStore.getState();
-  store.completeQuiz({ resultType: "CTRL", title: "控制者" });
+  store.completeQuiz(fullCtrlResult);
   store.enterAvatarPreview();
   store.enterOffice(" 阿控 ");
 
@@ -40,7 +53,7 @@ test("does not enter office without quiz result", () => {
 
 test("startQuiz clears stale result and character state", () => {
   const store = useAppStore.getState();
-  store.completeQuiz({ resultType: "CTRL", title: "控制者" });
+  store.completeQuiz(fullCtrlResult);
   store.enterAvatarPreview();
   store.enterOffice("阿控");
 
@@ -56,7 +69,7 @@ test("startQuiz clears stale result and character state", () => {
 });
 
 test("completeQuiz stores a copied result payload", () => {
-  const result: QuizResult = { resultType: "CTRL", title: "控制者" };
+  const result: QuizResult = fullCtrlResult;
 
   useAppStore.getState().completeQuiz(result);
 
@@ -71,10 +84,10 @@ test("completeQuiz hydrates preview-ready character data", () => {
     character: { ...state.character, title: "旧称号", customName: "老名字", state: "dance" }
   }));
 
-  useAppStore.getState().completeQuiz({ resultType: "CTRL", title: "控制者" });
+  useAppStore.getState().completeQuiz(fullCtrlResult);
 
   expect(useAppStore.getState().character).toEqual({
-    title: "控制者",
+    title: "拿捏者",
     customName: "",
     state: "idle"
   });
@@ -90,7 +103,7 @@ test("selectors expose room context and character label", () => {
   useAppStore.setState((state) => ({
     ...state,
     currentRoomId: "training",
-    character: { ...state.character, title: "控制者", customName: "阿控" }
+    character: { ...state.character, title: "拿捏者", customName: "阿控" }
   }));
 
   const state = useAppStore.getState();
@@ -105,10 +118,10 @@ test("selectors expose room context and character label", () => {
 test("character label falls back to title", () => {
   useAppStore.setState((state) => ({
     ...state,
-    character: { ...state.character, title: "控制者", customName: "" }
+    character: { ...state.character, title: "拿捏者", customName: "" }
   }));
 
-  expect(selectCharacterLabel(useAppStore.getState())).toBe("控制者");
+  expect(selectCharacterLabel(useAppStore.getState())).toBe("拿捏者");
 });
 
 
