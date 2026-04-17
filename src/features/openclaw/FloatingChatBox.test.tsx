@@ -48,6 +48,15 @@ test("updates the prompt copy when the active room changes", () => {
   expect(screen.getByPlaceholderText("更新 soul 或 memory")).toBeInTheDocument();
 });
 
+test("renders as an office communication terminal", () => {
+  render(<FloatingChatBox />);
+
+  const chat = screen.getByLabelText("openclaw-chat");
+  expect(chat).toHaveAttribute("data-office-theme", "digital-command-center");
+  expect(chat).toHaveAttribute("data-office-room", "meeting");
+  expect(screen.getByText("OpenClaw Link")).toBeInTheDocument();
+});
+
 test("sends the input through the adapter and renders the reply for non-task chat", async () => {
   const adapter: OpenClawAdapter = {
     buildRequest: (input, context) => ({

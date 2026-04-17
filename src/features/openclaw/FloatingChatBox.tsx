@@ -4,6 +4,7 @@ import { parseMeetingTaskIntent } from "./meetingTaskIntent";
 import { parseTrainingSkillIntent } from "./trainingSkillIntent";
 import { parseRestIntent } from "./restIntent";
 import { defaultOpenClawAdapter } from "./defaultAdapter";
+import { createGlassTerminalStyle, getOfficeRoomTheme, OFFICE_THEME } from "../office/officeTheme";
 import { useAppStore } from "../../state/appStore";
 import { selectCharacterLabel, selectCurrentRoomContext } from "../../state/selectors";
 import type { OpenClawAdapter } from "./OpenClawAdapter";
@@ -122,6 +123,7 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
   const roomContext = useAppStore(selectCurrentRoomContext);
   const characterName = useAppStore(selectCharacterLabel);
   const currentRoomId = useAppStore((state) => state.currentRoomId);
+  const roomTheme = getOfficeRoomTheme(currentRoomId);
   const [draft, setDraft] = useState("");
   const [isSending, setIsSending] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(() => [
@@ -134,6 +136,27 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
   );
   const roomHint = useMemo(() => resolveRoomHint(currentRoomId), [currentRoomId]);
   const embedUrl = adapter.getEmbedUrl?.();
+  const themedBoxStyle = {
+    ...createGlassTerminalStyle(currentRoomId, boxStyle),
+    border: `1px solid ${roomTheme.accent.rgba}`,
+    pointerEvents: "none"
+  } satisfies React.CSSProperties;
+  const themedInputStyle = {
+    ...inputStyle,
+    border: `1px solid ${roomTheme.accent.softRgba}`,
+    background: OFFICE_THEME.surface.input,
+    color: OFFICE_THEME.text.primary
+  } satisfies React.CSSProperties;
+  const themedButtonStyle = {
+    ...buttonStyle,
+    border: `1px solid ${roomTheme.accent.rgba}`,
+    background: `linear-gradient(180deg, ${roomTheme.accent.softRgba} 0%, rgba(6, 11, 20, 0.96) 100%)`,
+    color: OFFICE_THEME.text.accent
+  } satisfies React.CSSProperties;
+  const themedLinkStyle = {
+    ...linkStyle,
+    color: OFFICE_THEME.text.accent
+  } satisfies React.CSSProperties;
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -254,11 +277,16 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
   };
 
   return (
-    <section aria-label="openclaw-chat" style={boxStyle}>
+    <section
+      aria-label="openclaw-chat"
+      data-office-theme={OFFICE_THEME.id}
+      data-office-room={roomTheme.roomId}
+      style={themedBoxStyle}
+    >
       <div>
         <div
           style={{
-            color: "#F7D48B",
+            color: OFFICE_THEME.text.accent,
             fontSize: "11px",
             letterSpacing: "0.18em",
             textTransform: "uppercase",
@@ -267,10 +295,10 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
         >
           OpenClaw Link
         </div>
-        <h2 style={{ margin: 0, fontSize: "20px", color: "#FFF8E8" }}>右下角常驻对话框</h2>
+        <h2 style={{ margin: 0, fontSize: "20px", color: OFFICE_THEME.text.primary }}>右下角常驻对话框</h2>
       </div>
 
-      <div style={subtleTextStyle}>
+      <div style={{ ...subtleTextStyle, color: OFFICE_THEME.text.secondary }}>
         <div>当前房间：{roomContext?.label ?? "办公室"}</div>
         <div>默认对象：{characterName}</div>
       </div>
@@ -286,12 +314,12 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
               padding: "10px 12px",
               background:
                 message.role === "user"
-                  ? "linear-gradient(180deg, rgba(95, 59, 26, 0.92) 0%, rgba(67, 38, 17, 0.92) 100%)"
+                  ? `linear-gradient(180deg, ${roomTheme.accent.softRgba} 0%, rgba(6, 11, 20, 0.94) 100%)`
                   : "rgba(255, 248, 232, 0.08)",
-              color: "#FFF8E8",
+              color: OFFICE_THEME.text.primary,
               border:
                 message.role === "user"
-                  ? "1px solid rgba(247, 212, 139, 0.35)"
+                  ? `1px solid ${roomTheme.accent.rgba}`
                   : "1px solid rgba(255, 255, 255, 0.08)"
             }}
           >
@@ -300,7 +328,7 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
         ))}
       </div>
 
-      <div style={subtleTextStyle}>{roomHint}</div>
+      <div style={{ ...subtleTextStyle, color: OFFICE_THEME.text.secondary }}>{roomHint}</div>
 
       <form aria-label="openclaw composer" onSubmit={handleSubmit}>
         <div style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "10px" }}>
@@ -309,17 +337,17 @@ export function FloatingChatBox({ adapter = defaultOpenClawAdapter }: FloatingCh
             disabled={isSending}
             onChange={(event) => setDraft(event.target.value)}
             placeholder={placeholder}
-            style={inputStyle}
+            style={themedInputStyle}
             value={draft}
           />
-          <button disabled={isSending} style={buttonStyle} type="submit">
+          <button disabled={isSending} style={themedButtonStyle} type="submit">
             {isSending ? "发送中" : "发送"}
           </button>
         </div>
       </form>
 
       {embedUrl ? (
-        <a href={embedUrl} rel="noreferrer" style={linkStyle} target="_blank">
+        <a href={embedUrl} rel="noreferrer" style={themedLinkStyle} target="_blank">
           打开本地 Webchat
         </a>
       ) : null}
