@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom";
 import { render, screen, waitFor } from "@testing-library/react";
+import { within } from "@testing-library/react";
 import { createElement } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, expect, test, vi } from "vitest";
@@ -83,6 +84,42 @@ test("renders the office route with unified digital command center chrome", () =
   expect(screen.getByLabelText("office-observation-window")).toBeInTheDocument();
   expect(screen.getByText("SBTI Digital Office")).toBeInTheDocument();
   expect(screen.getByTestId("office-route-grid")).toHaveAttribute("aria-hidden", "true");
+});
+
+test("renders the main office as a current-room in-room view with minimap and persona slot", () => {
+  bridgeState.emittedRoomId = "office";
+
+  render(createElement(OfficeRoute));
+
+  const stage = screen.getByLabelText("office-current-room-stage");
+  expect(stage).toHaveAttribute("data-room-id", "office");
+  expect(stage).toHaveAttribute("data-view-mode", "in-room");
+  expect(within(stage).getByText("Main Office")).toBeInTheDocument();
+  expect(screen.getByText("办公室")).toBeInTheDocument();
+  expect(screen.getByLabelText("office-entry-door")).toBeInTheDocument();
+  expect(screen.getByAltText("拿捏者 房间立绘位")).toHaveAttribute(
+    "src",
+    "/assets/characters/ctrl/transparent.png"
+  );
+
+  const minimap = screen.getByLabelText("office-minimap");
+  expect(within(minimap).getByLabelText("minimap-room-office")).toHaveAttribute("aria-current", "true");
+  expect(within(minimap).getByLabelText("minimap-room-meeting")).toHaveAttribute("aria-current", "false");
+});
+
+test("updates the in-room shell and minimap highlight when the active room changes", async () => {
+  bridgeState.emittedRoomId = "training";
+
+  render(createElement(OfficeRoute));
+
+  await waitFor(() => {
+    expect(screen.getByLabelText("office-current-room-stage")).toHaveAttribute("data-room-id", "training");
+  });
+
+  const stage = screen.getByLabelText("office-current-room-stage");
+  expect(screen.getByText("培训室")).toBeInTheDocument();
+  expect(within(stage).getByText("Training Room")).toBeInTheDocument();
+  expect(screen.getByLabelText("minimap-room-training")).toHaveAttribute("aria-current", "true");
 });
 
 test("redirects away when office access requirements are not met", () => {
