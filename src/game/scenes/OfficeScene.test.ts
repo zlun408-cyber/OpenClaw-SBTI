@@ -4,18 +4,18 @@ import { createElement } from "react";
 import { beforeEach, test } from "vitest";
 
 import { OfficeRoute } from "../../features/office/OfficeRoute";
+import { getPersonalityDefinition } from "../../features/quiz/personalityCatalog";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
+
+const ctrlResult = getPersonalityDefinition("CTRL");
 
 beforeEach(() => {
   useAppStore.setState({
     ...createInitialAppState(),
     phase: "office",
-    result: {
-      resultType: "CTRL",
-      title: "Architect"
-    },
+    result: ctrlResult,
     character: {
-      title: "Architect",
+      title: ctrlResult.title,
       customName: "Alex",
       state: "idle"
     }

@@ -3,6 +3,7 @@ import { act, fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { FloatingChatBox } from "./FloatingChatBox";
+import { getPersonalityDefinition } from "../quiz/personalityCatalog";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
 import type { OpenClawAdapter, OpenClawContext } from "./OpenClawAdapter";
 
@@ -12,15 +13,16 @@ const buildContextSnapshot = (context?: OpenClawContext) => ({
   characterName: context?.characterName ?? null,
   characterTitle: context?.characterTitle ?? null
 });
+const ctrlResult = getPersonalityDefinition("CTRL");
 
 beforeEach(() => {
   useAppStore.setState({
     ...createInitialAppState(),
     phase: "office",
     currentRoomId: "meeting",
-    result: { resultType: "CTRL", title: "Architect" },
+    result: ctrlResult,
     character: {
-      title: "Architect",
+      title: ctrlResult.title,
       customName: "Alex",
       state: "idle"
     }

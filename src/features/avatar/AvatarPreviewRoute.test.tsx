@@ -4,6 +4,8 @@ import { act, fireEvent, render, screen, waitFor } from "@testing-library/react"
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 
 import { AvatarPreviewRoute } from "./AvatarPreviewRoute";
+import { getPersonalityDefinition } from "../quiz/personalityCatalog";
+import { questions } from "../quiz/questions";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
 import { appRoutes } from "../../app/router";
 
@@ -11,9 +13,34 @@ beforeEach(() => {
   useAppStore.setState(createInitialAppState());
 });
 
+const ctrlResult = getPersonalityDefinition("CTRL");
+
+const answerEveryQuestionForAxis = (axis: "control" | "execution" | "harmony") => {
+  for (const question of questions) {
+    const option = question.options.find((item) => item.axis === axis);
+    if (!option) {
+      throw new Error(`Missing ${axis} answer for ${question.id}`);
+    }
+
+    fireEvent.click(screen.getByRole("button", { name: option.label }));
+  }
+};
+
+const seedAvatarPreview = () => {
+  const store = useAppStore.getState();
+  store.completeQuiz(ctrlResult);
+  store.enterAvatarPreview();
+};
+
+const seedOffice = () => {
+  const store = useAppStore.getState();
+  store.completeQuiz(ctrlResult);
+  store.enterAvatarPreview();
+  store.enterOffice("阿控");
+};
+
 test("lets the user rename the generated character", async () => {
-  useAppStore.getState().completeQuiz({ resultType: "CTRL", title: "控制者" });
-  useAppStore.getState().enterAvatarPreview();
+  seedAvatarPreview();
   const router = createMemoryRouter([{ path: "/avatar", element: <AvatarPreviewRoute /> }], {
     initialEntries: ["/avatar"]
   });
@@ -25,26 +52,44 @@ test("lets the user rename the generated character", async () => {
   expect(screen.getByDisplayValue("阿张")).toBeInTheDocument();
 });
 
-test("completing quiz advances into avatar flow with generated result", async () => {
+test("shows the richer sbti result narrative and portrait preview", async () => {
+  seedAvatarPreview();
+  const router = createMemoryRouter([{ path: "/avatar", element: <AvatarPreviewRoute /> }], {
+    initialEntries: ["/avatar"]
+  });
+
+  render(<RouterProvider router={router} />);
+
+  expect(screen.getByRole("heading", { name: "拿捏者" })).toBeInTheDocument();
+  expect(screen.getByText("控场与边界感很强的主导型人格")).toBeInTheDocument();
+  expect(screen.getByText("怎么样，被我拿捏了吧？")).toBeInTheDocument();
+  expect(screen.getByText("习惯先建立秩序、标准与控制面，再推进整体局势。")).toBeInTheDocument();
+  expect(screen.getByText("秩序主导")).toBeInTheDocument();
+  expect(screen.getByText("掌控 / 边界 / 决策")).toBeInTheDocument();
+  expect(screen.getByLabelText("人格立绘预览")).toBeInTheDocument();
+});
+
+test("completing quiz advances into avatar flow with generated full result payload", async () => {
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  fireEvent.click(screen.getByRole("button", { name: "先定规则和边界，确保方向可控" }));
-  fireEvent.click(screen.getByRole("button", { name: "设定决策原则，快速收敛" }));
-  fireEvent.click(screen.getByRole("button", { name: "优先排定优先级，避免失控" }));
+  answerEveryQuestionForAxis("control");
 
   expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
-  expect(screen.getByRole("heading", { name: "控制者" })).toBeInTheDocument();
-  expect(useAppStore.getState().result?.title).toBe("控制者");
+  expect(screen.getByRole("heading", { name: "拿捏者" })).toBeInTheDocument();
+  expect(screen.getByText("控场与边界感很强的主导型人格")).toBeInTheDocument();
+  expect(useAppStore.getState().result).toMatchObject({
+    code: "CTRL",
+    title: "拿捏者",
+    slogan: "怎么样，被我拿捏了吧？"
+  });
 });
 
 test("entering office persists the chosen name", async () => {
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  fireEvent.click(screen.getByRole("button", { name: "先定规则和边界，确保方向可控" }));
-  fireEvent.click(screen.getByRole("button", { name: "设定决策原则，快速收敛" }));
-  fireEvent.click(screen.getByRole("button", { name: "优先排定优先级，避免失控" }));
+  answerEveryQuestionForAxis("control");
   expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
 
   fireEvent.change(screen.getByLabelText(/角色姓名/i), { target: { value: "阿张" } });
@@ -75,9 +120,7 @@ test("restarting quiz clears stale preview state and blocks avatar deep-link", a
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  fireEvent.click(screen.getByRole("button", { name: "先定规则和边界，确保方向可控" }));
-  fireEvent.click(screen.getByRole("button", { name: "设定决策原则，快速收敛" }));
-  fireEvent.click(screen.getByRole("button", { name: "优先排定优先级，避免失控" }));
+  answerEveryQuestionForAxis("control");
   expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
 
   await act(async () => {
@@ -92,12 +135,10 @@ test("restarting quiz clears stale preview state and blocks avatar deep-link", a
 });
 
 test("blocks manual office deep-link from avatar preview before CTA", async () => {
-  const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
+  seedAvatarPreview();
+  const router = createMemoryRouter(appRoutes, { initialEntries: ["/avatar"] });
   render(<RouterProvider router={router} />);
 
-  fireEvent.click(screen.getByRole("button", { name: "先定规则和边界，确保方向可控" }));
-  fireEvent.click(screen.getByRole("button", { name: "设定决策原则，快速收敛" }));
-  fireEvent.click(screen.getByRole("button", { name: "优先排定优先级，避免失控" }));
   expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
   expect(useAppStore.getState().phase).toBe("avatarPreview");
 
@@ -109,15 +150,10 @@ test("blocks manual office deep-link from avatar preview before CTA", async () =
 });
 
 test("blocks avatar revisit after entering office", async () => {
-  const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
+  seedOffice();
+  const router = createMemoryRouter(appRoutes, { initialEntries: ["/office"] });
   render(<RouterProvider router={router} />);
 
-  fireEvent.click(screen.getByRole("button", { name: "先定规则和边界，确保方向可控" }));
-  fireEvent.click(screen.getByRole("button", { name: "设定决策原则，快速收敛" }));
-  fireEvent.click(screen.getByRole("button", { name: "优先排定优先级，避免失控" }));
-  expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
-
-  fireEvent.click(screen.getByRole("button", { name: /进入数字办公室/i }));
   expect(await screen.findByTestId("game-canvas")).toBeInTheDocument();
 
   await act(async () => {

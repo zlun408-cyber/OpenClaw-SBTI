@@ -2,17 +2,20 @@ import '@testing-library/jest-dom';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, expect, test } from 'vitest';
 
+import { getPersonalityDefinition } from '../../quiz/personalityCatalog';
 import { createInitialAppState, useAppStore } from '../../../state/appStore';
 import { RestPanel } from './RestPanel';
+
+const ctrlResult = getPersonalityDefinition('CTRL');
 
 beforeEach(() => {
   useAppStore.setState({
     ...createInitialAppState(),
     phase: 'office',
     currentRoomId: 'rest',
-    result: { resultType: 'CTRL', title: '控制者' },
+    result: ctrlResult,
     character: {
-      title: '控制者',
+      title: ctrlResult.title,
       customName: '阿控',
       state: 'idle'
     }

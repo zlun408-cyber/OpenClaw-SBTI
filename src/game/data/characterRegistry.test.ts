@@ -2,7 +2,7 @@ import { describe, expect, test } from "vitest";
 
 import { getCharacterConfig } from "./characterRegistry";
 
-const SUPPORTED_TYPES = ["CTRL", "EXEC", "HARM"] as const;
+const SUPPORTED_TYPES = ["CTRL", "GOGO", "MUM"] as const;
 const EXPECTED_STATE_KEYS = [
   "idle",
   "walk",

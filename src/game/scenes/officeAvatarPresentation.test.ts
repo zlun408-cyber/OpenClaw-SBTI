@@ -40,7 +40,7 @@ describe("resolveAvatarPresentation", () => {
     const execPresentation = resolveAvatarPresentation({
       roomId: "office",
       state: "idle",
-      resultType: "EXEC"
+      resultType: "GOGO"
     });
 
     expect(ctrlPresentation.bodyColor).not.toBe(execPresentation.bodyColor);
@@ -59,7 +59,7 @@ describe("resolveAvatarFacing", () => {
 
 describe("resolveAvatarNameplate", () => {
   test("combines custom name with title", () => {
-    expect(resolveAvatarNameplate("Alex", "Architect")).toBe("Alex · Architect");
-    expect(resolveAvatarNameplate("", "Architect")).toBe("Architect");
+    expect(resolveAvatarNameplate("Alex", "拿捏者")).toBe("Alex · 拿捏者");
+    expect(resolveAvatarNameplate("", "拿捏者")).toBe("拿捏者");
   });
 });

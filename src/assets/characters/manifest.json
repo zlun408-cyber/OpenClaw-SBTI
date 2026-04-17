@@ -1,7 +1,7 @@
 [
   {
     "type": "CTRL",
-    "title": "控制者",
+    "title": "拿捏者",
     "sourceUrl": null,
     "quality": "placeholder",
     "transparent": "/assets/characters/ctrl/transparent.png",
@@ -17,8 +17,8 @@
     }
   },
   {
-    "type": "EXEC",
-    "title": "执行者",
+    "type": "GOGO",
+    "title": "行者",
     "sourceUrl": null,
     "quality": "placeholder",
     "transparent": "/assets/characters/exec/transparent.png",
@@ -34,8 +34,8 @@
     }
   },
   {
-    "type": "HARM",
-    "title": "协调者",
+    "type": "MUM",
+    "title": "妈妈",
     "sourceUrl": null,
     "quality": "placeholder",
     "transparent": "/assets/characters/harm/transparent.png",

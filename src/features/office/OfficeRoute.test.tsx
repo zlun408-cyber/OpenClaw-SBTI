@@ -5,12 +5,14 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { beforeEach, expect, test, vi } from "vitest";
 
 import { OfficeRoute } from "./OfficeRoute";
+import { getPersonalityDefinition } from "../quiz/personalityCatalog";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
 import type { RoomId } from "../../types/domain";
 
 const bridgeState = vi.hoisted(() => ({
   emittedRoomId: null as RoomId | null
 }));
+const ctrlResult = getPersonalityDefinition("CTRL");
 
 vi.mock("../../game/GameCanvas", async () => {
   const React = await import("react");
@@ -30,9 +32,9 @@ beforeEach(() => {
     ...createInitialAppState(),
     phase: "office",
     currentRoomId: "office",
-    result: { resultType: "CTRL", title: "Architect" },
+    result: ctrlResult,
     character: {
-      title: "Architect",
+      title: ctrlResult.title,
       customName: "Alex",
       state: "idle"
     }

@@ -3,16 +3,19 @@ import { fireEvent, render, screen, within } from "@testing-library/react";
 import { beforeEach, expect, test } from "vitest";
 
 import { MeetingRoomPanel } from "./MeetingRoomPanel";
+import { getPersonalityDefinition } from "../../quiz/personalityCatalog";
 import { createInitialAppState, useAppStore } from "../../../state/appStore";
+
+const ctrlResult = getPersonalityDefinition("CTRL");
 
 beforeEach(() => {
   useAppStore.setState({
     ...createInitialAppState(),
     phase: "office",
     currentRoomId: "meeting",
-    result: { resultType: "CTRL", title: "Architect" },
+    result: ctrlResult,
     character: {
-      title: "Architect",
+      title: ctrlResult.title,
       customName: "Alex",
       state: "idle"
     }

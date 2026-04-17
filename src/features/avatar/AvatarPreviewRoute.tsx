@@ -39,6 +39,7 @@ export function AvatarPreviewRoute() {
       <h2>Avatar Preview</h2>
       <AvatarPreviewCard
         character={character}
+        result={result}
         customName={customName}
         onCustomNameChange={handleCustomNameChange}
         onEnterOffice={handleEnterOffice}

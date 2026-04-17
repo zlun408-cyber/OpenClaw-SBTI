@@ -3,15 +3,18 @@ import { act, render, screen } from "@testing-library/react";
 import { beforeEach, expect, test } from "vitest";
 
 import { OfficeHUD } from "./OfficeHUD";
+import { getPersonalityDefinition } from "../quiz/personalityCatalog";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
+
+const ctrlResult = getPersonalityDefinition("CTRL");
 
 beforeEach(() => {
   useAppStore.setState({
     ...createInitialAppState(),
     phase: "office",
-    result: { resultType: "CTRL", title: "Architect" },
+    result: ctrlResult,
     character: {
-      title: "Architect",
+      title: ctrlResult.title,
       customName: "Alex",
       state: "idle"
     }
@@ -35,7 +38,7 @@ test("reacts to store updates for name and task status", () => {
     }));
   });
 
-  expect(screen.getByText("Architect")).toBeInTheDocument();
+  expect(screen.getByText("拿捏者")).toBeInTheDocument();
   expect(screen.getByText("Training")).toBeInTheDocument();
 });
 
