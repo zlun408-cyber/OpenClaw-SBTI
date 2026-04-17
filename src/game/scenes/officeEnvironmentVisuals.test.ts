@@ -34,7 +34,7 @@ describe("office environment visuals", () => {
     expect(OFFICE_ENVIRONMENT_LAYERS.foregroundOverlays.length).toBeGreaterThanOrEqual(3);
   });
 
-  test("uses room-local offsets and world-space environment coordinates", () => {
+  test("uses room-local offsets and scene-center-relative environment coordinates", () => {
     roomIds.forEach((roomId) => {
       const visual = getOfficeRoomVisual(roomId);
 
@@ -70,6 +70,22 @@ describe("office environment visuals", () => {
       expect(particle.id).toMatch(/^ambient-particle-/);
       expect(particle.alpha).toBeGreaterThan(0);
     });
+  });
+
+  test("environment coordinates are centered around the scene origin", () => {
+    const glowXs = OFFICE_ENVIRONMENT_LAYERS.ambientGlows.map((glow) => glow.x);
+    const glowYs = OFFICE_ENVIRONMENT_LAYERS.ambientGlows.map((glow) => glow.y);
+    const pathXs = OFFICE_ENVIRONMENT_LAYERS.signalPaths.flatMap((path) => path.points.map((point) => point.x));
+    const pathYs = OFFICE_ENVIRONMENT_LAYERS.signalPaths.flatMap((path) => path.points.map((point) => point.y));
+
+    expect(Math.min(...glowXs)).toBeLessThan(0);
+    expect(Math.max(...glowXs)).toBeGreaterThan(0);
+    expect(Math.min(...glowYs)).toBeLessThan(0);
+    expect(Math.max(...glowYs)).toBeGreaterThan(0);
+    expect(Math.min(...pathXs)).toBeLessThan(0);
+    expect(Math.max(...pathXs)).toBeGreaterThan(0);
+    expect(Math.min(...pathYs)).toBeLessThan(0);
+    expect(Math.max(...pathYs)).toBeGreaterThan(0);
   });
 
   test("keeps environment depths behind the avatar and labels", () => {

@@ -84,14 +84,16 @@ export class OfficeScene extends Phaser.Scene {
   create() {
     const centerX = this.scale.width / 2;
     const centerY = this.scale.height / 2;
+    this.ambientSignals = [];
+    this.pathPulses = [];
 
     this.cameras.main.setBackgroundColor(0x09111a);
 
     this.renderBackdrop(centerX, centerY);
     this.renderConnectionPaths(centerX, centerY);
     this.renderRooms(centerX, centerY);
-    this.renderAmbientSignals();
-    this.renderForegroundOverlays();
+    this.renderAmbientSignals(centerX, centerY);
+    this.renderForegroundOverlays(centerX, centerY);
 
     const startX = centerX + mapConfig.rooms.office.x;
     const startY = centerY + mapConfig.rooms.office.y;
@@ -249,13 +251,15 @@ export class OfficeScene extends Phaser.Scene {
     }
 
     OFFICE_ENVIRONMENT_LAYERS.ambientGlows.forEach((glow) => {
+      const position = this.resolveEnvironmentPoint(centerX, centerY, glow);
+
       this.add
-        .circle(glow.x, glow.y, glow.radius, glow.color, glow.alpha)
+        .circle(position.x, position.y, glow.radius, glow.color, glow.alpha)
         .setDepth(OFFICE_VISUAL_DEPTHS.backdrop);
     });
   }
 
-  private renderConnectionPaths(_centerX: number, _centerY: number) {
+  private renderConnectionPaths(centerX: number, centerY: number) {
     const railGraphics = this.add.graphics().setDepth(OFFICE_VISUAL_DEPTHS.signalPaths);
     const accentGraphics = this.add.graphics().setDepth(OFFICE_VISUAL_DEPTHS.signalPaths + 0.1);
 
@@ -264,14 +268,15 @@ export class OfficeScene extends Phaser.Scene {
       accentGraphics.lineStyle(3, path.color, path.alpha);
 
       for (let index = 0; index < path.points.length - 1; index += 1) {
-        const start = path.points[index];
-        const end = path.points[index + 1];
+        const start = this.resolveEnvironmentPoint(centerX, centerY, path.points[index]);
+        const end = this.resolveEnvironmentPoint(centerX, centerY, path.points[index + 1]);
 
         railGraphics.strokeLineShape(new Phaser.Geom.Line(start.x, start.y, end.x, end.y));
         accentGraphics.strokeLineShape(new Phaser.Geom.Line(start.x, start.y, end.x, end.y));
       }
 
-      const pulse = this.add.circle(path.points[0].x, path.points[0].y, 5, path.color, 0.42);
+      const origin = this.resolveEnvironmentPoint(centerX, centerY, path.points[0]);
+      const pulse = this.add.circle(origin.x, origin.y, 5, path.color, 0.42);
       pulse.setDepth(OFFICE_VISUAL_DEPTHS.dynamicSignals);
       pulse.setBlendMode(Phaser.BlendModes.ADD);
 
@@ -279,7 +284,7 @@ export class OfficeScene extends Phaser.Scene {
         baseAlpha: 0.42,
         pulseOffset: path.pulseOffset,
         pulseSpeed: path.pulseSpeed,
-        points: path.points,
+        points: path.points.map((point) => this.resolveEnvironmentPoint(centerX, centerY, point)),
         sprite: pulse
       });
     });
@@ -382,15 +387,16 @@ export class OfficeScene extends Phaser.Scene {
     });
   }
 
-  private renderAmbientSignals() {
+  private renderAmbientSignals(centerX: number, centerY: number) {
     OFFICE_ENVIRONMENT_LAYERS.particles.forEach((particle, index) => {
-      const sprite = this.add.circle(particle.x, particle.y, particle.radius, particle.color, particle.alpha);
+      const position = this.resolveEnvironmentPoint(centerX, centerY, particle);
+      const sprite = this.add.circle(position.x, position.y, particle.radius, particle.color, particle.alpha);
       sprite.setDepth(OFFICE_VISUAL_DEPTHS.dynamicSignals);
       sprite.setBlendMode(Phaser.BlendModes.ADD);
 
       this.ambientSignals.push({
-        baseX: particle.x,
-        baseY: particle.y,
+        baseX: position.x,
+        baseY: position.y,
         baseAlpha: particle.alpha,
         driftRadius: 4 + (index % 3),
         driftSpeed: 0.2 + index * 0.03,
@@ -400,12 +406,14 @@ export class OfficeScene extends Phaser.Scene {
     });
   }
 
-  private renderForegroundOverlays() {
+  private renderForegroundOverlays(centerX: number, centerY: number) {
     OFFICE_ENVIRONMENT_LAYERS.foregroundOverlays.forEach((overlay) => {
+      const position = this.resolveEnvironmentPoint(centerX, centerY, overlay);
+
       this.add
         .rectangle(
-          overlay.x + overlay.width / 2,
-          overlay.y + overlay.height / 2,
+          position.x + overlay.width / 2,
+          position.y + overlay.height / 2,
           overlay.width,
           overlay.height,
           overlay.color,
@@ -438,6 +446,13 @@ export class OfficeScene extends Phaser.Scene {
         .setScale(0.85 + shimmer)
         .setAlpha(pulse.baseAlpha + shimmer * 0.35);
     });
+  }
+
+  private resolveEnvironmentPoint(centerX: number, centerY: number, point: Point): Point {
+    return {
+      x: centerX + point.x,
+      y: centerY + point.y
+    };
   }
 
   private resolvePathPoint(points: Array<{ x: number; y: number }>, progress: number): Point {

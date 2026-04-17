@@ -29,7 +29,7 @@ export type OfficeRoomVisual = {
 };
 
 type OfficeAmbientGlow = {
-  // Scene/world coordinates used directly by OfficeScene environment layers.
+  // Scene-center-relative offsets resolved by OfficeScene at runtime.
   x: number;
   y: number;
   radius: number;
@@ -49,13 +49,13 @@ type OfficeSignalPath = {
   alpha: number;
   pulseOffset: number;
   pulseSpeed: number;
-  // Scene/world coordinates used directly by OfficeScene environment layers.
+  // Scene-center-relative offsets resolved by OfficeScene at runtime.
   points: Array<{ x: number; y: number }>;
 };
 
 type OfficeParticle = {
   id: string;
-  // Scene/world coordinates used directly by OfficeScene environment layers.
+  // Scene-center-relative offsets resolved by OfficeScene at runtime.
   x: number;
   y: number;
   radius: number;
@@ -65,7 +65,7 @@ type OfficeParticle = {
 
 type OfficeForegroundOverlay = {
   id: string;
-  // Scene/world coordinates used directly by OfficeScene environment layers.
+  // Scene-center-relative top-left offsets resolved by OfficeScene at runtime.
   x: number;
   y: number;
   width: number;
@@ -184,9 +184,9 @@ export const OFFICE_ENVIRONMENT_LAYERS: {
     color: 0x28485a
   },
   ambientGlows: [
-    { x: 128, y: 92, radius: 120, color: 0x69d6ff, alpha: 0.12 },
-    { x: 332, y: 144, radius: 96, color: 0xf0ca87, alpha: 0.1 },
-    { x: 236, y: 248, radius: 132, color: 0x9fe3c4, alpha: 0.08 }
+    { x: -82, y: -48, radius: 120, color: 0x69d6ff, alpha: 0.12 },
+    { x: 122, y: 4, radius: 96, color: 0xf0ca87, alpha: 0.1 },
+    { x: 26, y: 108, radius: 132, color: 0x9fe3c4, alpha: 0.08 }
   ],
   signalPaths: [
     {
@@ -195,7 +195,7 @@ export const OFFICE_ENVIRONMENT_LAYERS: {
       alpha: 0.24,
       pulseOffset: 0.08,
       pulseSpeed: 0.42,
-      points: [{ x: 88, y: 116 }, { x: 188, y: 116 }, { x: 236, y: 84 }]
+      points: [{ x: -122, y: -24 }, { x: -22, y: -24 }, { x: 26, y: -56 }]
     },
     {
       id: "west-link",
@@ -203,7 +203,7 @@ export const OFFICE_ENVIRONMENT_LAYERS: {
       alpha: 0.2,
       pulseOffset: 0.36,
       pulseSpeed: 0.34,
-      points: [{ x: 84, y: 180 }, { x: 162, y: 180 }, { x: 188, y: 140 }]
+      points: [{ x: -126, y: 40 }, { x: -48, y: 40 }, { x: -22, y: 0 }]
     },
     {
       id: "east-link",
@@ -211,7 +211,7 @@ export const OFFICE_ENVIRONMENT_LAYERS: {
       alpha: 0.22,
       pulseOffset: 0.62,
       pulseSpeed: 0.48,
-      points: [{ x: 236, y: 84 }, { x: 308, y: 84 }, { x: 336, y: 148 }]
+      points: [{ x: 26, y: -56 }, { x: 98, y: -56 }, { x: 126, y: 8 }]
     },
     {
       id: "south-link",
@@ -219,23 +219,23 @@ export const OFFICE_ENVIRONMENT_LAYERS: {
       alpha: 0.22,
       pulseOffset: 0.84,
       pulseSpeed: 0.38,
-      points: [{ x: 188, y: 140 }, { x: 188, y: 228 }, { x: 260, y: 228 }]
+      points: [{ x: -22, y: 0 }, { x: -22, y: 88 }, { x: 50, y: 88 }]
     }
   ],
   particles: [
-    { id: "ambient-particle-1", x: 66, y: 60, radius: 1, alpha: 0.3, color: 0x69d6ff },
-    { id: "ambient-particle-2", x: 120, y: 88, radius: 2, alpha: 0.24, color: 0xf0ca87 },
-    { id: "ambient-particle-3", x: 180, y: 42, radius: 1, alpha: 0.28, color: 0xd3b2f3 },
-    { id: "ambient-particle-4", x: 248, y: 74, radius: 2, alpha: 0.26, color: 0x9fe3c4 },
-    { id: "ambient-particle-5", x: 304, y: 98, radius: 1, alpha: 0.22, color: 0x69d6ff },
-    { id: "ambient-particle-6", x: 348, y: 136, radius: 2, alpha: 0.25, color: 0xf0ca87 },
-    { id: "ambient-particle-7", x: 222, y: 198, radius: 1, alpha: 0.24, color: 0x9fe3c4 },
-    { id: "ambient-particle-8", x: 128, y: 244, radius: 2, alpha: 0.2, color: 0xd3b2f3 }
+    { id: "ambient-particle-1", x: -144, y: -80, radius: 1, alpha: 0.3, color: 0x69d6ff },
+    { id: "ambient-particle-2", x: -90, y: -52, radius: 2, alpha: 0.24, color: 0xf0ca87 },
+    { id: "ambient-particle-3", x: -30, y: -98, radius: 1, alpha: 0.28, color: 0xd3b2f3 },
+    { id: "ambient-particle-4", x: 38, y: -66, radius: 2, alpha: 0.26, color: 0x9fe3c4 },
+    { id: "ambient-particle-5", x: 94, y: -42, radius: 1, alpha: 0.22, color: 0x69d6ff },
+    { id: "ambient-particle-6", x: 138, y: -4, radius: 2, alpha: 0.25, color: 0xf0ca87 },
+    { id: "ambient-particle-7", x: 12, y: 58, radius: 1, alpha: 0.24, color: 0x9fe3c4 },
+    { id: "ambient-particle-8", x: -82, y: 104, radius: 2, alpha: 0.2, color: 0xd3b2f3 }
   ],
   foregroundOverlays: [
-    { id: "top-glass", x: 0, y: 0, width: 420, height: 28, alpha: 0.08, color: 0xd7f1ff },
-    { id: "left-frame", x: 0, y: 0, width: 18, height: 280, alpha: 0.1, color: 0x89c8ff },
-    { id: "right-frame", x: 402, y: 0, width: 18, height: 280, alpha: 0.1, color: 0x89c8ff }
+    { id: "top-glass", x: -210, y: -140, width: 420, height: 28, alpha: 0.08, color: 0xd7f1ff },
+    { id: "left-frame", x: -210, y: -140, width: 18, height: 280, alpha: 0.1, color: 0x89c8ff },
+    { id: "right-frame", x: 192, y: -140, width: 18, height: 280, alpha: 0.1, color: 0x89c8ff }
   ]
 };
 
