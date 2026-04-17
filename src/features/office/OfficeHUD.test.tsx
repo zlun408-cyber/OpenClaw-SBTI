@@ -7,6 +7,7 @@ import { getPersonalityDefinition } from "../quiz/personalityCatalog";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
 
 const ctrlResult = getPersonalityDefinition("CTRL");
+const drunkResult = getPersonalityDefinition("DRUNK");
 
 beforeEach(() => {
   useAppStore.setState({
@@ -54,4 +55,29 @@ test("renders as a room-aware digital employee terminal", () => {
   expect(hud).toHaveAttribute("data-office-theme", "digital-command-center");
   expect(hud).toHaveAttribute("data-office-room", "training");
   expect(screen.getByText(/digital employee/i)).toBeInTheDocument();
+});
+
+test("surfaces the active 27-type persona identity from the shared registry", () => {
+  useAppStore.setState({
+    ...createInitialAppState(),
+    phase: "office",
+    currentRoomId: "rest",
+    result: drunkResult,
+    character: {
+      title: drunkResult.title,
+      customName: "",
+      state: "idle"
+    }
+  });
+
+  render(<OfficeHUD />);
+
+  const hud = screen.getByLabelText("office-hud");
+  expect(hud).toHaveAttribute("data-persona-code", "DRUNK");
+  expect(screen.getByText("DRUNK")).toBeInTheDocument();
+  expect(screen.getByText("酒鬼")).toBeInTheDocument();
+  expect(screen.getByAltText("酒鬼 办公室头像")).toHaveAttribute(
+    "src",
+    "/assets/characters/drunk/transparent.png"
+  );
 });

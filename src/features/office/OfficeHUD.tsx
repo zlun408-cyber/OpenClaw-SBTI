@@ -1,5 +1,9 @@
 import { useAppStore } from "../../state/appStore";
-import { selectCharacterLabel, selectCurrentRoomContext } from "../../state/selectors";
+import {
+  selectCharacterLabel,
+  selectCurrentPersonaConfig,
+  selectCurrentRoomContext
+} from "../../state/selectors";
 import type { CharacterState } from "../../types/domain";
 import { createGlassTerminalStyle, getOfficeRoomTheme, OFFICE_THEME } from "./officeTheme";
 
@@ -45,6 +49,7 @@ const chipStyle = {
 export function OfficeHUD() {
   const characterName = useAppStore(selectCharacterLabel);
   const roomContext = useAppStore(selectCurrentRoomContext);
+  const personaConfig = useAppStore(selectCurrentPersonaConfig);
   const currentRoomId = useAppStore((state) => state.currentRoomId);
   const currentTaskStatus = useAppStore(
     (state) => TASK_STATUS_LABELS[state.character.state]
@@ -60,6 +65,7 @@ export function OfficeHUD() {
       aria-label="office-hud"
       data-office-theme={OFFICE_THEME.id}
       data-office-room={roomTheme.roomId}
+      data-persona-code={personaConfig?.type ?? "none"}
       style={themedHudStyle}
     >
       <div
@@ -79,6 +85,35 @@ export function OfficeHUD() {
             Digital Employee
           </div>
           <div style={{ marginTop: "4px", fontSize: "24px", fontWeight: 700 }}>{characterName}</div>
+          {personaConfig ? (
+            <div
+              aria-label="active-persona"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginTop: "8px",
+                color: "#AEEFEB",
+                fontSize: "12px",
+                letterSpacing: "0.08em"
+              }}
+            >
+              {personaConfig.transparent ? (
+                <img
+                  alt={`${personaConfig.title} 办公室头像`}
+                  src={personaConfig.transparent}
+                  style={{
+                    width: "28px",
+                    height: "28px",
+                    objectFit: "contain",
+                    imageRendering: "pixelated"
+                  }}
+                />
+              ) : null}
+              <span style={{ fontWeight: 700 }}>{personaConfig.type}</span>
+              <span style={{ color: "#D9FCF7" }}>· {personaConfig.title}</span>
+            </div>
+          ) : null}
         </div>
         <div style={chipStyle}>{currentTaskStatus}</div>
       </div>

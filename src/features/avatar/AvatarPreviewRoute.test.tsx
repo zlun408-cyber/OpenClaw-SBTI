@@ -14,6 +14,7 @@ beforeEach(() => {
 });
 
 const ctrlResult = getPersonalityDefinition("CTRL");
+const drunkResult = getPersonalityDefinition("DRUNK");
 
 const answerEveryQuestionForAxis = (axis: "control" | "execution" | "harmony") => {
   for (const question of questions) {
@@ -26,9 +27,9 @@ const answerEveryQuestionForAxis = (axis: "control" | "execution" | "harmony") =
   }
 };
 
-const seedAvatarPreview = () => {
+const seedAvatarPreview = (result = ctrlResult) => {
   const store = useAppStore.getState();
-  store.completeQuiz(ctrlResult);
+  store.completeQuiz(result);
   store.enterAvatarPreview();
 };
 
@@ -67,6 +68,21 @@ test("shows the richer sbti result narrative and portrait preview", async () => 
   expect(screen.getByText("秩序主导")).toBeInTheDocument();
   expect(screen.getByText("掌控 / 边界 / 决策")).toBeInTheDocument();
   expect(screen.getByLabelText("人格立绘预览")).toBeInTheDocument();
+});
+
+test("renders the shared registry portrait for the generated persona", async () => {
+  seedAvatarPreview(drunkResult);
+  const router = createMemoryRouter([{ path: "/avatar", element: <AvatarPreviewRoute /> }], {
+    initialEntries: ["/avatar"]
+  });
+
+  render(<RouterProvider router={router} />);
+
+  expect(screen.getByRole("heading", { name: "酒鬼" })).toBeInTheDocument();
+  expect(screen.getByAltText("酒鬼 人格立绘")).toHaveAttribute(
+    "src",
+    "/assets/characters/drunk/transparent.png"
+  );
 });
 
 test("completing quiz advances into avatar flow with generated full result payload", async () => {

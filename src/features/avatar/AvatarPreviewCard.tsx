@@ -1,4 +1,5 @@
 import type { CharacterProfile, QuizResult } from "../../types/domain";
+import { getCharacterConfig } from "../../game/data/characterRegistry";
 
 type AvatarPreviewCardProps = {
   character: CharacterProfile;
@@ -15,6 +16,8 @@ export function AvatarPreviewCard({
   onCustomNameChange,
   onEnterOffice
 }: AvatarPreviewCardProps) {
+  const personaConfig = getCharacterConfig(result.code);
+
   return (
     <section>
       <div
@@ -33,6 +36,19 @@ export function AvatarPreviewCard({
           boxShadow: "0 0 18px rgba(95,251,241,0.18)"
         }}
       >
+        {personaConfig.transparent ? (
+          <img
+            alt={`${result.title} 人格立绘`}
+            src={personaConfig.transparent}
+            style={{
+              width: "96px",
+              height: "96px",
+              objectFit: "contain",
+              imageRendering: "pixelated",
+              filter: "drop-shadow(0 10px 18px rgba(0,0,0,0.35))"
+            }}
+          />
+        ) : null}
         <div style={{ textAlign: "center" }}>
           <strong style={{ display: "block", fontSize: "28px", letterSpacing: "0.12em" }}>
             {result.code}

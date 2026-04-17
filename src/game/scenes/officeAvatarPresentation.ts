@@ -9,7 +9,7 @@ type AvatarPresentationInput = {
   resultType: QuizResultType | null;
 };
 
-type AvatarPalette = {
+type AvatarBasePalette = {
   auraColor: number;
   accentColor: number;
   bodyColor: number;
@@ -19,7 +19,14 @@ type AvatarPalette = {
   emoteLabel: string;
 };
 
-const ROOM_IDLE_PRESENTATIONS: Record<RoomId, AvatarPalette> = {
+type AvatarPresentation = AvatarBasePalette & {
+  personaCode: QuizResultType | null;
+  personaTitle: string | null;
+  portraitPath: string | null;
+  assetPath: string | null;
+};
+
+const ROOM_IDLE_PRESENTATIONS: Record<RoomId, AvatarBasePalette> = {
   office: {
     auraColor: 0x8cc2b3,
     accentColor: 0x8cc2b3,
@@ -67,7 +74,7 @@ const ROOM_IDLE_PRESENTATIONS: Record<RoomId, AvatarPalette> = {
   }
 };
 
-const STATE_PRESENTATIONS: Partial<Record<CharacterState, AvatarPalette>> = {
+const STATE_PRESENTATIONS: Partial<Record<CharacterState, AvatarBasePalette>> = {
   walk: {
     auraColor: 0x8fd9ff,
     accentColor: 0xd7f4ff,
@@ -137,26 +144,37 @@ export const resolveAvatarPresentation = ({
   roomId,
   state,
   resultType
-}: AvatarPresentationInput): AvatarPalette => {
+}: AvatarPresentationInput): AvatarPresentation => {
   const resolvedRoomId = roomId ?? "office";
   const basePresentation = STATE_PRESENTATIONS[state] ?? ROOM_IDLE_PRESENTATIONS[resolvedRoomId];
 
   if (!resultType) {
-    return basePresentation;
+    return {
+      ...basePresentation,
+      personaCode: null,
+      personaTitle: null,
+      portraitPath: null,
+      assetPath: null
+    };
   }
 
   const characterConfig = getCharacterConfig(resultType);
+  const assetPath = characterConfig.states[state];
   const tintKey =
-    characterConfig.states[state] ??
+    assetPath ??
     characterConfig.transparent ??
     characterConfig.sourceUrl ??
     `${characterConfig.type}:${characterConfig.title}`;
   const tintSeed = hashString(tintKey);
-  const hasSpecificStateAsset = Boolean(characterConfig.states[state]);
+  const hasSpecificStateAsset = Boolean(assetPath);
   const tintWeight = hasSpecificStateAsset ? 0.36 : 0.22;
 
   return {
     ...basePresentation,
+    personaCode: characterConfig.type,
+    personaTitle: characterConfig.title,
+    portraitPath: characterConfig.transparent,
+    assetPath,
     auraColor: mixColor(basePresentation.auraColor, createColorFromSeed(tintSeed ^ 0x11aa33, 118, 224), tintWeight),
     accentColor: mixColor(
       basePresentation.accentColor,

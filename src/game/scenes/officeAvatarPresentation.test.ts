@@ -1,10 +1,24 @@
 import { describe, expect, test } from "vitest";
 
+import { PERSONALITY_TYPES } from "../../features/quiz/personalityCatalog";
+import type { CharacterState } from "../../types/domain";
+import { getCharacterConfig } from "../data/characterRegistry";
 import {
   resolveAvatarFacing,
   resolveAvatarNameplate,
   resolveAvatarPresentation
 } from "./officeAvatarPresentation";
+
+const EXPECTED_STATE_KEYS: readonly CharacterState[] = [
+  "idle",
+  "walk",
+  "work",
+  "rest",
+  "sleep",
+  "dance",
+  "train",
+  "task-submit"
+];
 
 describe("resolveAvatarPresentation", () => {
   test("prefers explicit character state styling over room idle styling", () => {
@@ -46,6 +60,25 @@ describe("resolveAvatarPresentation", () => {
     expect(ctrlPresentation.bodyColor).not.toBe(execPresentation.bodyColor);
     expect(ctrlPresentation.mantleColor).not.toBe(execPresentation.mantleColor);
     expect(ctrlPresentation.accentColor).not.toBe(execPresentation.accentColor);
+  });
+
+  test("maps all 27 personas to shared office-state asset paths", () => {
+    for (const type of PERSONALITY_TYPES) {
+      const config = getCharacterConfig(type);
+
+      for (const state of EXPECTED_STATE_KEYS) {
+        const presentation = resolveAvatarPresentation({
+          roomId: "office",
+          state,
+          resultType: type
+        });
+
+        expect(presentation.personaCode).toBe(type);
+        expect(presentation.personaTitle).toBe(config.title);
+        expect(presentation.portraitPath).toBe(config.transparent);
+        expect(presentation.assetPath).toBe(config.states[state]);
+      }
+    }
   });
 });
 
