@@ -48,6 +48,7 @@ export function SbtiQuizRoute() {
   const { isWarping, runWarpSequence } = useWarpOverlaySequence();
 
   const currentQuestion = questions[currentQuestionIndex];
+  const progressPercent = Math.floor(((currentQuestionIndex + 1) / questions.length) * 100);
 
   useEffect(() => {
     startQuiz();
@@ -82,6 +83,15 @@ export function SbtiQuizRoute() {
       <p>
         第 {currentQuestionIndex + 1} / {questions.length} 题
       </p>
+      <div
+        aria-label="quiz progress"
+        aria-valuemax={100}
+        aria-valuemin={0}
+        aria-valuenow={progressPercent}
+        role="progressbar"
+      >
+        当前进度 {progressPercent}%
+      </div>
       <h2>{currentQuestion.prompt}</h2>
       <div>
         {currentQuestion.options.map((option) => (
