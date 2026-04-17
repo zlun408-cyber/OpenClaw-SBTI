@@ -1,7 +1,8 @@
 import manifest from "../../assets/characters/manifest.json";
+import { PERSONALITY_TYPES } from "../../features/quiz/personalityCatalog";
 import type { CharacterState, QuizResultType } from "../../types/domain";
 
-const SUPPORTED_TYPES: readonly QuizResultType[] = ["CTRL", "GOGO", "MUM"];
+const SUPPORTED_TYPES: readonly QuizResultType[] = PERSONALITY_TYPES;
 const REQUIRED_STATES: readonly CharacterState[] = [
   "idle",
   "walk",

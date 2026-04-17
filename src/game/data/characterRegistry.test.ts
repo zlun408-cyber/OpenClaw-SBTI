@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 
+import { PERSONALITY_TYPES } from "../../features/quiz/personalityCatalog";
 import { getCharacterConfig } from "./characterRegistry";
 
-const SUPPORTED_TYPES = ["CTRL", "GOGO", "MUM"] as const;
 const EXPECTED_STATE_KEYS = [
   "idle",
   "walk",
@@ -15,8 +15,10 @@ const EXPECTED_STATE_KEYS = [
 ] as const;
 
 describe("getCharacterConfig", () => {
-  test("returns a config for every supported SBTI result", () => {
-    for (const type of SUPPORTED_TYPES) {
+  test("returns a config for all 27 sbti personas", () => {
+    expect(PERSONALITY_TYPES).toHaveLength(27);
+
+    for (const type of PERSONALITY_TYPES) {
       expect(getCharacterConfig(type)).toBeDefined();
     }
   });
@@ -27,14 +29,18 @@ describe("getCharacterConfig", () => {
     expect(config.states).not.toHaveProperty("transparent");
   });
 
-  test("represents unavailable assets explicitly with null", () => {
+  test("maps every animation state to a concrete asset path", () => {
     const config = getCharacterConfig("CTRL");
 
     for (const state of EXPECTED_STATE_KEYS) {
       expect(state in config.states).toBe(true);
-      expect(["string", "object"]).toContain(typeof config.states[state]);
+      expect(typeof config.states[state]).toBe("string");
     }
+  });
 
-    expect(Object.values(config.states).some((value) => value === null)).toBe(true);
+  test("exposes representative late-catalog personas through the registry", () => {
+    expect(getCharacterConfig("DRUNK").title).toBe("酒鬼");
+    expect(getCharacterConfig("ZZZZ").title).toBe("装死者");
+    expect(getCharacterConfig("ATM-er").title).toBe("送钱者");
   });
 });

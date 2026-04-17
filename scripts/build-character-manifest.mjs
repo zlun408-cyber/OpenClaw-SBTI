@@ -12,7 +12,35 @@ const defaultPublicRoot = path.resolve(__dirname, "../public");
 const TRANSPARENT_PNG_BASE64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4////fwAJ+wP9KobjigAAAABJRU5ErkJggg==";
 
-const SUPPORTED_TYPES = ["CTRL", "EXEC", "HARM"];
+const SUPPORTED_TYPES = [
+  "CTRL",
+  "ATM-er",
+  "Dior-s",
+  "BOSS",
+  "THAN-K",
+  "OH-NO",
+  "GOGO",
+  "SEXY",
+  "LOVE-R",
+  "MUM",
+  "FAKE",
+  "OJBK",
+  "MALO",
+  "JOKE-R",
+  "WOC!",
+  "THIN-K",
+  "SHIT",
+  "ZZZZ",
+  "POOR",
+  "MONK",
+  "IMSB",
+  "SOLO",
+  "FUCK",
+  "DEAD",
+  "IMFW",
+  "HHHH",
+  "DRUNK"
+];
 const REQUIRED_HEADERS = [
   "Type",
   "Title",

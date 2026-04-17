@@ -10,10 +10,95 @@
       "walk": "/assets/characters/ctrl/walk.png",
       "work": "/assets/characters/ctrl/work.png",
       "rest": "/assets/characters/ctrl/rest.png",
-      "sleep": null,
-      "dance": null,
+      "sleep": "/assets/characters/ctrl/sleep.png",
+      "dance": "/assets/characters/ctrl/dance.png",
       "train": "/assets/characters/ctrl/train.png",
-      "task-submit": null
+      "task-submit": "/assets/characters/ctrl/task-submit.png"
+    }
+  },
+  {
+    "type": "ATM-er",
+    "title": "送钱者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/atm-er/transparent.png",
+    "states": {
+      "idle": "/assets/characters/atm-er/idle.png",
+      "walk": "/assets/characters/atm-er/walk.png",
+      "work": "/assets/characters/atm-er/work.png",
+      "rest": "/assets/characters/atm-er/rest.png",
+      "sleep": "/assets/characters/atm-er/sleep.png",
+      "dance": "/assets/characters/atm-er/dance.png",
+      "train": "/assets/characters/atm-er/train.png",
+      "task-submit": "/assets/characters/atm-er/task-submit.png"
+    }
+  },
+  {
+    "type": "Dior-s",
+    "title": "屌丝",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/dior-s/transparent.png",
+    "states": {
+      "idle": "/assets/characters/dior-s/idle.png",
+      "walk": "/assets/characters/dior-s/walk.png",
+      "work": "/assets/characters/dior-s/work.png",
+      "rest": "/assets/characters/dior-s/rest.png",
+      "sleep": "/assets/characters/dior-s/sleep.png",
+      "dance": "/assets/characters/dior-s/dance.png",
+      "train": "/assets/characters/dior-s/train.png",
+      "task-submit": "/assets/characters/dior-s/task-submit.png"
+    }
+  },
+  {
+    "type": "BOSS",
+    "title": "领导者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/boss/transparent.png",
+    "states": {
+      "idle": "/assets/characters/boss/idle.png",
+      "walk": "/assets/characters/boss/walk.png",
+      "work": "/assets/characters/boss/work.png",
+      "rest": "/assets/characters/boss/rest.png",
+      "sleep": "/assets/characters/boss/sleep.png",
+      "dance": "/assets/characters/boss/dance.png",
+      "train": "/assets/characters/boss/train.png",
+      "task-submit": "/assets/characters/boss/task-submit.png"
+    }
+  },
+  {
+    "type": "THAN-K",
+    "title": "感恩者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/than-k/transparent.png",
+    "states": {
+      "idle": "/assets/characters/than-k/idle.png",
+      "walk": "/assets/characters/than-k/walk.png",
+      "work": "/assets/characters/than-k/work.png",
+      "rest": "/assets/characters/than-k/rest.png",
+      "sleep": "/assets/characters/than-k/sleep.png",
+      "dance": "/assets/characters/than-k/dance.png",
+      "train": "/assets/characters/than-k/train.png",
+      "task-submit": "/assets/characters/than-k/task-submit.png"
+    }
+  },
+  {
+    "type": "OH-NO",
+    "title": "哦不人",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/oh-no/transparent.png",
+    "states": {
+      "idle": "/assets/characters/oh-no/idle.png",
+      "walk": "/assets/characters/oh-no/walk.png",
+      "work": "/assets/characters/oh-no/work.png",
+      "rest": "/assets/characters/oh-no/rest.png",
+      "sleep": "/assets/characters/oh-no/sleep.png",
+      "dance": "/assets/characters/oh-no/dance.png",
+      "train": "/assets/characters/oh-no/train.png",
+      "task-submit": "/assets/characters/oh-no/task-submit.png"
     }
   },
   {
@@ -21,16 +106,50 @@
     "title": "行者",
     "sourceUrl": null,
     "quality": "placeholder",
-    "transparent": "/assets/characters/exec/transparent.png",
+    "transparent": "/assets/characters/gogo/transparent.png",
     "states": {
-      "idle": "/assets/characters/exec/idle.png",
-      "walk": "/assets/characters/exec/walk.png",
-      "work": "/assets/characters/exec/work.png",
-      "rest": "/assets/characters/exec/rest.png",
-      "sleep": null,
-      "dance": null,
-      "train": "/assets/characters/exec/train.png",
-      "task-submit": null
+      "idle": "/assets/characters/gogo/idle.png",
+      "walk": "/assets/characters/gogo/walk.png",
+      "work": "/assets/characters/gogo/work.png",
+      "rest": "/assets/characters/gogo/rest.png",
+      "sleep": "/assets/characters/gogo/sleep.png",
+      "dance": "/assets/characters/gogo/dance.png",
+      "train": "/assets/characters/gogo/train.png",
+      "task-submit": "/assets/characters/gogo/task-submit.png"
+    }
+  },
+  {
+    "type": "SEXY",
+    "title": "尤物",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/sexy/transparent.png",
+    "states": {
+      "idle": "/assets/characters/sexy/idle.png",
+      "walk": "/assets/characters/sexy/walk.png",
+      "work": "/assets/characters/sexy/work.png",
+      "rest": "/assets/characters/sexy/rest.png",
+      "sleep": "/assets/characters/sexy/sleep.png",
+      "dance": "/assets/characters/sexy/dance.png",
+      "train": "/assets/characters/sexy/train.png",
+      "task-submit": "/assets/characters/sexy/task-submit.png"
+    }
+  },
+  {
+    "type": "LOVE-R",
+    "title": "多情者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/love-r/transparent.png",
+    "states": {
+      "idle": "/assets/characters/love-r/idle.png",
+      "walk": "/assets/characters/love-r/walk.png",
+      "work": "/assets/characters/love-r/work.png",
+      "rest": "/assets/characters/love-r/rest.png",
+      "sleep": "/assets/characters/love-r/sleep.png",
+      "dance": "/assets/characters/love-r/dance.png",
+      "train": "/assets/characters/love-r/train.png",
+      "task-submit": "/assets/characters/love-r/task-submit.png"
     }
   },
   {
@@ -38,16 +157,305 @@
     "title": "妈妈",
     "sourceUrl": null,
     "quality": "placeholder",
-    "transparent": "/assets/characters/harm/transparent.png",
+    "transparent": "/assets/characters/mum/transparent.png",
     "states": {
-      "idle": "/assets/characters/harm/idle.png",
-      "walk": "/assets/characters/harm/walk.png",
-      "work": "/assets/characters/harm/work.png",
-      "rest": "/assets/characters/harm/rest.png",
-      "sleep": null,
-      "dance": null,
-      "train": "/assets/characters/harm/train.png",
-      "task-submit": null
+      "idle": "/assets/characters/mum/idle.png",
+      "walk": "/assets/characters/mum/walk.png",
+      "work": "/assets/characters/mum/work.png",
+      "rest": "/assets/characters/mum/rest.png",
+      "sleep": "/assets/characters/mum/sleep.png",
+      "dance": "/assets/characters/mum/dance.png",
+      "train": "/assets/characters/mum/train.png",
+      "task-submit": "/assets/characters/mum/task-submit.png"
+    }
+  },
+  {
+    "type": "FAKE",
+    "title": "伪人",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/fake/transparent.png",
+    "states": {
+      "idle": "/assets/characters/fake/idle.png",
+      "walk": "/assets/characters/fake/walk.png",
+      "work": "/assets/characters/fake/work.png",
+      "rest": "/assets/characters/fake/rest.png",
+      "sleep": "/assets/characters/fake/sleep.png",
+      "dance": "/assets/characters/fake/dance.png",
+      "train": "/assets/characters/fake/train.png",
+      "task-submit": "/assets/characters/fake/task-submit.png"
+    }
+  },
+  {
+    "type": "OJBK",
+    "title": "无所谓人",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/ojbk/transparent.png",
+    "states": {
+      "idle": "/assets/characters/ojbk/idle.png",
+      "walk": "/assets/characters/ojbk/walk.png",
+      "work": "/assets/characters/ojbk/work.png",
+      "rest": "/assets/characters/ojbk/rest.png",
+      "sleep": "/assets/characters/ojbk/sleep.png",
+      "dance": "/assets/characters/ojbk/dance.png",
+      "train": "/assets/characters/ojbk/train.png",
+      "task-submit": "/assets/characters/ojbk/task-submit.png"
+    }
+  },
+  {
+    "type": "MALO",
+    "title": "吗喽",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/malo/transparent.png",
+    "states": {
+      "idle": "/assets/characters/malo/idle.png",
+      "walk": "/assets/characters/malo/walk.png",
+      "work": "/assets/characters/malo/work.png",
+      "rest": "/assets/characters/malo/rest.png",
+      "sleep": "/assets/characters/malo/sleep.png",
+      "dance": "/assets/characters/malo/dance.png",
+      "train": "/assets/characters/malo/train.png",
+      "task-submit": "/assets/characters/malo/task-submit.png"
+    }
+  },
+  {
+    "type": "JOKE-R",
+    "title": "小丑",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/joke-r/transparent.png",
+    "states": {
+      "idle": "/assets/characters/joke-r/idle.png",
+      "walk": "/assets/characters/joke-r/walk.png",
+      "work": "/assets/characters/joke-r/work.png",
+      "rest": "/assets/characters/joke-r/rest.png",
+      "sleep": "/assets/characters/joke-r/sleep.png",
+      "dance": "/assets/characters/joke-r/dance.png",
+      "train": "/assets/characters/joke-r/train.png",
+      "task-submit": "/assets/characters/joke-r/task-submit.png"
+    }
+  },
+  {
+    "type": "WOC!",
+    "title": "握草人",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/woc/transparent.png",
+    "states": {
+      "idle": "/assets/characters/woc/idle.png",
+      "walk": "/assets/characters/woc/walk.png",
+      "work": "/assets/characters/woc/work.png",
+      "rest": "/assets/characters/woc/rest.png",
+      "sleep": "/assets/characters/woc/sleep.png",
+      "dance": "/assets/characters/woc/dance.png",
+      "train": "/assets/characters/woc/train.png",
+      "task-submit": "/assets/characters/woc/task-submit.png"
+    }
+  },
+  {
+    "type": "THIN-K",
+    "title": "思考者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/thin-k/transparent.png",
+    "states": {
+      "idle": "/assets/characters/thin-k/idle.png",
+      "walk": "/assets/characters/thin-k/walk.png",
+      "work": "/assets/characters/thin-k/work.png",
+      "rest": "/assets/characters/thin-k/rest.png",
+      "sleep": "/assets/characters/thin-k/sleep.png",
+      "dance": "/assets/characters/thin-k/dance.png",
+      "train": "/assets/characters/thin-k/train.png",
+      "task-submit": "/assets/characters/thin-k/task-submit.png"
+    }
+  },
+  {
+    "type": "SHIT",
+    "title": "愤世者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/shit/transparent.png",
+    "states": {
+      "idle": "/assets/characters/shit/idle.png",
+      "walk": "/assets/characters/shit/walk.png",
+      "work": "/assets/characters/shit/work.png",
+      "rest": "/assets/characters/shit/rest.png",
+      "sleep": "/assets/characters/shit/sleep.png",
+      "dance": "/assets/characters/shit/dance.png",
+      "train": "/assets/characters/shit/train.png",
+      "task-submit": "/assets/characters/shit/task-submit.png"
+    }
+  },
+  {
+    "type": "ZZZZ",
+    "title": "装死者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/zzzz/transparent.png",
+    "states": {
+      "idle": "/assets/characters/zzzz/idle.png",
+      "walk": "/assets/characters/zzzz/walk.png",
+      "work": "/assets/characters/zzzz/work.png",
+      "rest": "/assets/characters/zzzz/rest.png",
+      "sleep": "/assets/characters/zzzz/sleep.png",
+      "dance": "/assets/characters/zzzz/dance.png",
+      "train": "/assets/characters/zzzz/train.png",
+      "task-submit": "/assets/characters/zzzz/task-submit.png"
+    }
+  },
+  {
+    "type": "POOR",
+    "title": "贫困者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/poor/transparent.png",
+    "states": {
+      "idle": "/assets/characters/poor/idle.png",
+      "walk": "/assets/characters/poor/walk.png",
+      "work": "/assets/characters/poor/work.png",
+      "rest": "/assets/characters/poor/rest.png",
+      "sleep": "/assets/characters/poor/sleep.png",
+      "dance": "/assets/characters/poor/dance.png",
+      "train": "/assets/characters/poor/train.png",
+      "task-submit": "/assets/characters/poor/task-submit.png"
+    }
+  },
+  {
+    "type": "MONK",
+    "title": "僧人",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/monk/transparent.png",
+    "states": {
+      "idle": "/assets/characters/monk/idle.png",
+      "walk": "/assets/characters/monk/walk.png",
+      "work": "/assets/characters/monk/work.png",
+      "rest": "/assets/characters/monk/rest.png",
+      "sleep": "/assets/characters/monk/sleep.png",
+      "dance": "/assets/characters/monk/dance.png",
+      "train": "/assets/characters/monk/train.png",
+      "task-submit": "/assets/characters/monk/task-submit.png"
+    }
+  },
+  {
+    "type": "IMSB",
+    "title": "傻者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/imsb/transparent.png",
+    "states": {
+      "idle": "/assets/characters/imsb/idle.png",
+      "walk": "/assets/characters/imsb/walk.png",
+      "work": "/assets/characters/imsb/work.png",
+      "rest": "/assets/characters/imsb/rest.png",
+      "sleep": "/assets/characters/imsb/sleep.png",
+      "dance": "/assets/characters/imsb/dance.png",
+      "train": "/assets/characters/imsb/train.png",
+      "task-submit": "/assets/characters/imsb/task-submit.png"
+    }
+  },
+  {
+    "type": "SOLO",
+    "title": "孤儿",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/solo/transparent.png",
+    "states": {
+      "idle": "/assets/characters/solo/idle.png",
+      "walk": "/assets/characters/solo/walk.png",
+      "work": "/assets/characters/solo/work.png",
+      "rest": "/assets/characters/solo/rest.png",
+      "sleep": "/assets/characters/solo/sleep.png",
+      "dance": "/assets/characters/solo/dance.png",
+      "train": "/assets/characters/solo/train.png",
+      "task-submit": "/assets/characters/solo/task-submit.png"
+    }
+  },
+  {
+    "type": "FUCK",
+    "title": "草者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/fuck/transparent.png",
+    "states": {
+      "idle": "/assets/characters/fuck/idle.png",
+      "walk": "/assets/characters/fuck/walk.png",
+      "work": "/assets/characters/fuck/work.png",
+      "rest": "/assets/characters/fuck/rest.png",
+      "sleep": "/assets/characters/fuck/sleep.png",
+      "dance": "/assets/characters/fuck/dance.png",
+      "train": "/assets/characters/fuck/train.png",
+      "task-submit": "/assets/characters/fuck/task-submit.png"
+    }
+  },
+  {
+    "type": "DEAD",
+    "title": "死者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/dead/transparent.png",
+    "states": {
+      "idle": "/assets/characters/dead/idle.png",
+      "walk": "/assets/characters/dead/walk.png",
+      "work": "/assets/characters/dead/work.png",
+      "rest": "/assets/characters/dead/rest.png",
+      "sleep": "/assets/characters/dead/sleep.png",
+      "dance": "/assets/characters/dead/dance.png",
+      "train": "/assets/characters/dead/train.png",
+      "task-submit": "/assets/characters/dead/task-submit.png"
+    }
+  },
+  {
+    "type": "IMFW",
+    "title": "废物",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/imfw/transparent.png",
+    "states": {
+      "idle": "/assets/characters/imfw/idle.png",
+      "walk": "/assets/characters/imfw/walk.png",
+      "work": "/assets/characters/imfw/work.png",
+      "rest": "/assets/characters/imfw/rest.png",
+      "sleep": "/assets/characters/imfw/sleep.png",
+      "dance": "/assets/characters/imfw/dance.png",
+      "train": "/assets/characters/imfw/train.png",
+      "task-submit": "/assets/characters/imfw/task-submit.png"
+    }
+  },
+  {
+    "type": "HHHH",
+    "title": "傻乐者",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/hhhh/transparent.png",
+    "states": {
+      "idle": "/assets/characters/hhhh/idle.png",
+      "walk": "/assets/characters/hhhh/walk.png",
+      "work": "/assets/characters/hhhh/work.png",
+      "rest": "/assets/characters/hhhh/rest.png",
+      "sleep": "/assets/characters/hhhh/sleep.png",
+      "dance": "/assets/characters/hhhh/dance.png",
+      "train": "/assets/characters/hhhh/train.png",
+      "task-submit": "/assets/characters/hhhh/task-submit.png"
+    }
+  },
+  {
+    "type": "DRUNK",
+    "title": "酒鬼",
+    "sourceUrl": null,
+    "quality": "placeholder",
+    "transparent": "/assets/characters/drunk/transparent.png",
+    "states": {
+      "idle": "/assets/characters/drunk/idle.png",
+      "walk": "/assets/characters/drunk/walk.png",
+      "work": "/assets/characters/drunk/work.png",
+      "rest": "/assets/characters/drunk/rest.png",
+      "sleep": "/assets/characters/drunk/sleep.png",
+      "dance": "/assets/characters/drunk/dance.png",
+      "train": "/assets/characters/drunk/train.png",
+      "task-submit": "/assets/characters/drunk/task-submit.png"
     }
   }
 ]

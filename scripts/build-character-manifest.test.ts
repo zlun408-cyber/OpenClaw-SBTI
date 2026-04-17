@@ -4,6 +4,7 @@ import path from "node:path";
 
 import { afterEach, expect, test } from "vitest";
 
+import { personalityCatalog } from "../src/features/quiz/personalityCatalog";
 import { buildCharacterManifest } from "./build-character-manifest.mjs";
 
 const tempDirectories: string[] = [];
@@ -25,15 +26,20 @@ test("writes manifest output and placeholder assets from the audit table", () =>
   const manifestPath = path.join(workspace, "manifest.json");
   const publicRoot = path.join(workspace, "public");
 
+  const rows = personalityCatalog
+    .map(
+      (persona) =>
+        `| ${persona.code} | ${persona.title} | TODO | /assets/characters/${persona.assetKey}/transparent.png | /assets/characters/${persona.assetKey}/idle.png | /assets/characters/${persona.assetKey}/walk.png | /assets/characters/${persona.assetKey}/work.png | /assets/characters/${persona.assetKey}/rest.png | /assets/characters/${persona.assetKey}/sleep.png | /assets/characters/${persona.assetKey}/dance.png | /assets/characters/${persona.assetKey}/train.png | /assets/characters/${persona.assetKey}/task-submit.png | placeholder |`
+    )
+    .join("\n");
+
   fs.writeFileSync(
     auditPath,
     `# Character Asset Audit
 
 | Type | Title | Source URL | Transparent | Idle | Walk | Work | Rest | Sleep | Dance | Train | Task Submit | Quality |
 | ---- | ----- | ---------- | ----------- | ---- | ---- | ---- | ---- | ----- | ----- | ----- | ----------- | ------- |
-| CTRL | 控制者 | TODO | /assets/characters/ctrl/transparent.png | /assets/characters/ctrl/idle.png | /assets/characters/ctrl/walk.png | /assets/characters/ctrl/work.png | /assets/characters/ctrl/rest.png | TODO | TODO | /assets/characters/ctrl/train.png | TODO | placeholder |
-| EXEC | 执行者 | TODO | /assets/characters/exec/transparent.png | /assets/characters/exec/idle.png | /assets/characters/exec/walk.png | /assets/characters/exec/work.png | /assets/characters/exec/rest.png | TODO | TODO | /assets/characters/exec/train.png | TODO | placeholder |
-| HARM | 协调者 | TODO | /assets/characters/harm/transparent.png | /assets/characters/harm/idle.png | /assets/characters/harm/walk.png | /assets/characters/harm/work.png | /assets/characters/harm/rest.png | TODO | TODO | /assets/characters/harm/train.png | TODO | placeholder |
+${rows}
 `,
     "utf8"
   );
@@ -44,9 +50,11 @@ test("writes manifest output and placeholder assets from the audit table", () =>
     publicRoot
   });
 
-  expect(result.manifest).toHaveLength(3);
+  expect(result.manifest).toHaveLength(27);
   expect(fs.existsSync(manifestPath)).toBe(true);
   expect(fs.existsSync(path.join(publicRoot, "assets/characters/ctrl/idle.png"))).toBe(true);
+  expect(fs.existsSync(path.join(publicRoot, "assets/characters/woc/dance.png"))).toBe(true);
+  expect(fs.existsSync(path.join(publicRoot, "assets/characters/drunk/train.png"))).toBe(true);
   expect(fs.existsSync(path.join(publicRoot, "assets/maps"))).toBe(true);
   expect(fs.existsSync(path.join(publicRoot, "assets/ui"))).toBe(true);
 });
