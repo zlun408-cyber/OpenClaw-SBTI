@@ -3,11 +3,29 @@ import { beforeEach, expect, test } from "vitest";
 import { fireEvent, render, screen, within } from "@testing-library/react";
 
 import { createInitialAppState, useAppStore } from "../../../state/appStore";
+import type { OpenClawAdapter } from "../../openclaw/OpenClawAdapter";
 import { TrainingPanel } from "./TrainingPanel";
 
 beforeEach(() => {
   useAppStore.setState(createInitialAppState());
 });
+
+const fallbackAdapter: OpenClawAdapter = {
+  buildRequest: (input, context) => ({
+    session: "main",
+    message: input,
+    context: {
+      roomId: context?.roomId ?? null,
+      roomLabel: context?.roomLabel ?? null,
+      characterName: context?.characterName ?? null,
+      characterTitle: context?.characterTitle ?? null
+    }
+  }),
+  sendMessage: async () => ({
+    text: "fallback install",
+    source: "fallback"
+  })
+};
 
 test("renders training workstations and install actions", () => {
   render(<TrainingPanel />);
@@ -33,7 +51,7 @@ test("switches available skills when selecting a workstation", () => {
 });
 
 test("allows installing a preset skill from the selected workstation", async () => {
-  render(<TrainingPanel />);
+  render(<TrainingPanel adapter={fallbackAdapter} />);
 
   fireEvent.click(screen.getByRole("button", { name: /训练工位 文书工坊/i }));
   fireEvent.click(screen.getByRole("button", { name: /安装 skill 会议纪要整理/i }));

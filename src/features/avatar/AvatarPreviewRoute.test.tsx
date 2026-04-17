@@ -40,6 +40,16 @@ const seedOffice = () => {
   store.enterOffice("阿控");
 };
 
+const waitForAvatarPreview = async () => {
+  await waitFor(() => {
+    expect(useAppStore.getState().phase).toBe("avatarPreview");
+  }, { timeout: 5_000 });
+
+  await waitFor(() => {
+    expect(screen.getByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
+  }, { timeout: 5_000 });
+};
+
 test("lets the user rename the generated character", async () => {
   seedAvatarPreview();
   const router = createMemoryRouter([{ path: "/avatar", element: <AvatarPreviewRoute /> }], {
@@ -91,7 +101,7 @@ test("completing quiz advances into avatar flow with generated full result paylo
 
   answerEveryQuestionForAxis("control");
 
-  expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
+  await waitForAvatarPreview();
   expect(screen.getByRole("heading", { name: "拿捏者" })).toBeInTheDocument();
   expect(screen.getByText("控场与边界感很强的主导型人格")).toBeInTheDocument();
   expect(useAppStore.getState().result).toMatchObject({
@@ -106,7 +116,7 @@ test("entering office persists the chosen name", async () => {
   render(<RouterProvider router={router} />);
 
   answerEveryQuestionForAxis("control");
-  expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
+  await waitForAvatarPreview();
 
   fireEvent.change(screen.getByLabelText(/角色姓名/i), { target: { value: "阿张" } });
   fireEvent.click(screen.getByRole("button", { name: /进入数字办公室/i }));
@@ -137,7 +147,7 @@ test("restarting quiz clears stale preview state and blocks avatar deep-link", a
   render(<RouterProvider router={router} />);
 
   answerEveryQuestionForAxis("control");
-  expect(await screen.findByRole("heading", { name: /avatar preview/i })).toBeInTheDocument();
+  await waitForAvatarPreview();
 
   await act(async () => {
     await router.navigate("/quiz");
