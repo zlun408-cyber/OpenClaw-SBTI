@@ -19,8 +19,8 @@ const panelStyle = {
   width: "min(960px, calc(100vw - 440px))",
   padding: "20px",
   borderRadius: "24px",
-  border: "1px solid rgba(255,255,255,0.12)",
-  background: "linear-gradient(180deg, rgba(18,33,28,0.94) 0%, rgba(9,18,16,0.96) 100%)",
+  border: "1px solid rgba(159,227,196,0.14)",
+  background: "linear-gradient(180deg, rgba(8,18,30,0.78) 0%, rgba(5,10,18,0.74) 100%)",
   color: "#ECF4E7",
   boxShadow: "0 28px 80px rgba(0,0,0,0.34)"
 } satisfies React.CSSProperties;
