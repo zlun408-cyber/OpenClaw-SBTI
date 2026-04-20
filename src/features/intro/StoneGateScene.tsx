@@ -167,12 +167,13 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
             aria-label="stone-gate-torch-left"
             className={`stone-gate__fire stone-gate__fire--${fireState}`}
             data-fire-state={fireState}
+            data-torch-placement="edge"
             style={{
               position: "absolute",
-              left: "-7.5%",
-              top: "20%",
-              width: "9%",
-              height: "32%",
+              left: "-11.5%",
+              top: "18%",
+              width: "8%",
+              height: "34%",
               display: "grid",
               justifyItems: "center",
               alignContent: "start",
@@ -208,12 +209,13 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
             aria-label="stone-gate-torch-right"
             className={`stone-gate__fire stone-gate__fire--${fireState}`}
             data-fire-state={fireState}
+            data-torch-placement="edge"
             style={{
               position: "absolute",
-              right: "-7.5%",
-              top: "20%",
-              width: "9%",
-              height: "32%",
+              right: "-11.5%",
+              top: "18%",
+              width: "8%",
+              height: "34%",
               display: "grid",
               justifyItems: "center",
               alignContent: "start",
@@ -247,14 +249,15 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
 
           <div
             aria-label="stone-gate-doorframe"
+            data-stone-finish="weathered"
             style={{
               position: "absolute",
               inset: "4% 8%",
-              borderRadius: "8px",
+              borderRadius: "2px",
               background:
-                "linear-gradient(180deg, rgba(68,70,76,0.98) 0%, rgba(44,44,48,0.98) 58%, rgba(20,20,22,1) 100%)",
+                "linear-gradient(180deg, rgba(80,82,86,0.98) 0%, rgba(51,51,54,0.99) 54%, rgba(24,24,26,1) 100%)",
               boxShadow:
-                "inset 0 0 0 10px rgba(97,95,87,0.72), inset 0 0 0 22px rgba(31,30,30,0.96), 0 18px 44px rgba(0,0,0,0.34)"
+                "inset 0 0 0 10px rgba(110,106,98,0.68), inset 0 0 0 22px rgba(28,28,30,0.98), inset 0 1px 0 rgba(181,177,168,0.12), 0 18px 44px rgba(0,0,0,0.34)"
             }}
           />
 
@@ -289,16 +292,17 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
 
           <div
             aria-label="stone-gate-inner-glow"
+            data-glow-strength="faint"
             style={{
               position: "absolute",
-              left: "49.2%",
+              left: "49.35%",
               top: "9%",
               bottom: "15%",
-              width: "1.6%",
-              opacity: stage === "closed" ? 0.08 : stage === "opening" ? 0.46 : 0.72,
+              width: "1.1%",
+              opacity: stage === "closed" ? 0.03 : stage === "opening" ? 0.16 : 0.28,
               background:
-                "linear-gradient(180deg, rgba(255,231,177,0) 0%, rgba(255,210,128,0.58) 24%, rgba(255,188,99,0.82) 50%, rgba(255,225,172,0.52) 82%, rgba(255,231,177,0) 100%)",
-              filter: stage === "closed" ? "blur(1px)" : "blur(3px)",
+                "linear-gradient(180deg, rgba(255,231,177,0) 0%, rgba(255,205,120,0.18) 24%, rgba(255,170,84,0.28) 50%, rgba(255,225,172,0.12) 82%, rgba(255,231,177,0) 100%)",
+              filter: stage === "closed" ? "blur(0.5px)" : "blur(1.6px)",
               pointerEvents: "none"
             }}
           />
@@ -328,25 +332,26 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
 
           <div
             aria-label="stone-gate-relief-band"
+            data-relief-weight="heavy"
             style={{
               position: "absolute",
               left: "16%",
               right: "16%",
               bottom: "12%",
               height: "13%",
-              borderRadius: "4px",
+              borderRadius: "2px",
               background:
-                "linear-gradient(180deg, rgba(87,86,88,0.96) 0%, rgba(58,57,58,0.98) 48%, rgba(32,30,30,1) 100%)",
-              boxShadow: "inset 0 2px 0 rgba(175,168,154,0.16), inset 0 -3px 0 rgba(0,0,0,0.34)"
+                "linear-gradient(180deg, rgba(96,95,98,0.98) 0%, rgba(61,60,61,0.98) 42%, rgba(29,28,28,1) 100%)",
+              boxShadow: "inset 0 2px 0 rgba(188,180,166,0.14), inset 0 -5px 0 rgba(0,0,0,0.42)"
             }}
           >
             <div
               aria-hidden="true"
               style={{
                 position: "absolute",
-                inset: "22% 4%",
+                inset: "18% 3%",
                 background:
-                  "repeating-linear-gradient(90deg, rgba(129,122,110,0.14) 0 22px, rgba(0,0,0,0.06) 22px 44px)"
+                  "repeating-linear-gradient(90deg, rgba(145,138,126,0.16) 0 16px, rgba(64,60,57,0.22) 16px 32px, rgba(0,0,0,0.08) 32px 48px)"
               }}
             />
           </div>
@@ -377,6 +382,7 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
             className={`stone-gate__door-leaf stone-gate__door-leaf--left stone-gate__door-leaf--${leafMotionState}`}
             aria-label="stone-gate-left-leaf"
             data-motion-state={leafMotionState}
+            data-door-shape="flat-slab"
             style={{
               position: "absolute",
               left: "14%",
@@ -384,9 +390,9 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
               bottom: "14%",
               width: "35%",
               background:
-                "linear-gradient(180deg, rgba(126,126,130,0.98) 0%, rgba(86,84,86,0.98) 46%, rgba(42,40,42,1) 100%)",
-              borderRadius: "4px",
-              boxShadow: "inset -12px 0 22px rgba(0,0,0,0.28), inset 0 0 0 2px rgba(182,174,160,0.08)"
+                "linear-gradient(180deg, rgba(132,133,136,0.98) 0%, rgba(92,90,91,0.98) 42%, rgba(44,42,42,1) 100%)",
+              borderRadius: "1px",
+              boxShadow: "inset -10px 0 20px rgba(0,0,0,0.26), inset 0 0 0 2px rgba(182,174,160,0.08), inset 0 1px 0 rgba(205,201,192,0.06)"
             }}
           >
             <div
@@ -394,21 +400,22 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
               style={{
                 position: "absolute",
                 inset: "6%",
-                border: "1px solid rgba(23,22,23,0.8)"
+                border: "1px solid rgba(23,22,23,0.8)",
+                boxShadow: "inset 0 0 0 1px rgba(133,127,118,0.08)"
               }}
             />
             <div
               aria-label="stone-gate-beast-left"
               style={{
                 position: "absolute",
-                top: "20%",
-                left: "23%",
-                width: "30%",
+                top: "18%",
+                left: "18%",
+                width: "36%",
                 aspectRatio: "1 / 1",
                 borderRadius: "52% 48% 56% 44%",
                 background:
-                  "radial-gradient(circle at 50% 40%, rgba(166,167,173,0.34) 0%, rgba(68,66,72,0.56) 56%, rgba(34,32,36,0.9) 82%, transparent 83%)",
-                boxShadow: "inset 0 0 16px rgba(0,0,0,0.28)"
+                  "radial-gradient(circle at 50% 40%, rgba(176,177,181,0.28) 0%, rgba(82,80,84,0.62) 52%, rgba(37,35,38,0.94) 80%, transparent 82%)",
+                boxShadow: "inset 0 0 18px rgba(0,0,0,0.34), 0 0 0 1px rgba(20,18,18,0.32)"
               }}
             />
           </div>
@@ -417,6 +424,7 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
             className={`stone-gate__door-leaf stone-gate__door-leaf--right stone-gate__door-leaf--${leafMotionState}`}
             aria-label="stone-gate-right-leaf"
             data-motion-state={leafMotionState}
+            data-door-shape="flat-slab"
             style={{
               position: "absolute",
               right: "14%",
@@ -424,9 +432,9 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
               bottom: "14%",
               width: "35%",
               background:
-                "linear-gradient(180deg, rgba(126,126,130,0.98) 0%, rgba(86,84,86,0.98) 46%, rgba(42,40,42,1) 100%)",
-              borderRadius: "4px",
-              boxShadow: "inset 12px 0 22px rgba(0,0,0,0.28), inset 0 0 0 2px rgba(182,174,160,0.08)"
+                "linear-gradient(180deg, rgba(132,133,136,0.98) 0%, rgba(92,90,91,0.98) 42%, rgba(44,42,42,1) 100%)",
+              borderRadius: "1px",
+              boxShadow: "inset 10px 0 20px rgba(0,0,0,0.26), inset 0 0 0 2px rgba(182,174,160,0.08), inset 0 1px 0 rgba(205,201,192,0.06)"
             }}
           >
             <div
@@ -434,21 +442,22 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
               style={{
                 position: "absolute",
                 inset: "6%",
-                border: "1px solid rgba(23,22,23,0.8)"
+                border: "1px solid rgba(23,22,23,0.8)",
+                boxShadow: "inset 0 0 0 1px rgba(133,127,118,0.08)"
               }}
             />
             <div
               aria-label="stone-gate-beast-right"
               style={{
                 position: "absolute",
-                top: "20%",
-                right: "23%",
-                width: "30%",
+                top: "18%",
+                right: "18%",
+                width: "36%",
                 aspectRatio: "1 / 1",
                 borderRadius: "48% 52% 44% 56%",
                 background:
-                  "radial-gradient(circle at 50% 40%, rgba(166,167,173,0.34) 0%, rgba(68,66,72,0.56) 56%, rgba(34,32,36,0.9) 82%, transparent 83%)",
-                boxShadow: "inset 0 0 16px rgba(0,0,0,0.28)"
+                  "radial-gradient(circle at 50% 40%, rgba(176,177,181,0.28) 0%, rgba(82,80,84,0.62) 52%, rgba(37,35,38,0.94) 80%, transparent 82%)",
+                boxShadow: "inset 0 0 18px rgba(0,0,0,0.34), 0 0 0 1px rgba(20,18,18,0.32)"
               }}
             />
           </div>
