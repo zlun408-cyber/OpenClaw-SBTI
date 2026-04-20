@@ -21,6 +21,7 @@ type AvatarBasePalette = {
 
 type AvatarPresentation = AvatarBasePalette & {
   personaCode: QuizResultType | null;
+  personaAssetKey: string | null;
   personaTitle: string | null;
   portraitPath: string | null;
   assetPath: string | null;
@@ -152,6 +153,7 @@ export const resolveAvatarPresentation = ({
     return {
       ...basePresentation,
       personaCode: null,
+      personaAssetKey: null,
       personaTitle: null,
       portraitPath: null,
       assetPath: null
@@ -172,6 +174,7 @@ export const resolveAvatarPresentation = ({
   return {
     ...basePresentation,
     personaCode: characterConfig.type,
+    personaAssetKey: characterConfig.assetKey,
     personaTitle: characterConfig.title,
     portraitPath: characterConfig.transparent,
     assetPath,

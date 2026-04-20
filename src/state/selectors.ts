@@ -10,3 +10,6 @@ export const selectCharacterLabel = (state: AppState) =>
 
 export const selectCurrentPersonaConfig = (state: AppState) =>
   state.result ? getCharacterConfig(state.result.code) : null;
+
+export const selectCurrentPersonaAssetKey = (state: AppState) =>
+  selectCurrentPersonaConfig(state)?.assetKey ?? null;

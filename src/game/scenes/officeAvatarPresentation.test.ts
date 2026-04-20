@@ -74,6 +74,7 @@ describe("resolveAvatarPresentation", () => {
         });
 
         expect(presentation.personaCode).toBe(type);
+        expect(presentation.personaAssetKey).toBe(config.assetKey);
         expect(presentation.personaTitle).toBe(config.title);
         expect(presentation.portraitPath).toBe(config.transparent);
         expect(presentation.assetPath).toBe(config.states[state]);

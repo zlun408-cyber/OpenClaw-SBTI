@@ -74,6 +74,7 @@ test("surfaces the active 27-type persona identity from the shared registry", ()
 
   const hud = screen.getByLabelText("office-hud");
   expect(hud).toHaveAttribute("data-persona-code", "DRUNK");
+  expect(hud).toHaveAttribute("data-persona-asset-key", "drunk");
   expect(screen.getByText("DRUNK")).toBeInTheDocument();
   expect(screen.getByText("酒鬼")).toBeInTheDocument();
   expect(screen.getByAltText("酒鬼 办公室头像")).toHaveAttribute(

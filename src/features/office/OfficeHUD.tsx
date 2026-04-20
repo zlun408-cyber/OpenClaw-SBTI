@@ -1,6 +1,7 @@
 import { useAppStore } from "../../state/appStore";
 import {
   selectCharacterLabel,
+  selectCurrentPersonaAssetKey,
   selectCurrentPersonaConfig,
   selectCurrentRoomContext
 } from "../../state/selectors";
@@ -50,6 +51,7 @@ export function OfficeHUD() {
   const characterName = useAppStore(selectCharacterLabel);
   const roomContext = useAppStore(selectCurrentRoomContext);
   const personaConfig = useAppStore(selectCurrentPersonaConfig);
+  const personaAssetKey = useAppStore(selectCurrentPersonaAssetKey);
   const currentRoomId = useAppStore((state) => state.currentRoomId);
   const currentTaskStatus = useAppStore(
     (state) => TASK_STATUS_LABELS[state.character.state]
@@ -66,6 +68,7 @@ export function OfficeHUD() {
       data-office-theme={OFFICE_THEME.id}
       data-office-room={roomTheme.roomId}
       data-persona-code={personaConfig?.type ?? "none"}
+      data-persona-asset-key={personaAssetKey ?? "none"}
       style={themedHudStyle}
     >
       <div
