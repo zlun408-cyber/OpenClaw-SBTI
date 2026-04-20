@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 
+import { personalityCatalog } from "../../features/quiz/personalityCatalog";
 import { PERSONALITY_TYPES } from "../../features/quiz/personalityCatalog";
 import { getCharacterConfig } from "./characterRegistry";
 
@@ -42,5 +43,18 @@ describe("getCharacterConfig", () => {
     expect(getCharacterConfig("DRUNK").title).toBe("酒鬼");
     expect(getCharacterConfig("ZZZZ").title).toBe("装死者");
     expect(getCharacterConfig("ATM-er").title).toBe("送钱者");
+  });
+
+  test("exposes a stable assetKey aligned with the 27-persona catalog", () => {
+    for (const persona of personalityCatalog) {
+      const config = getCharacterConfig(persona.code);
+
+      expect(config.assetKey).toBe(persona.assetKey);
+      expect(config.transparent).toBe(`/assets/characters/${persona.assetKey}/transparent.png`);
+
+      for (const state of EXPECTED_STATE_KEYS) {
+        expect(config.states[state]).toBe(`/assets/characters/${persona.assetKey}/${state}.png`);
+      }
+    }
   });
 });

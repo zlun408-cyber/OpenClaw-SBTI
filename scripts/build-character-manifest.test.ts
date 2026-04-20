@@ -51,6 +51,9 @@ ${rows}
   });
 
   expect(result.manifest).toHaveLength(27);
+  expect(result.manifest[0]?.assetKey).toBe("ctrl");
+  expect(result.manifest.find((entry) => entry.type === "WOC!")?.assetKey).toBe("woc");
+  expect(result.manifest.find((entry) => entry.type === "DRUNK")?.assetKey).toBe("drunk");
   expect(fs.existsSync(manifestPath)).toBe(true);
   expect(fs.existsSync(path.join(publicRoot, "assets/characters/ctrl/idle.png"))).toBe(true);
   expect(fs.existsSync(path.join(publicRoot, "assets/characters/woc/dance.png"))).toBe(true);

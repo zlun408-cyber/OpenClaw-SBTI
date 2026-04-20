@@ -20,6 +20,7 @@ type CharacterStateAssets = Record<CharacterState, CharacterAssetPath>;
 
 export type CharacterConfig = {
   type: QuizResultType;
+  assetKey: string;
   title: string;
   sourceUrl: string | null;
   quality: string | null;
@@ -48,7 +49,7 @@ function validateManifest(rawManifest: unknown): CharacterConfig[] {
       throw new Error("Character manifest entry must be an object.");
     }
 
-    const { type, title, sourceUrl, quality, transparent, states } = entry;
+    const { type, assetKey, title, sourceUrl, quality, transparent, states } = entry;
 
     if (!SUPPORTED_TYPES.includes(type as QuizResultType)) {
       throw new Error(`Character manifest has unsupported type '${String(type)}'.`);
@@ -62,6 +63,10 @@ function validateManifest(rawManifest: unknown): CharacterConfig[] {
 
     if (typeof title !== "string" || title.trim() === "") {
       throw new Error(`Character manifest title is invalid for type '${String(type)}'.`);
+    }
+
+    if (typeof assetKey !== "string" || assetKey.trim() === "") {
+      throw new Error(`Character manifest assetKey is invalid for type '${String(type)}'.`);
     }
 
     if (!isNullableString(sourceUrl)) {

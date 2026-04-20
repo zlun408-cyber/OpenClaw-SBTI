@@ -132,6 +132,34 @@ function parseNullable(value) {
   return normalized;
 }
 
+function deriveAssetKey(row) {
+  const candidates = [
+    row.Transparent,
+    row.Idle,
+    row.Walk,
+    row.Work,
+    row.Rest,
+    row.Sleep,
+    row.Dance,
+    row.Train,
+    row["Task Submit"]
+  ];
+
+  for (const candidate of candidates) {
+    const normalized = parseNullable(candidate);
+    if (typeof normalized !== "string") {
+      continue;
+    }
+
+    const match = normalized.match(/^\/assets\/characters\/([^/]+)\//);
+    if (match?.[1]) {
+      return match[1];
+    }
+  }
+
+  throw new Error(`Unable to derive assetKey for character type '${row.Type}'.`);
+}
+
 function ensureDirectory(directoryPath) {
   fs.mkdirSync(directoryPath, { recursive: true });
 }
@@ -149,6 +177,7 @@ export function buildCharacterManifest({
       row.Type,
       {
         type: row.Type,
+        assetKey: deriveAssetKey(row),
         title: row.Title,
         sourceUrl: parseNullable(row["Source URL"]),
         quality: parseNullable(row.Quality),

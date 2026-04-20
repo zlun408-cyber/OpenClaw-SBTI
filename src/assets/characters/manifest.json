@@ -1,6 +1,7 @@
 [
   {
     "type": "CTRL",
+    "assetKey": "ctrl",
     "title": "拿捏者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -18,6 +19,7 @@
   },
   {
     "type": "ATM-er",
+    "assetKey": "atm-er",
     "title": "送钱者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -35,6 +37,7 @@
   },
   {
     "type": "Dior-s",
+    "assetKey": "dior-s",
     "title": "屌丝",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -52,6 +55,7 @@
   },
   {
     "type": "BOSS",
+    "assetKey": "boss",
     "title": "领导者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -69,6 +73,7 @@
   },
   {
     "type": "THAN-K",
+    "assetKey": "than-k",
     "title": "感恩者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -86,6 +91,7 @@
   },
   {
     "type": "OH-NO",
+    "assetKey": "oh-no",
     "title": "哦不人",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -103,6 +109,7 @@
   },
   {
     "type": "GOGO",
+    "assetKey": "gogo",
     "title": "行者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -120,6 +127,7 @@
   },
   {
     "type": "SEXY",
+    "assetKey": "sexy",
     "title": "尤物",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -137,6 +145,7 @@
   },
   {
     "type": "LOVE-R",
+    "assetKey": "love-r",
     "title": "多情者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -154,6 +163,7 @@
   },
   {
     "type": "MUM",
+    "assetKey": "mum",
     "title": "妈妈",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -171,6 +181,7 @@
   },
   {
     "type": "FAKE",
+    "assetKey": "fake",
     "title": "伪人",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -188,6 +199,7 @@
   },
   {
     "type": "OJBK",
+    "assetKey": "ojbk",
     "title": "无所谓人",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -205,6 +217,7 @@
   },
   {
     "type": "MALO",
+    "assetKey": "malo",
     "title": "吗喽",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -222,6 +235,7 @@
   },
   {
     "type": "JOKE-R",
+    "assetKey": "joke-r",
     "title": "小丑",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -239,6 +253,7 @@
   },
   {
     "type": "WOC!",
+    "assetKey": "woc",
     "title": "握草人",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -256,6 +271,7 @@
   },
   {
     "type": "THIN-K",
+    "assetKey": "thin-k",
     "title": "思考者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -273,6 +289,7 @@
   },
   {
     "type": "SHIT",
+    "assetKey": "shit",
     "title": "愤世者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -290,6 +307,7 @@
   },
   {
     "type": "ZZZZ",
+    "assetKey": "zzzz",
     "title": "装死者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -307,6 +325,7 @@
   },
   {
     "type": "POOR",
+    "assetKey": "poor",
     "title": "贫困者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -324,6 +343,7 @@
   },
   {
     "type": "MONK",
+    "assetKey": "monk",
     "title": "僧人",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -341,6 +361,7 @@
   },
   {
     "type": "IMSB",
+    "assetKey": "imsb",
     "title": "傻者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -358,6 +379,7 @@
   },
   {
     "type": "SOLO",
+    "assetKey": "solo",
     "title": "孤儿",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -375,6 +397,7 @@
   },
   {
     "type": "FUCK",
+    "assetKey": "fuck",
     "title": "草者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -392,6 +415,7 @@
   },
   {
     "type": "DEAD",
+    "assetKey": "dead",
     "title": "死者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -409,6 +433,7 @@
   },
   {
     "type": "IMFW",
+    "assetKey": "imfw",
     "title": "废物",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -426,6 +451,7 @@
   },
   {
     "type": "HHHH",
+    "assetKey": "hhhh",
     "title": "傻乐者",
     "sourceUrl": null,
     "quality": "placeholder",
@@ -443,6 +469,7 @@
   },
   {
     "type": "DRUNK",
+    "assetKey": "drunk",
     "title": "酒鬼",
     "sourceUrl": null,
     "quality": "placeholder",
