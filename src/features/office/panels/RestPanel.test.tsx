@@ -31,6 +31,14 @@ test('renders furniture hotspots for the rest area scene', () => {
   expect(screen.getByRole('button', { name: /家具 音乐角/i })).toBeInTheDocument();
 });
 
+test('aligns the rest panel surface to the shared office glass theme', () => {
+  render(<RestPanel />);
+
+  expect(screen.getByLabelText('rest-panel')).toHaveStyle({
+    borderColor: 'rgba(126, 214, 255, 0.1)'
+  });
+});
+
 test('can trigger dance by clicking the music corner hotspot', () => {
   render(<RestPanel />);
 

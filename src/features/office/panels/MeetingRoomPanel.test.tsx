@@ -39,6 +39,14 @@ test("renders meeting hotspots and grouped tasks", () => {
   expect(screen.getByText("整理客户反馈")).toBeInTheDocument();
 });
 
+test("aligns the meeting panel surface to the shared office glass theme", () => {
+  render(<MeetingRoomPanel />);
+
+  expect(screen.getByLabelText("meeting-room-panel")).toHaveStyle({
+    borderColor: "rgba(126, 214, 255, 0.1)"
+  });
+});
+
 test("switches focus when selecting the submission station", () => {
   render(<MeetingRoomPanel />);
 

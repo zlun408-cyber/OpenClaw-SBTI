@@ -6,6 +6,7 @@ import {
   MEETING_TASK_SOURCE_LABELS,
   MEETING_TASK_STATUS_LABELS
 } from "../tasks/meetingTasks";
+import { OFFICE_ROOM_ACCENTS, OFFICE_THEME } from "../officeTheme";
 import type { MeetingTaskStatus } from "../../../types/domain";
 
 const panelStyle = {
@@ -14,10 +15,10 @@ const panelStyle = {
   width: "min(980px, calc(100vw - 440px))",
   padding: "20px",
   borderRadius: "24px",
-  border: "1px solid rgba(240,202,135,0.14)",
+  border: "1px solid rgba(126,214,255,0.10)",
   background: "linear-gradient(180deg, rgba(8,18,30,0.78) 0%, rgba(5,10,18,0.74) 100%)",
   color: "#F5EBD7",
-  boxShadow: "0 28px 80px rgba(0,0,0,0.34)"
+  boxShadow: `${OFFICE_THEME.shadow.panel}, 0 0 0 1px ${OFFICE_ROOM_ACCENTS.meeting.softRgba} inset`
 } satisfies React.CSSProperties;
 
 const statusOrder: MeetingTaskStatus[] = [

@@ -36,6 +36,14 @@ test("renders training workstations and install actions", () => {
   expect(screen.getByRole("button", { name: /训练工位 洞察档案台/i })).toBeInTheDocument();
 });
 
+test("aligns the training panel surface to the shared office glass theme", () => {
+  render(<TrainingPanel />);
+
+  expect(screen.getByLabelText("training-panel")).toHaveStyle({
+    borderColor: "rgba(126, 214, 255, 0.1)"
+  });
+});
+
 test("switches available skills when selecting a workstation", () => {
   render(<TrainingPanel />);
 

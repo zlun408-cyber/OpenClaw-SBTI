@@ -32,6 +32,14 @@ test("renders HR hotspots and dual editors", () => {
   expect(screen.getByLabelText(/memory.md editor/i)).toBeInTheDocument();
 });
 
+test("aligns the hr panel surface to the shared office glass theme", () => {
+  render(<HRPanel adapter={createAdapter("webchat")} />);
+
+  expect(screen.getByLabelText("hr-panel")).toHaveStyle({
+    borderColor: "rgba(126, 214, 255, 0.1)"
+  });
+});
+
 test("switches focus when selecting the memory cabinet hotspot", () => {
   render(<HRPanel adapter={createAdapter("webchat")} />);
 
