@@ -37,12 +37,20 @@ test("renders animated stone gate leaves and inner portal states", async () => {
   expect(leftLeaf).toHaveAttribute("data-motion-state", "sealed");
   expect(rightLeaf).toHaveAttribute("data-motion-state", "sealed");
   expect(portalCore).toHaveAttribute("data-energy-state", "dormant");
+  expect(leftLeaf).toHaveClass("stone-gate__leaf", "stone-gate__leaf--left", "stone-gate__leaf--sealed");
+  expect(rightLeaf).toHaveClass("stone-gate__leaf", "stone-gate__leaf--right", "stone-gate__leaf--sealed");
+  expect(portalCore).toHaveClass("stone-gate__core", "stone-gate__core--dormant");
+  expect(screen.getByLabelText("stone-gate-motion-styles")).toHaveTextContent("stone-gate-core-spin");
+  expect(screen.getByLabelText("stone-gate-motion-styles")).toHaveTextContent("stone-gate-threshold-pulse");
 
   fireEvent.click(screen.getByRole("button", { name: /穿越之门/i }));
 
   expect(leftLeaf).toHaveAttribute("data-motion-state", "opening");
   expect(rightLeaf).toHaveAttribute("data-motion-state", "opening");
   expect(portalCore).toHaveAttribute("data-energy-state", "charging");
+  expect(leftLeaf).toHaveClass("stone-gate__leaf--opening");
+  expect(rightLeaf).toHaveClass("stone-gate__leaf--opening");
+  expect(portalCore).toHaveClass("stone-gate__core--charging");
   expect(screen.getByLabelText("stone-gate-runes")).toHaveAttribute("data-rune-state", "charging");
 
   await screen.findByRole("button", { name: /开始试炼/i });
@@ -50,5 +58,9 @@ test("renders animated stone gate leaves and inner portal states", async () => {
   expect(leftLeaf).toHaveAttribute("data-motion-state", "revealed");
   expect(rightLeaf).toHaveAttribute("data-motion-state", "revealed");
   expect(portalCore).toHaveAttribute("data-energy-state", "open");
+  expect(leftLeaf).toHaveClass("stone-gate__leaf--revealed");
+  expect(rightLeaf).toHaveClass("stone-gate__leaf--revealed");
+  expect(portalCore).toHaveClass("stone-gate__core--open");
   expect(screen.getByLabelText("stone-gate-threshold")).toHaveAttribute("data-threshold-state", "open");
+  expect(screen.getByLabelText("stone-gate-threshold")).toHaveClass("stone-gate__threshold--open");
 });

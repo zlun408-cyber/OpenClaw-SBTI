@@ -6,7 +6,7 @@ import { useAppStore } from "../../state/appStore";
 import { OfficeHUD } from "./OfficeHUD";
 import { RoomPanelHost } from "./RoomPanelHost";
 import { FloatingChatBox } from "../openclaw/FloatingChatBox";
-import type { RoomId } from "../../types/domain";
+import type { CharacterState, RoomId } from "../../types/domain";
 import { ROOM_CONTEXTS } from "../../types/domain";
 import { selectCurrentPersonaConfig } from "../../state/selectors";
 import { getOfficeRoomVisual } from "../../game/scenes/officeEnvironmentVisuals";
@@ -179,18 +179,80 @@ const roomIds = Object.keys(ROOM_CONTEXTS) as RoomId[];
 
 const toHexColor = (value: number) => `#${value.toString(16).padStart(6, "0")}`;
 
+const OFFICE_DOOR_MOTION_CSS = `
+  @keyframes office-door-core-hum {
+    0%, 100% { transform: translateX(-50%) scale(1); filter: brightness(1); }
+    50% { transform: translateX(-50%) scale(1.04); filter: brightness(1.14); }
+  }
+
+  @keyframes office-door-rune-cascade {
+    0% { opacity: 0.42; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-2px); }
+    100% { opacity: 0.42; transform: translateY(0); }
+  }
+
+  @keyframes office-door-threshold-wave {
+    0%, 100% { transform: scaleX(1); opacity: 0.8; }
+    50% { transform: scaleX(1.06); opacity: 1; }
+  }
+
+  .office-door__core--syncing,
+  .office-door__core--routing,
+  .office-door__core--resonating,
+  .office-door__core--release {
+    animation: office-door-core-hum 1.8s ease-in-out infinite;
+  }
+
+  .office-door__runes--accelerating span,
+  .office-door__runes--streaming span,
+  .office-door__runes--resonant span,
+  .office-door__runes--confirming span {
+    animation: office-door-rune-cascade 0.95s ease-in-out infinite;
+  }
+
+  .office-door__threshold--pulsing,
+  .office-door__threshold--tracking,
+  .office-door__threshold--vibrating,
+  .office-door__threshold--opening {
+    animation: office-door-threshold-wave 1.35s ease-in-out infinite;
+    transform-origin: center;
+  }
+`;
+
+const DOOR_RUNTIME_STATES: Record<
+  CharacterState,
+  {
+    activity: string;
+    core: string;
+    runes: string;
+    threshold: string;
+  }
+> = {
+  idle: { activity: "idle", core: "active", runes: "online", threshold: "glowing" },
+  walk: { activity: "walk", core: "routing", runes: "streaming", threshold: "tracking" },
+  work: { activity: "work", core: "focused", runes: "targeting", threshold: "steady" },
+  rest: { activity: "rest", core: "calm", runes: "slow", threshold: "soft" },
+  sleep: { activity: "sleep", core: "dimmed", runes: "quiet", threshold: "dim" },
+  dance: { activity: "dance", core: "resonating", runes: "resonant", threshold: "vibrating" },
+  train: { activity: "train", core: "syncing", runes: "accelerating", threshold: "pulsing" },
+  "task-submit": { activity: "task-submit", core: "release", runes: "confirming", threshold: "opening" }
+};
+
 function OfficeCurrentRoomStage({
   roomId,
-  persona
+  persona,
+  characterState
 }: {
   roomId: RoomId;
   persona: ReturnType<typeof selectCurrentPersonaConfig>;
+  characterState: CharacterState;
 }) {
   const visual = getOfficeRoomVisual(roomId);
   const roomTheme = getOfficeRoomTheme(roomId);
   const roomContext = ROOM_CONTEXTS[roomId];
   const accentColor = toHexColor(visual.accent);
   const fillColor = toHexColor(visual.fill);
+  const doorRuntime = DOOR_RUNTIME_STATES[characterState];
 
   const themedStageStyle = {
     ...currentRoomStageStyle,
@@ -208,6 +270,7 @@ function OfficeCurrentRoomStage({
       data-view-mode="in-room"
       style={themedStageStyle}
     >
+      <style aria-label="office-door-motion-styles">{OFFICE_DOOR_MOTION_CSS}</style>
       <aside aria-label="office-minimap" style={minimapStyle}>
         <div style={{ color: "#F3DCB1", fontSize: "11px", letterSpacing: "0.16em", textTransform: "uppercase" }}>
           minimap
@@ -265,7 +328,9 @@ function OfficeCurrentRoomStage({
           ) : null}
         </div>
         <div
+          className={`office-door office-door--room-${roomId} office-door--activity-${doorRuntime.activity}`}
           aria-label="office-entry-door"
+          data-door-activity={doorRuntime.activity}
           data-room-id={roomId}
           style={{
             ...roomDoorStyle,
@@ -274,8 +339,9 @@ function OfficeCurrentRoomStage({
           }}
         >
           <div
+            className={`office-door__core office-door__core--${doorRuntime.core}`}
             aria-label="office-door-core"
-            data-door-core-state="active"
+            data-door-core-state={doorRuntime.core}
             style={{
               position: "absolute",
               left: "50%",
@@ -289,8 +355,9 @@ function OfficeCurrentRoomStage({
             }}
           />
           <div
+            className={`office-door__runes office-door__runes--${doorRuntime.runes}`}
             aria-label="office-door-runes"
-            data-rune-band="online"
+            data-rune-band={doorRuntime.runes}
             style={{
               position: "absolute",
               left: "50%",
@@ -314,8 +381,9 @@ function OfficeCurrentRoomStage({
             ))}
           </div>
           <div
+            className={`office-door__threshold office-door__threshold--${doorRuntime.threshold}`}
             aria-label="office-door-threshold"
-            data-threshold-state="glowing"
+            data-threshold-state={doorRuntime.threshold}
             style={{
               position: "absolute",
               left: "14%",
@@ -350,6 +418,7 @@ function OfficeCurrentRoomStage({
 export function OfficeRoute() {
   const currentRoomId = useAppStore((state) => state.currentRoomId ?? "office");
   const personaConfig = useAppStore(selectCurrentPersonaConfig);
+  const characterState = useAppStore((state) => state.character.state);
   const canEnterOffice = useAppStore(
     (state) =>
       state.result !== null &&
@@ -383,7 +452,11 @@ export function OfficeRoute() {
         <div aria-label="office-observation-window" style={canvasFrameStyle}>
           <div style={ambientFrameStyle} />
           <div style={titleRibbonStyle}>SBTI Digital Office</div>
-          <OfficeCurrentRoomStage roomId={currentRoomId} persona={personaConfig} />
+          <OfficeCurrentRoomStage
+            roomId={currentRoomId}
+            persona={personaConfig}
+            characterState={characterState}
+          />
           <GameCanvas onRoomChanged={handleRoomChanged} />
         </div>
       </div>

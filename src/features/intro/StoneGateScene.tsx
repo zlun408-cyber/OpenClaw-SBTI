@@ -28,6 +28,58 @@ const thresholdStates: Record<GateStage, string> = {
   revealed: "open"
 };
 
+const STONE_GATE_MOTION_CSS = `
+  @keyframes stone-gate-leaf-open-left {
+    0% { transform: translateX(0) scaleY(1); }
+    35% { transform: translateX(-8%) scaleY(1.01); }
+    100% { transform: translateX(-48%) scaleY(1); }
+  }
+
+  @keyframes stone-gate-leaf-open-right {
+    0% { transform: translateX(0) scaleY(1); }
+    35% { transform: translateX(8%) scaleY(1.01); }
+    100% { transform: translateX(48%) scaleY(1); }
+  }
+
+  @keyframes stone-gate-core-spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.96); }
+    100% { transform: translate(-50%, -50%) rotate(360deg) scale(1.04); }
+  }
+
+  @keyframes stone-gate-rune-flicker {
+    0%, 100% { opacity: 0.72; transform: translateY(0); }
+    50% { opacity: 1; transform: translateY(-3px); }
+  }
+
+  @keyframes stone-gate-threshold-pulse {
+    0%, 100% { transform: scaleX(1); filter: brightness(1); }
+    50% { transform: scaleX(1.04); filter: brightness(1.18); }
+  }
+
+  .stone-gate__leaf { transition: transform 180ms ease, filter 180ms ease; }
+  .stone-gate__leaf--sealed { transform: translateX(0); }
+  .stone-gate__leaf--opening.stone-gate__leaf--left { animation: stone-gate-leaf-open-left 450ms ease forwards; }
+  .stone-gate__leaf--opening.stone-gate__leaf--right { animation: stone-gate-leaf-open-right 450ms ease forwards; }
+  .stone-gate__leaf--revealed.stone-gate__leaf--left { transform: translateX(-48%); }
+  .stone-gate__leaf--revealed.stone-gate__leaf--right { transform: translateX(48%); }
+
+  .stone-gate__core--charging,
+  .stone-gate__core--open {
+    animation: stone-gate-core-spin 7.5s linear infinite;
+  }
+
+  .stone-gate__runes--charging span,
+  .stone-gate__runes--open span {
+    animation: stone-gate-rune-flicker 1.2s ease-in-out infinite;
+  }
+
+  .stone-gate__threshold--charging,
+  .stone-gate__threshold--open {
+    animation: stone-gate-threshold-pulse 1.8s ease-in-out infinite;
+    transform-origin: center;
+  }
+`;
+
 type StoneGateSceneProps = {
   onStartTrial: () => void;
 };
@@ -77,6 +129,7 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
       }}
     >
       <div style={{ display: "grid", gap: "24px", justifyItems: "center", width: "min(880px, 100%)" }}>
+        <style aria-label="stone-gate-motion-styles">{STONE_GATE_MOTION_CSS}</style>
         <div style={{ textAlign: "center", display: "grid", gap: "8px" }}>
           <h1 style={{ margin: 0, fontSize: "clamp(36px, 5vw, 62px)", letterSpacing: "0.08em" }}>
             SBTI Digital Employee
@@ -116,6 +169,7 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
           />
 
           <div
+            className={`stone-gate__threshold stone-gate__threshold--${thresholdState}`}
             aria-label="stone-gate-threshold"
             data-threshold-state={thresholdState}
             style={{
@@ -137,6 +191,7 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
           />
 
           <div
+            className={`stone-gate__runes stone-gate__runes--${runeState}`}
             aria-label="stone-gate-runes"
             data-rune-state={runeState}
             style={{
@@ -173,6 +228,7 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
           </div>
 
           <div
+            className={`stone-gate__core stone-gate__core--${coreEnergyState}`}
             aria-label="stone-gate-core"
             data-energy-state={coreEnergyState}
             style={{
@@ -199,11 +255,12 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
           />
 
           <div
+            className={`stone-gate__leaf stone-gate__leaf--left stone-gate__leaf--${leafMotionState}`}
             aria-label="stone-gate-left-leaf"
             data-motion-state={leafMotionState}
             style={{
               position: "absolute",
-              left: stage === "revealed" ? "-4%" : stage === "opening" ? "3%" : "10%",
+              left: "10%",
               top: "7%",
               bottom: "8%",
               width: "31%",
@@ -215,11 +272,12 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
           />
 
           <div
+            className={`stone-gate__leaf stone-gate__leaf--right stone-gate__leaf--${leafMotionState}`}
             aria-label="stone-gate-right-leaf"
             data-motion-state={leafMotionState}
             style={{
               position: "absolute",
-              right: stage === "revealed" ? "-4%" : stage === "opening" ? "3%" : "10%",
+              right: "10%",
               top: "7%",
               bottom: "8%",
               width: "31%",

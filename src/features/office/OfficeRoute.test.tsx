@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { within } from "@testing-library/react";
 import { createElement } from "react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
@@ -124,6 +124,31 @@ test("updates the in-room shell and minimap highlight when the active room chang
   expect(within(stage).getByText("Training Room")).toBeInTheDocument();
   expect(screen.getByLabelText("office-entry-door")).toHaveAttribute("data-room-id", "training");
   expect(screen.getByLabelText("minimap-room-training")).toHaveAttribute("aria-current", "true");
+});
+
+test("links office door effects to runtime room and employee state", async () => {
+  bridgeState.emittedRoomId = "training";
+
+  render(createElement(OfficeRoute));
+
+  await waitFor(() => {
+    expect(screen.getByLabelText("office-entry-door")).toHaveAttribute("data-room-id", "training");
+  });
+
+  act(() => {
+    useAppStore.setState((state) => ({
+      ...state,
+      character: {
+        ...state.character,
+        state: "train"
+      }
+    }));
+  });
+
+  expect(screen.getByLabelText("office-entry-door")).toHaveAttribute("data-door-activity", "train");
+  expect(screen.getByLabelText("office-door-core")).toHaveAttribute("data-door-core-state", "syncing");
+  expect(screen.getByLabelText("office-door-runes")).toHaveAttribute("data-rune-band", "accelerating");
+  expect(screen.getByLabelText("office-door-threshold")).toHaveAttribute("data-threshold-state", "pulsing");
 });
 
 test("redirects away when office access requirements are not met", () => {
