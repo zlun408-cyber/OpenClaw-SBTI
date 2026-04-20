@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 
 export type GateStage = "closed" | "opening" | "revealed";
 
-const GATE_OPENING_MS = 450;
+const GATE_OPENING_MS = 650;
 
 const stageLabels: Record<GateStage, string> = {
   closed: "封印",
@@ -16,10 +16,16 @@ const leafMotionStates: Record<GateStage, string> = {
   revealed: "revealed"
 };
 
-const coreEnergyStates: Record<GateStage, string> = {
-  closed: "dormant",
-  opening: "charging",
+const seamStates: Record<GateStage, string> = {
+  closed: "sealed",
+  opening: "glowing",
   revealed: "open"
+};
+
+const fireStates: Record<GateStage, string> = {
+  closed: "ember",
+  opening: "blazing",
+  revealed: "revealed"
 };
 
 const thresholdStates: Record<GateStage, string> = {
@@ -29,74 +35,57 @@ const thresholdStates: Record<GateStage, string> = {
 };
 
 const STONE_GATE_MOTION_CSS = `
-  @keyframes stone-gate-leaf-open-left {
-    0% { transform: translateX(0) scaleY(1); }
-    35% { transform: translateX(-8%) scaleY(1.01); }
-    100% { transform: translateX(-48%) scaleY(1); }
+  @keyframes stone-gate-door-open-left {
+    0% { transform: translateX(0); }
+    18% { transform: translateX(-3%); }
+    100% { transform: translateX(-52%); }
   }
 
-  @keyframes stone-gate-leaf-open-right {
-    0% { transform: translateX(0) scaleY(1); }
-    35% { transform: translateX(8%) scaleY(1.01); }
-    100% { transform: translateX(48%) scaleY(1); }
+  @keyframes stone-gate-door-open-right {
+    0% { transform: translateX(0); }
+    18% { transform: translateX(3%); }
+    100% { transform: translateX(52%); }
   }
 
-  @keyframes stone-gate-core-spin {
-    0% { transform: translate(-50%, -50%) rotate(0deg) scale(0.96); }
-    100% { transform: translate(-50%, -50%) rotate(360deg) scale(1.04); }
+  @keyframes stone-gate-fire-flicker {
+    0%, 100% { transform: scale(0.96, 1); opacity: 0.88; filter: brightness(0.94); }
+    50% { transform: scale(1.08, 1.14); opacity: 1; filter: brightness(1.16); }
   }
 
-  @keyframes stone-gate-rune-flicker {
-    0%, 100% { opacity: 0.72; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(-3px); }
+  @keyframes stone-gate-seam-glow {
+    0%, 100% { opacity: 0.38; filter: blur(2px) brightness(0.82); }
+    50% { opacity: 1; filter: blur(5px) brightness(1.2); }
   }
 
   @keyframes stone-gate-threshold-pulse {
-    0%, 100% { transform: scaleX(1); filter: brightness(1); }
-    50% { transform: scaleX(1.04); filter: brightness(1.18); }
+    0%, 100% { opacity: 0.75; filter: brightness(0.9); }
+    50% { opacity: 1; filter: brightness(1.18); }
   }
 
-  @keyframes stone-gate-rift-bloom {
-    0%, 100% { opacity: 0.28; filter: blur(8px) brightness(0.9); transform: scale(0.96); }
-    50% { opacity: 0.82; filter: blur(18px) brightness(1.18); transform: scale(1.06); }
+  .stone-gate__door-leaf { transition: transform 180ms ease; }
+  .stone-gate__door-leaf--sealed { transform: translateX(0); }
+  .stone-gate__door-leaf--opening.stone-gate__door-leaf--left { animation: stone-gate-door-open-left 650ms cubic-bezier(0.24, 0.84, 0.24, 1) forwards; }
+  .stone-gate__door-leaf--opening.stone-gate__door-leaf--right { animation: stone-gate-door-open-right 650ms cubic-bezier(0.24, 0.84, 0.24, 1) forwards; }
+  .stone-gate__door-leaf--revealed.stone-gate__door-leaf--left { transform: translateX(-52%); }
+  .stone-gate__door-leaf--revealed.stone-gate__door-leaf--right { transform: translateX(52%); }
+
+  .stone-gate__fire--ember .stone-gate__flame {
+    animation: stone-gate-fire-flicker 2.6s ease-in-out infinite;
   }
 
-  @keyframes stone-gate-monolith-hum {
-    0%, 100% { filter: brightness(1); }
-    50% { filter: brightness(1.08); }
+  .stone-gate__fire--blazing .stone-gate__flame,
+  .stone-gate__fire--revealed .stone-gate__flame {
+    animation: stone-gate-fire-flicker 1.3s ease-in-out infinite;
   }
 
-  .stone-gate__leaf { transition: transform 180ms ease, filter 180ms ease; }
-  .stone-gate__leaf--sealed { transform: translateX(0); }
-  .stone-gate__leaf--opening.stone-gate__leaf--left { animation: stone-gate-leaf-open-left 450ms ease forwards; }
-  .stone-gate__leaf--opening.stone-gate__leaf--right { animation: stone-gate-leaf-open-right 450ms ease forwards; }
-  .stone-gate__leaf--revealed.stone-gate__leaf--left { transform: translateX(-48%); }
-  .stone-gate__leaf--revealed.stone-gate__leaf--right { transform: translateX(48%); }
-
-  .stone-gate__core--charging,
-  .stone-gate__core--open {
-    animation: stone-gate-core-spin 7.5s linear infinite;
-  }
-
-  .stone-gate__runes--charging span,
-  .stone-gate__runes--open span {
-    animation: stone-gate-rune-flicker 1.2s ease-in-out infinite;
+  .stone-gate__seam--glowing,
+  .stone-gate__seam--open {
+    animation: stone-gate-seam-glow 1.8s ease-in-out infinite;
   }
 
   .stone-gate__threshold--charging,
   .stone-gate__threshold--open {
-    animation: stone-gate-threshold-pulse 1.8s ease-in-out infinite;
-    transform-origin: center;
-  }
-
-  .stone-gate__rift--charging,
-  .stone-gate__rift--open {
-    animation: stone-gate-rift-bloom 2.2s ease-in-out infinite;
-  }
-
-  .stone-gate__monolith--charging,
-  .stone-gate__monolith--open {
-    animation: stone-gate-monolith-hum 2.8s ease-in-out infinite;
+    animation: stone-gate-threshold-pulse 2.1s ease-in-out infinite;
   }
 `;
 
@@ -130,10 +119,9 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
   };
 
   const leafMotionState = leafMotionStates[stage];
-  const coreEnergyState = coreEnergyStates[stage];
+  const seamState = seamStates[stage];
+  const fireState = fireStates[stage];
   const thresholdState = thresholdStates[stage];
-  const runeState = stage === "closed" ? "dormant" : stage === "opening" ? "charging" : "open";
-  const riftState = stage === "closed" ? "sealed" : stage === "opening" ? "charging" : "open";
 
   return (
     <section
@@ -145,17 +133,17 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
         placeItems: "center",
         padding: "48px 24px",
         background:
-          "radial-gradient(circle at 50% 18%, rgba(239, 209, 147, 0.18), transparent 24%), linear-gradient(180deg, #05070c 0%, #0d111b 48%, #05070b 100%)",
-        color: "#F7EEDB"
+          "radial-gradient(circle at 50% 12%, rgba(77, 104, 150, 0.18), transparent 20%), linear-gradient(180deg, #06090f 0%, #0b1220 46%, #05070b 100%)",
+        color: "#F0E6D4"
       }}
     >
-      <div style={{ display: "grid", gap: "30px", justifyItems: "center", width: "min(1320px, 100%)" }}>
+      <div style={{ display: "grid", gap: "30px", justifyItems: "center", width: "min(1380px, 100%)" }}>
         <style aria-label="stone-gate-motion-styles">{STONE_GATE_MOTION_CSS}</style>
         <div style={{ textAlign: "center", display: "grid", gap: "8px" }}>
           <h1 style={{ margin: 0, fontSize: "clamp(36px, 5vw, 62px)", letterSpacing: "0.08em" }}>
             SBTI Digital Employee
           </h1>
-          <p style={{ margin: 0, color: "#D9C7A4", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+          <p style={{ margin: 0, color: "#B8B3A8", letterSpacing: "0.14em", textTransform: "uppercase" }}>
             石门状态：{stageLabels[stage]}
           </p>
         </div>
@@ -166,23 +154,25 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
           data-gate-style="legendary-stone"
           style={{
             position: "relative",
-            width: "min(1100px, 100%)",
-            aspectRatio: "1.38 / 1",
-            borderRadius: "52px",
+            width: "min(1180px, 100%)",
+            aspectRatio: "1.34 / 1",
             overflow: "visible",
+            borderRadius: "24px",
             background:
-              "radial-gradient(circle at 50% 18%, rgba(105, 126, 173, 0.12), transparent 22%), linear-gradient(180deg, rgba(32,38,53,0.98) 0%, rgba(10,12,18,0.98) 100%)",
-            boxShadow: "0 42px 120px rgba(0,0,0,0.64), inset 0 0 0 1px rgba(248,226,187,0.08)"
+              "linear-gradient(180deg, rgba(29,34,44,0.98) 0%, rgba(12,14,18,0.99) 100%)",
+            boxShadow: "0 46px 120px rgba(0,0,0,0.7)"
           }}
         >
           <div
             aria-label="stone-gate-torch-left"
+            className={`stone-gate__fire stone-gate__fire--${fireState}`}
+            data-fire-state={fireState}
             style={{
               position: "absolute",
-              left: "-8%",
-              top: "18%",
-              width: "10%",
-              height: "34%",
+              left: "-7.5%",
+              top: "20%",
+              width: "9%",
+              height: "32%",
               display: "grid",
               justifyItems: "center",
               alignContent: "start",
@@ -190,33 +180,40 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
             }}
           >
             <span
+              className="stone-gate__flame"
               aria-hidden="true"
               style={{
-                width: "46%",
+                width: "48%",
                 height: "18%",
-                borderRadius: "999px 999px 28px 28px",
-                background: "radial-gradient(circle at 50% 34%, rgba(255,233,176,0.98) 0%, rgba(255,140,63,0.9) 46%, rgba(104,39,13,0.16) 100%)",
-                boxShadow: "0 0 24px rgba(255,159,84,0.55), 0 0 54px rgba(255,213,132,0.3)"
+                borderRadius: "999px 999px 38px 38px",
+                background:
+                  "radial-gradient(circle at 50% 34%, rgba(255,237,184,1) 0%, rgba(255,176,82,0.96) 36%, rgba(163,56,14,0.78) 70%, rgba(100,31,7,0.14) 100%)",
+                boxShadow: stage === "closed"
+                  ? "0 0 18px rgba(255,147,69,0.34)"
+                  : "0 0 30px rgba(255,156,80,0.5), 0 0 64px rgba(255,205,126,0.28)"
               }}
             />
             <span
               aria-hidden="true"
               style={{
                 width: "28%",
-                height: "28%",
+                height: "24%",
                 borderRadius: "14px",
-                background: "linear-gradient(180deg, rgba(79,65,50,0.96) 0%, rgba(31,24,17,0.98) 100%)"
+                background: "linear-gradient(180deg, rgba(76,62,51,0.96) 0%, rgba(30,22,17,0.98) 100%)"
               }}
             />
           </div>
+
           <div
             aria-label="stone-gate-torch-right"
+            className={`stone-gate__fire stone-gate__fire--${fireState}`}
+            data-fire-state={fireState}
             style={{
               position: "absolute",
-              right: "-8%",
-              top: "18%",
-              width: "10%",
-              height: "34%",
+              right: "-7.5%",
+              top: "20%",
+              width: "9%",
+              height: "32%",
               display: "grid",
               justifyItems: "center",
               alignContent: "start",
@@ -224,303 +221,234 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
             }}
           >
             <span
+              className="stone-gate__flame"
               aria-hidden="true"
               style={{
-                width: "46%",
+                width: "48%",
                 height: "18%",
-                borderRadius: "999px 999px 28px 28px",
-                background: "radial-gradient(circle at 50% 34%, rgba(255,233,176,0.98) 0%, rgba(255,140,63,0.9) 46%, rgba(104,39,13,0.16) 100%)",
-                boxShadow: "0 0 24px rgba(255,159,84,0.55), 0 0 54px rgba(255,213,132,0.3)"
+                borderRadius: "999px 999px 38px 38px",
+                background:
+                  "radial-gradient(circle at 50% 34%, rgba(255,237,184,1) 0%, rgba(255,176,82,0.96) 36%, rgba(163,56,14,0.78) 70%, rgba(100,31,7,0.14) 100%)",
+                boxShadow: stage === "closed"
+                  ? "0 0 18px rgba(255,147,69,0.34)"
+                  : "0 0 30px rgba(255,156,80,0.5), 0 0 64px rgba(255,205,126,0.28)"
               }}
             />
             <span
               aria-hidden="true"
               style={{
                 width: "28%",
-                height: "28%",
+                height: "24%",
                 borderRadius: "14px",
-                background: "linear-gradient(180deg, rgba(79,65,50,0.96) 0%, rgba(31,24,17,0.98) 100%)"
+                background: "linear-gradient(180deg, rgba(76,62,51,0.96) 0%, rgba(30,22,17,0.98) 100%)"
               }}
             />
           </div>
+
           <div
-            aria-label="stone-gate-monolith-left"
-            className={`stone-gate__monolith stone-gate__monolith--${riftState}`}
+            aria-label="stone-gate-doorframe"
             style={{
               position: "absolute",
-              left: "-4%",
-              top: "-4%",
-              bottom: "0%",
-              width: "15%",
-              borderRadius: "36px",
+              inset: "4% 8%",
+              borderRadius: "8px",
               background:
-                "linear-gradient(180deg, rgba(92,79,62,0.96) 0%, rgba(49,40,30,0.98) 62%, rgba(24,20,15,1) 100%)",
-              boxShadow: "inset -10px 0 18px rgba(0,0,0,0.26), 0 26px 40px rgba(0,0,0,0.32)"
+                "linear-gradient(180deg, rgba(68,70,76,0.98) 0%, rgba(44,44,48,0.98) 58%, rgba(20,20,22,1) 100%)",
+              boxShadow:
+                "inset 0 0 0 10px rgba(97,95,87,0.72), inset 0 0 0 22px rgba(31,30,30,0.96), 0 18px 44px rgba(0,0,0,0.34)"
+            }}
+          />
+
+          <div
+            aria-label="stone-gate-monolith-left"
+            style={{
+              position: "absolute",
+              left: "2%",
+              top: "1%",
+              bottom: "0%",
+              width: "9%",
+              borderRadius: "8px",
+              background:
+                "linear-gradient(180deg, rgba(62,64,68,1) 0%, rgba(38,39,42,1) 56%, rgba(18,18,20,1) 100%)",
+              boxShadow: "inset -10px 0 18px rgba(0,0,0,0.28)"
             }}
           />
           <div
             aria-label="stone-gate-monolith-right"
-            className={`stone-gate__monolith stone-gate__monolith--${riftState}`}
             style={{
               position: "absolute",
-              right: "-4%",
-              top: "-4%",
+              right: "2%",
+              top: "1%",
               bottom: "0%",
-              width: "15%",
-              borderRadius: "36px",
+              width: "9%",
+              borderRadius: "8px",
               background:
-                "linear-gradient(180deg, rgba(92,79,62,0.96) 0%, rgba(49,40,30,0.98) 62%, rgba(24,20,15,1) 100%)",
-              boxShadow: "inset 10px 0 18px rgba(0,0,0,0.26), 0 26px 40px rgba(0,0,0,0.32)"
+                "linear-gradient(180deg, rgba(62,64,68,1) 0%, rgba(38,39,42,1) 56%, rgba(18,18,20,1) 100%)",
+              boxShadow: "inset 10px 0 18px rgba(0,0,0,0.28)"
             }}
           />
+
+          <div
+            aria-label="stone-gate-inner-glow"
+            style={{
+              position: "absolute",
+              left: "49.2%",
+              top: "9%",
+              bottom: "15%",
+              width: "1.6%",
+              opacity: stage === "closed" ? 0.08 : stage === "opening" ? 0.46 : 0.72,
+              background:
+                "linear-gradient(180deg, rgba(255,231,177,0) 0%, rgba(255,210,128,0.58) 24%, rgba(255,188,99,0.82) 50%, rgba(255,225,172,0.52) 82%, rgba(255,231,177,0) 100%)",
+              filter: stage === "closed" ? "blur(1px)" : "blur(3px)",
+              pointerEvents: "none"
+            }}
+          />
+
           <div
             aria-label="stone-gate-center-seam"
+            className={`stone-gate__seam stone-gate__seam--${seamState}`}
+            data-seam-state={seamState}
             style={{
               position: "absolute",
               left: "50%",
-              top: "7%",
-              bottom: "8%",
-              width: "1.8%",
+              top: "8.5%",
+              bottom: "14%",
+              width: "1%",
               transform: "translateX(-50%)",
               borderRadius: "999px",
-              background: stage === "closed"
-                ? "linear-gradient(180deg, rgba(26,24,24,0.92) 0%, rgba(74,60,42,0.78) 48%, rgba(16,16,16,0.94) 100%)"
-                : "linear-gradient(180deg, rgba(26,24,24,0.42) 0%, rgba(241,209,141,0.24) 52%, rgba(16,16,16,0.62) 100%)",
-              boxShadow: stage === "closed" ? "0 0 10px rgba(0,0,0,0.36)" : "0 0 28px rgba(241,209,141,0.22)"
+              background:
+                stage === "closed"
+                  ? "linear-gradient(180deg, rgba(13,13,14,0.98) 0%, rgba(52,44,37,0.86) 50%, rgba(10,10,10,0.98) 100%)"
+                  : "linear-gradient(180deg, rgba(61,45,30,0.42) 0%, rgba(255,205,120,0.56) 50%, rgba(61,45,30,0.42) 100%)",
+              boxShadow:
+                stage === "closed"
+                  ? "0 0 8px rgba(0,0,0,0.36)"
+                  : "0 0 18px rgba(255,193,94,0.18), 0 0 34px rgba(255,142,63,0.12)"
             }}
           />
 
           <div
+            aria-label="stone-gate-relief-band"
             style={{
               position: "absolute",
-              inset: "4% 16%",
-              borderRadius: "320px 320px 42px 42px",
+              left: "16%",
+              right: "16%",
+              bottom: "12%",
+              height: "13%",
+              borderRadius: "4px",
               background:
-                stage === "closed"
-                  ? "radial-gradient(circle at 50% 42%, rgba(83, 124, 162, 0.12), rgba(10,14,20,0.92) 66%)"
-                  : "radial-gradient(circle at 50% 42%, rgba(117, 233, 255, 0.38), rgba(60, 98, 161, 0.24) 28%, rgba(7, 14, 28, 0.92) 72%)",
-              boxShadow:
-                stage === "revealed"
-                  ? "0 0 48px rgba(117, 233, 255, 0.28), inset 0 0 34px rgba(182, 240, 255, 0.14)"
-                  : "inset 0 0 24px rgba(255,255,255,0.06)"
+                "linear-gradient(180deg, rgba(87,86,88,0.96) 0%, rgba(58,57,58,0.98) 48%, rgba(32,30,30,1) 100%)",
+              boxShadow: "inset 0 2px 0 rgba(175,168,154,0.16), inset 0 -3px 0 rgba(0,0,0,0.34)"
             }}
-          />
-          <div
-            aria-label="stone-gate-rift"
-            className={`stone-gate__rift stone-gate__rift--${riftState}`}
-            data-rift-state={riftState}
-            style={{
-              position: "absolute",
-              inset: "12% 24% 18%",
-              borderRadius: "320px 320px 40px 40px",
-              background:
-                stage === "closed"
-                  ? "radial-gradient(circle at 50% 45%, rgba(84, 118, 154, 0.18) 0%, rgba(10,14,20,0.02) 72%)"
-                  : stage === "opening"
-                    ? "radial-gradient(circle at 50% 42%, rgba(117,233,255,0.78) 0%, rgba(79,131,208,0.22) 48%, rgba(10,14,20,0.02) 72%)"
-                    : "radial-gradient(circle at 50% 42%, rgba(255,231,181,0.94) 0%, rgba(117,233,255,0.4) 42%, rgba(10,14,20,0.02) 76%)",
-              boxShadow:
-                stage === "closed"
-                  ? "none"
-                  : stage === "opening"
-                    ? "0 0 64px rgba(117,233,255,0.28)"
-                    : "0 0 120px rgba(255,231,181,0.32), 0 0 180px rgba(117,233,255,0.22)"
-            }}
-          />
+          >
+            <div
+              aria-hidden="true"
+              style={{
+                position: "absolute",
+                inset: "22% 4%",
+                background:
+                  "repeating-linear-gradient(90deg, rgba(129,122,110,0.14) 0 22px, rgba(0,0,0,0.06) 22px 44px)"
+              }}
+            />
+          </div>
 
           <div
-            className={`stone-gate__threshold stone-gate__threshold--${thresholdState}`}
             aria-label="stone-gate-threshold"
+            className={`stone-gate__threshold stone-gate__threshold--${thresholdState}`}
             data-threshold-state={thresholdState}
             style={{
               position: "absolute",
-              left: "22%",
-              right: "22%",
-              bottom: "10%",
-              height: "10%",
-              borderRadius: "22px",
+              left: "12%",
+              right: "12%",
+              bottom: "4%",
+              height: "8%",
+              borderRadius: "6px",
               background:
                 stage === "closed"
-                  ? "linear-gradient(180deg, rgba(73, 55, 37, 0.72) 0%, rgba(22, 16, 11, 0.96) 100%)"
-                  : "linear-gradient(180deg, rgba(241, 209, 141, 0.44) 0%, rgba(43, 24, 8, 0.96) 100%)",
+                  ? "linear-gradient(180deg, rgba(86,78,66,0.88) 0%, rgba(38,32,26,0.98) 100%)"
+                  : "linear-gradient(180deg, rgba(127,96,56,0.96) 0%, rgba(51,35,18,0.98) 100%)",
               boxShadow:
-                stage === "revealed"
-                  ? "0 0 26px rgba(241, 209, 141, 0.28), inset 0 0 20px rgba(255,255,255,0.08)"
-                  : "inset 0 0 14px rgba(0,0,0,0.32)"
+                stage === "closed"
+                  ? "inset 0 0 14px rgba(0,0,0,0.34)"
+                  : "0 0 24px rgba(255,185,92,0.18), inset 0 0 14px rgba(255,220,168,0.12)"
             }}
           />
 
           <div
-            className={`stone-gate__runes stone-gate__runes--${runeState}`}
-            aria-label="stone-gate-runes"
-            data-rune-state={runeState}
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "8%",
-              transform: "translateX(-50%)",
-              display: "flex",
-              gap: "12px"
-            }}
-          >
-            {Array.from({ length: 5 }).map((_, index) => (
-              <span
-                key={index}
-                style={{
-                  width: "14px",
-                  height: "28px",
-                  borderRadius: "10px",
-                  background:
-                    stage === "closed"
-                      ? "rgba(129, 150, 170, 0.18)"
-                      : stage === "opening"
-                        ? "rgba(147, 232, 255, 0.62)"
-                        : "rgba(241, 209, 141, 0.84)",
-                  boxShadow:
-                    stage === "closed"
-                      ? "none"
-                      : stage === "opening"
-                        ? "0 0 16px rgba(147, 232, 255, 0.34)"
-                        : "0 0 18px rgba(241, 209, 141, 0.38)"
-                }}
-              />
-            ))}
-          </div>
-          <div
-            aria-label="stone-gate-foreground-runes"
-            style={{
-              position: "absolute",
-              left: "50%",
-              bottom: "16%",
-              transform: "translateX(-50%)",
-              display: "flex",
-              gap: "20px"
-            }}
-          >
-            {Array.from({ length: 6 }).map((_, index) => (
-              <span
-                key={index}
-                style={{
-                  width: "10px",
-                  height: "30px",
-                  borderRadius: "999px",
-                  background: stage === "closed" ? "rgba(255,255,255,0.08)" : "rgba(241,209,141,0.72)",
-                  boxShadow: stage === "closed" ? "none" : "0 0 18px rgba(241,209,141,0.32)",
-                  transform: `rotate(${index % 2 === 0 ? -8 : 8}deg)`
-                }}
-              />
-            ))}
-          </div>
-
-          <div
-            className={`stone-gate__core stone-gate__core--${coreEnergyState}`}
-            aria-label="stone-gate-core"
-            data-energy-state={coreEnergyState}
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "44%",
-              width: stage === "revealed" ? "144px" : stage === "opening" ? "118px" : "84px",
-              height: stage === "revealed" ? "144px" : stage === "opening" ? "118px" : "84px",
-              transform: "translate(-50%, -50%)",
-              borderRadius: "999px",
-              background:
-                stage === "closed"
-                  ? "radial-gradient(circle, rgba(113, 134, 154, 0.32) 0%, rgba(17, 21, 29, 0.9) 72%)"
-                  : stage === "opening"
-                    ? "radial-gradient(circle, rgba(125, 243, 255, 0.92) 0%, rgba(79, 131, 208, 0.42) 52%, rgba(14, 19, 31, 0.18) 100%)"
-                    : "radial-gradient(circle, rgba(255, 236, 187, 0.98) 0%, rgba(137, 233, 255, 0.72) 36%, rgba(52, 93, 155, 0.18) 100%)",
-              boxShadow:
-                stage === "closed"
-                  ? "0 0 0 1px rgba(255,255,255,0.04)"
-                  : stage === "opening"
-                    ? "0 0 28px rgba(125, 243, 255, 0.32)"
-                    : "0 0 44px rgba(255, 236, 187, 0.4), 0 0 72px rgba(125, 243, 255, 0.28)"
-            }}
-          />
-
-          <div
-            className={`stone-gate__leaf stone-gate__leaf--left stone-gate__leaf--${leafMotionState}`}
+            className={`stone-gate__door-leaf stone-gate__door-leaf--left stone-gate__door-leaf--${leafMotionState}`}
             aria-label="stone-gate-left-leaf"
             data-motion-state={leafMotionState}
             style={{
               position: "absolute",
               left: "14%",
-              top: "5%",
-              bottom: "8%",
-              width: "24%",
-              borderRadius: "36px 22px 28px 36px",
+              top: "8%",
+              bottom: "14%",
+              width: "35%",
               background:
-                "linear-gradient(180deg, rgba(108, 110, 118, 0.98) 0%, rgba(66, 61, 62, 0.98) 52%, rgba(32, 28, 29, 1) 100%)",
-              boxShadow: "inset -10px 0 20px rgba(0,0,0,0.28), 0 28px 44px rgba(0,0,0,0.34)"
+                "linear-gradient(180deg, rgba(126,126,130,0.98) 0%, rgba(86,84,86,0.98) 46%, rgba(42,40,42,1) 100%)",
+              borderRadius: "4px",
+              boxShadow: "inset -12px 0 22px rgba(0,0,0,0.28), inset 0 0 0 2px rgba(182,174,160,0.08)"
             }}
           >
-            <div
-              aria-label="stone-gate-beast-left"
-              style={{
-                position: "absolute",
-                left: "18%",
-                top: "18%",
-                width: "34%",
-                aspectRatio: "1 / 1",
-                borderRadius: "50% 44% 48% 52%",
-                background: "radial-gradient(circle at 50% 42%, rgba(128,130,140,0.42) 0%, rgba(37,35,40,0.58) 68%, transparent 72%)",
-                boxShadow: "inset 0 0 18px rgba(0,0,0,0.28)"
-              }}
-            />
             <div
               aria-hidden="true"
               style={{
                 position: "absolute",
-                left: "12%",
-                right: "12%",
-                bottom: "12%",
-                height: "17%",
-                borderRadius: "14px",
-                background: "linear-gradient(180deg, rgba(84,74,60,0.44) 0%, rgba(35,31,28,0.82) 100%)"
+                inset: "6%",
+                border: "1px solid rgba(23,22,23,0.8)"
+              }}
+            />
+            <div
+              aria-label="stone-gate-beast-left"
+              style={{
+                position: "absolute",
+                top: "20%",
+                left: "23%",
+                width: "30%",
+                aspectRatio: "1 / 1",
+                borderRadius: "52% 48% 56% 44%",
+                background:
+                  "radial-gradient(circle at 50% 40%, rgba(166,167,173,0.34) 0%, rgba(68,66,72,0.56) 56%, rgba(34,32,36,0.9) 82%, transparent 83%)",
+                boxShadow: "inset 0 0 16px rgba(0,0,0,0.28)"
               }}
             />
           </div>
 
           <div
-            className={`stone-gate__leaf stone-gate__leaf--right stone-gate__leaf--${leafMotionState}`}
+            className={`stone-gate__door-leaf stone-gate__door-leaf--right stone-gate__door-leaf--${leafMotionState}`}
             aria-label="stone-gate-right-leaf"
             data-motion-state={leafMotionState}
             style={{
               position: "absolute",
               right: "14%",
-              top: "5%",
-              bottom: "8%",
-              width: "24%",
-              borderRadius: "22px 36px 36px 28px",
+              top: "8%",
+              bottom: "14%",
+              width: "35%",
               background:
-                "linear-gradient(180deg, rgba(108, 110, 118, 0.98) 0%, rgba(66, 61, 62, 0.98) 52%, rgba(32, 28, 29, 1) 100%)",
-              boxShadow: "inset 10px 0 20px rgba(0,0,0,0.28), 0 28px 44px rgba(0,0,0,0.34)"
+                "linear-gradient(180deg, rgba(126,126,130,0.98) 0%, rgba(86,84,86,0.98) 46%, rgba(42,40,42,1) 100%)",
+              borderRadius: "4px",
+              boxShadow: "inset 12px 0 22px rgba(0,0,0,0.28), inset 0 0 0 2px rgba(182,174,160,0.08)"
             }}
           >
-            <div
-              aria-label="stone-gate-beast-right"
-              style={{
-                position: "absolute",
-                right: "18%",
-                top: "18%",
-                width: "34%",
-                aspectRatio: "1 / 1",
-                borderRadius: "44% 50% 52% 48%",
-                background: "radial-gradient(circle at 50% 42%, rgba(128,130,140,0.42) 0%, rgba(37,35,40,0.58) 68%, transparent 72%)",
-                boxShadow: "inset 0 0 18px rgba(0,0,0,0.28)"
-              }}
-            />
             <div
               aria-hidden="true"
               style={{
                 position: "absolute",
-                left: "12%",
-                right: "12%",
-                bottom: "12%",
-                height: "17%",
-                borderRadius: "14px",
-                background: "linear-gradient(180deg, rgba(84,74,60,0.44) 0%, rgba(35,31,28,0.82) 100%)"
+                inset: "6%",
+                border: "1px solid rgba(23,22,23,0.8)"
+              }}
+            />
+            <div
+              aria-label="stone-gate-beast-right"
+              style={{
+                position: "absolute",
+                top: "20%",
+                right: "23%",
+                width: "30%",
+                aspectRatio: "1 / 1",
+                borderRadius: "48% 52% 44% 56%",
+                background:
+                  "radial-gradient(circle at 50% 40%, rgba(166,167,173,0.34) 0%, rgba(68,66,72,0.56) 56%, rgba(34,32,36,0.9) 82%, transparent 83%)",
+                boxShadow: "inset 0 0 16px rgba(0,0,0,0.28)"
               }}
             />
           </div>
@@ -535,8 +463,8 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
               minWidth: "148px",
               padding: "12px 20px",
               borderRadius: "999px",
-              border: "1px solid rgba(241,209,141,0.28)",
-              background: "linear-gradient(180deg, rgba(241,209,141,0.16) 0%, rgba(16,22,33,0.92) 100%)",
+              border: "1px solid rgba(183, 154, 101, 0.28)",
+              background: "linear-gradient(180deg, rgba(95, 87, 72, 0.5) 0%, rgba(18,20,26,0.96) 100%)",
               color: "#F7EEDB",
               cursor: stage === "closed" ? "pointer" : "default"
             }}
@@ -551,9 +479,9 @@ export function StoneGateScene({ onStartTrial }: StoneGateSceneProps) {
                 minWidth: "148px",
                 padding: "12px 20px",
                 borderRadius: "999px",
-                border: "1px solid rgba(125,243,255,0.34)",
-                background: "linear-gradient(180deg, rgba(125,243,255,0.2) 0%, rgba(8,14,26,0.96) 100%)",
-                color: "#F1F8FF",
+                border: "1px solid rgba(255, 193, 113, 0.34)",
+                background: "linear-gradient(180deg, rgba(174,122,61,0.28) 0%, rgba(20,14,10,0.96) 100%)",
+                color: "#FFF2DC",
                 cursor: "pointer"
               }}
             >
