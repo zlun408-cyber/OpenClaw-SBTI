@@ -8,20 +8,38 @@ import { beforeEach, expect, test, vi } from "vitest";
 import { OfficeRoute } from "./OfficeRoute";
 import { getPersonalityDefinition } from "../quiz/personalityCatalog";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
-import type { RoomId } from "../../types/domain";
+import type { CharacterState, RoomId } from "../../types/domain";
+import type { OfficeDoorRuntimeState } from "../../game/scenes/officeDoorRuntime";
 
 const bridgeState = vi.hoisted(() => ({
-  emittedRoomId: null as RoomId | null
+  emittedRoomId: null as RoomId | null,
+  doorRuntimeByCharacterState: {} as Partial<Record<CharacterState, OfficeDoorRuntimeState>>
 }));
 const ctrlResult = getPersonalityDefinition("CTRL");
 
 vi.mock("../../game/GameCanvas", async () => {
   const React = await import("react");
+  const { useAppStore } = await import("../../state/appStore");
   return {
-    GameCanvas: ({ onRoomChanged }: { onRoomChanged?: (roomId: RoomId | null) => void }) => {
+    GameCanvas: ({
+      onRoomChanged,
+      onDoorStateChanged
+    }: {
+      onRoomChanged?: (roomId: RoomId | null) => void;
+      onDoorStateChanged?: (doorState: OfficeDoorRuntimeState) => void;
+    }) => {
+      const characterState = useAppStore((state) => state.character.state);
+
       React.useEffect(() => {
         onRoomChanged?.(bridgeState.emittedRoomId);
-      }, [onRoomChanged]);
+        const nextDoorRuntime =
+          bridgeState.doorRuntimeByCharacterState[characterState] ??
+          bridgeState.doorRuntimeByCharacterState.idle;
+
+        if (nextDoorRuntime) {
+          onDoorStateChanged?.(nextDoorRuntime);
+        }
+      }, [characterState, onDoorStateChanged, onRoomChanged]);
 
       return React.createElement("div", { "data-testid": "mock-canvas" });
     }
@@ -29,6 +47,20 @@ vi.mock("../../game/GameCanvas", async () => {
 });
 
 beforeEach(() => {
+  bridgeState.emittedRoomId = "office";
+  bridgeState.doorRuntimeByCharacterState = {
+    idle: {
+      roomId: "office",
+      activity: "idle",
+      core: "active",
+      runes: "online",
+      threshold: "glowing",
+      accentColor: 0x69d6ff,
+      fillColor: 0x182f3a,
+      isActive: true
+    }
+  };
+
   useAppStore.setState({
     ...createInitialAppState(),
     phase: "office",
@@ -96,7 +128,7 @@ test("renders the main office as a current-room in-room view with minimap and pe
   expect(stage).toHaveAttribute("data-view-mode", "in-room");
   expect(within(stage).getByText("Main Office")).toBeInTheDocument();
   expect(screen.getByText("办公室")).toBeInTheDocument();
-  expect(screen.getByLabelText("office-entry-door")).toBeInTheDocument();
+  expect(screen.getByLabelText("office-entry-door")).toHaveAttribute("data-door-runtime-source", "scene");
   expect(screen.getByLabelText("office-door-core")).toHaveAttribute("data-door-core-state", "active");
   expect(screen.getByLabelText("office-door-threshold")).toHaveAttribute("data-threshold-state", "glowing");
   expect(screen.getByLabelText("office-door-runes")).toHaveAttribute("data-rune-band", "online");
@@ -112,6 +144,18 @@ test("renders the main office as a current-room in-room view with minimap and pe
 
 test("updates the in-room shell and minimap highlight when the active room changes", async () => {
   bridgeState.emittedRoomId = "training";
+  bridgeState.doorRuntimeByCharacterState = {
+    idle: {
+      roomId: "training",
+      activity: "idle",
+      core: "active",
+      runes: "online",
+      threshold: "glowing",
+      accentColor: 0x9fe3c4,
+      fillColor: 0x183934,
+      isActive: true
+    }
+  };
 
   render(createElement(OfficeRoute));
 
@@ -126,8 +170,30 @@ test("updates the in-room shell and minimap highlight when the active room chang
   expect(screen.getByLabelText("minimap-room-training")).toHaveAttribute("aria-current", "true");
 });
 
-test("links office door effects to runtime room and employee state", async () => {
+test("links office door effects to scene runtime instead of recomputing them in the React shell", async () => {
   bridgeState.emittedRoomId = "training";
+  bridgeState.doorRuntimeByCharacterState = {
+    idle: {
+      roomId: "training",
+      activity: "idle",
+      core: "active",
+      runes: "online",
+      threshold: "glowing",
+      accentColor: 0x9fe3c4,
+      fillColor: 0x183934,
+      isActive: true
+    },
+    train: {
+      roomId: "training",
+      activity: "train",
+      core: "scene-charged",
+      runes: "accelerating",
+      threshold: "pulsing",
+      accentColor: 0x9fe3c4,
+      fillColor: 0x183934,
+      isActive: true
+    }
+  };
 
   render(createElement(OfficeRoute));
 
@@ -146,7 +212,8 @@ test("links office door effects to runtime room and employee state", async () =>
   });
 
   expect(screen.getByLabelText("office-entry-door")).toHaveAttribute("data-door-activity", "train");
-  expect(screen.getByLabelText("office-door-core")).toHaveAttribute("data-door-core-state", "syncing");
+  expect(screen.getByLabelText("office-entry-door")).toHaveAttribute("data-door-runtime-source", "scene");
+  expect(screen.getByLabelText("office-door-core")).toHaveAttribute("data-door-core-state", "scene-charged");
   expect(screen.getByLabelText("office-door-runes")).toHaveAttribute("data-rune-band", "accelerating");
   expect(screen.getByLabelText("office-door-threshold")).toHaveAttribute("data-threshold-state", "pulsing");
 });

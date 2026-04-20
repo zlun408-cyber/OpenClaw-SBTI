@@ -6,13 +6,19 @@ import { MovementSystem } from "../systems/MovementSystem";
 import { AnimationSystem } from "../systems/AnimationSystem";
 import { RoomTriggerSystem } from "../systems/RoomTriggerSystem";
 import { useAppStore } from "../../state/appStore";
-import type { RoomId } from "../../types/domain";
+import type { CharacterState, RoomId } from "../../types/domain";
 import {
   resolveAvatarFacing,
   resolveAvatarNameplate,
   resolveAvatarPresentation,
   type AvatarFacing
 } from "./officeAvatarPresentation";
+import {
+  OFFICE_DOOR_CHANGED_EVENT,
+  resolveOfficeDoorRuntime,
+  type OfficeDoorChangedEvent,
+  type OfficeDoorRuntimeState
+} from "./officeDoorRuntime";
 import {
   getOfficeRoomVisual,
   OFFICE_ENVIRONMENT_LAYERS,
@@ -50,6 +56,15 @@ type PathPulse = {
   sprite: Phaser.GameObjects.Arc;
 };
 
+type RoomDoorVisual = {
+  arch: Phaser.GameObjects.Ellipse;
+  core: Phaser.GameObjects.Ellipse;
+  threshold: Phaser.GameObjects.Ellipse;
+  aura: Phaser.GameObjects.Ellipse;
+  runes: Phaser.GameObjects.Rectangle[];
+  label: Phaser.GameObjects.Text;
+};
+
 export class OfficeScene extends Phaser.Scene {
   static readonly KEY = "OfficeScene";
 
@@ -75,9 +90,11 @@ export class OfficeScene extends Phaser.Scene {
   private wasd?: Record<"W" | "A" | "S" | "D", Phaser.Input.Keyboard.Key>;
   private ambientSignals: AmbientSignal[] = [];
   private pathPulses: PathPulse[] = [];
+  private roomDoors: Partial<Record<RoomId, RoomDoorVisual>> = {};
   private readonly playableArea = this.createPlayableArea();
   private activeRoomId: RoomId | null = "office";
   private avatarFacing: AvatarFacing = "center";
+  private lastDoorRuntimeSignature = "";
 
   constructor() {
     super(OfficeScene.KEY);
@@ -88,6 +105,8 @@ export class OfficeScene extends Phaser.Scene {
     const centerY = this.scale.height / 2;
     this.ambientSignals = [];
     this.pathPulses = [];
+    this.roomDoors = {};
+    this.lastDoorRuntimeSignature = "";
 
     this.cameras.main.setBackgroundColor(0x09111a);
 
@@ -195,6 +214,12 @@ export class OfficeScene extends Phaser.Scene {
     });
 
     this.syncAvatarPresentation(0, { x: 0, y: 0 });
+    this.syncRoomDoors(0, "idle");
+    this.emitDoorChangedIfNeeded(resolveOfficeDoorRuntime({
+      roomId: this.activeRoomId ?? "office",
+      activeRoomId: this.activeRoomId,
+      characterState: "idle"
+    }));
     this.emitRoomChangedIfNeeded();
   }
 
@@ -228,7 +253,17 @@ export class OfficeScene extends Phaser.Scene {
       this.avatarFacing = resolveAvatarFacing(movementDelta);
     }
 
-    this.syncAvatarPresentation(time, movementDelta);
+    const effectiveState = this.resolveEffectiveCharacterState(movementDelta);
+
+    this.syncAvatarPresentation(time, movementDelta, effectiveState);
+    this.syncRoomDoors(time, effectiveState);
+    this.emitDoorChangedIfNeeded(
+      resolveOfficeDoorRuntime({
+        roomId: this.activeRoomId ?? "office",
+        activeRoomId: this.activeRoomId,
+        characterState: effectiveState
+      })
+    );
 
     if (movedDistance < 0.2) {
       this.destinationMarker?.setVisible(false);
@@ -386,7 +421,42 @@ export class OfficeScene extends Phaser.Scene {
           sprite: node
         });
       });
+
+      this.roomDoors[roomId] = this.renderRoomDoor(roomId, x, y + 18, visual.accent);
     });
+  }
+
+  private renderRoomDoor(roomId: RoomId, x: number, y: number, accentColor: number): RoomDoorVisual {
+    const aura = this.add.ellipse(x, y - 2, 56, 72, accentColor, 0.08);
+    aura.setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment);
+    aura.setBlendMode(Phaser.BlendModes.ADD);
+
+    const arch = this.add.ellipse(x, y + 2, 36, 46, 0x0f1824, 0.88);
+    arch.setStrokeStyle(2, accentColor, 0.22).setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment + 0.1);
+
+    const core = this.add.ellipse(x, y - 4, 18, 22, accentColor, 0.16);
+    core.setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment + 0.2);
+
+    const threshold = this.add.ellipse(x, y + 20, 26, 6, accentColor, 0.18);
+    threshold.setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment + 0.2);
+
+    const runes = [-12, -4, 4, 12].map((offsetX) => {
+      const rune = this.add.rectangle(x + offsetX, y - 18, 4, 10, accentColor, 0.22);
+      rune.setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment + 0.25);
+      return rune;
+    });
+
+    const label = this.add
+      .text(x, y + 30, roomId === "office" ? "ENTRY" : "PORTAL", {
+        color: "#f3dcb1",
+        fontFamily: "sans-serif",
+        fontSize: "9px",
+        fontStyle: "700"
+      })
+      .setOrigin(0.5)
+      .setDepth(OFFICE_VISUAL_DEPTHS.roomEquipment + 0.25);
+
+    return { arch, aura, core, threshold, runes, label };
   }
 
   private renderAmbientSignals(centerX: number, centerY: number) {
@@ -485,7 +555,80 @@ export class OfficeScene extends Phaser.Scene {
     return points[points.length - 1];
   }
 
-  private syncAvatarPresentation(time: number, movementDelta: Point) {
+  private resolveEffectiveCharacterState(movementDelta: Point): CharacterState {
+    const isMoving = Math.abs(movementDelta.x) > 0.2 || Math.abs(movementDelta.y) > 0.2;
+    return isMoving ? "walk" : useAppStore.getState().character.state;
+  }
+
+  private syncRoomDoors(time: number, characterState: CharacterState) {
+    const activeRoomId = this.activeRoomId ?? "office";
+    const pulse = (Math.sin(time / 220) + 1) / 2;
+
+    (Object.keys(mapConfig.rooms) as RoomId[]).forEach((roomId) => {
+      const runtime = resolveOfficeDoorRuntime({
+        roomId,
+        activeRoomId,
+        characterState
+      });
+      const door = this.roomDoors[roomId];
+
+      if (!door) {
+        return;
+      }
+
+      const accent = runtime.accentColor;
+      const isAnimatedCore = ["routing", "syncing", "resonating", "release"].includes(runtime.core);
+      const isAnimatedRunes = ["streaming", "accelerating", "resonant", "confirming"].includes(runtime.runes);
+      const isAnimatedThreshold = ["tracking", "pulsing", "vibrating", "opening"].includes(runtime.threshold);
+      const auraAlpha = runtime.isActive ? 0.1 + pulse * 0.16 : 0.04;
+      const runeAlpha = runtime.isActive ? (isAnimatedRunes ? 0.42 + pulse * 0.5 : 0.42) : 0.12;
+      const coreScale = runtime.isActive ? (isAnimatedCore ? 1 + pulse * 0.18 : 1.08) : 0.94;
+      const thresholdScale = runtime.isActive ? (isAnimatedThreshold ? 1 + pulse * 0.1 : 1) : 0.88;
+
+      door.aura.setFillStyle(accent, auraAlpha).setScale(runtime.isActive ? 1.05 + pulse * 0.12 : 0.92);
+      door.arch
+        .setStrokeStyle(2, accent, runtime.isActive ? 0.48 : 0.18)
+        .setFillStyle(runtime.fillColor, runtime.isActive ? 0.92 : 0.78);
+      door.core.setFillStyle(accent, runtime.isActive ? 0.28 + pulse * 0.28 : 0.12).setScale(coreScale);
+      door.threshold
+        .setFillStyle(accent, runtime.isActive ? 0.32 + pulse * 0.26 : 0.14)
+        .setScale(thresholdScale, 1);
+      door.label
+        .setText(runtime.isActive ? "ENTRY" : "STANDBY")
+        .setColor(runtime.isActive ? "#f3dcb1" : "#8fa4b7");
+
+      door.runes.forEach((rune, index) => {
+        const phase = pulse + index * 0.12;
+        rune
+          .setFillStyle(accent, runeAlpha)
+          .setScale(1, runtime.isActive ? 1 + Math.sin(phase * Math.PI * 2) * 0.18 : 0.82)
+          .setY(door.arch.y - 20 + (runtime.isActive ? Math.sin(phase * Math.PI * 2) * 1.8 : 0));
+      });
+    });
+  }
+
+  private emitDoorChangedIfNeeded(doorState: OfficeDoorRuntimeState) {
+    const signature = [
+      doorState.roomId,
+      doorState.activity,
+      doorState.core,
+      doorState.runes,
+      doorState.threshold,
+      doorState.isActive
+    ].join(":");
+
+    if (signature === this.lastDoorRuntimeSignature) {
+      return;
+    }
+
+    this.lastDoorRuntimeSignature = signature;
+    this.game.events.emit(OFFICE_DOOR_CHANGED_EVENT, {
+      type: OFFICE_DOOR_CHANGED_EVENT,
+      doorState
+    } satisfies OfficeDoorChangedEvent);
+  }
+
+  private syncAvatarPresentation(time: number, movementDelta: Point, effectiveState: CharacterState) {
     if (
       !this.player ||
       !this.playerGlow ||
@@ -504,8 +647,6 @@ export class OfficeScene extends Phaser.Scene {
     }
 
     const appState = useAppStore.getState();
-    const isMoving = Math.abs(movementDelta.x) > 0.2 || Math.abs(movementDelta.y) > 0.2;
-    const effectiveState = isMoving ? "walk" : appState.character.state;
     const presentation = resolveAvatarPresentation({
       roomId: this.activeRoomId,
       state: effectiveState,

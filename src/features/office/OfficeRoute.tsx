@@ -1,15 +1,16 @@
 import { Navigate } from "react-router-dom";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 import { GameCanvas } from "../../game/GameCanvas";
 import { useAppStore } from "../../state/appStore";
 import { OfficeHUD } from "./OfficeHUD";
 import { RoomPanelHost } from "./RoomPanelHost";
 import { FloatingChatBox } from "../openclaw/FloatingChatBox";
-import type { CharacterState, RoomId } from "../../types/domain";
+import type { RoomId } from "../../types/domain";
 import { ROOM_CONTEXTS } from "../../types/domain";
 import { selectCurrentPersonaConfig } from "../../state/selectors";
 import { getOfficeRoomVisual } from "../../game/scenes/officeEnvironmentVisuals";
+import type { OfficeDoorRuntimeState } from "../../game/scenes/officeDoorRuntime";
 import { OFFICE_THEME, getOfficeRoomTheme } from "./officeTheme";
 
 const layoutStyle = {
@@ -219,40 +220,23 @@ const OFFICE_DOOR_MOTION_CSS = `
   }
 `;
 
-const DOOR_RUNTIME_STATES: Record<
-  CharacterState,
-  {
-    activity: string;
-    core: string;
-    runes: string;
-    threshold: string;
-  }
-> = {
-  idle: { activity: "idle", core: "active", runes: "online", threshold: "glowing" },
-  walk: { activity: "walk", core: "routing", runes: "streaming", threshold: "tracking" },
-  work: { activity: "work", core: "focused", runes: "targeting", threshold: "steady" },
-  rest: { activity: "rest", core: "calm", runes: "slow", threshold: "soft" },
-  sleep: { activity: "sleep", core: "dimmed", runes: "quiet", threshold: "dim" },
-  dance: { activity: "dance", core: "resonating", runes: "resonant", threshold: "vibrating" },
-  train: { activity: "train", core: "syncing", runes: "accelerating", threshold: "pulsing" },
-  "task-submit": { activity: "task-submit", core: "release", runes: "confirming", threshold: "opening" }
-};
-
 function OfficeCurrentRoomStage({
   roomId,
   persona,
-  characterState
+  doorRuntime
 }: {
   roomId: RoomId;
   persona: ReturnType<typeof selectCurrentPersonaConfig>;
-  characterState: CharacterState;
+  doorRuntime: OfficeDoorRuntimeState | null;
 }) {
   const visual = getOfficeRoomVisual(roomId);
   const roomTheme = getOfficeRoomTheme(roomId);
   const roomContext = ROOM_CONTEXTS[roomId];
   const accentColor = toHexColor(visual.accent);
   const fillColor = toHexColor(visual.fill);
-  const doorRuntime = DOOR_RUNTIME_STATES[characterState];
+  const activeDoorRuntime = doorRuntime?.roomId === roomId ? doorRuntime : null;
+  const doorAccentColor = toHexColor(activeDoorRuntime?.accentColor ?? visual.accent);
+  const doorFillColor = toHexColor(activeDoorRuntime?.fillColor ?? visual.fill);
 
   const themedStageStyle = {
     ...currentRoomStageStyle,
@@ -328,20 +312,22 @@ function OfficeCurrentRoomStage({
           ) : null}
         </div>
         <div
-          className={`office-door office-door--room-${roomId} office-door--activity-${doorRuntime.activity}`}
+          className={`office-door office-door--room-${roomId} office-door--activity-${activeDoorRuntime?.activity ?? "standby"}`}
           aria-label="office-entry-door"
-          data-door-activity={doorRuntime.activity}
-          data-room-id={roomId}
+          data-door-activity={activeDoorRuntime?.activity ?? "standby"}
+          data-door-runtime-source={activeDoorRuntime ? "scene" : "scene-pending"}
+          data-room-id={activeDoorRuntime?.roomId ?? roomId}
           style={{
             ...roomDoorStyle,
-            borderColor: `${accentColor}88`,
-            boxShadow: `inset 0 0 24px ${accentColor}20, 0 20px 50px rgba(0,0,0,0.36)`
+            borderColor: `${doorAccentColor}88`,
+            background: `linear-gradient(180deg, ${doorAccentColor}24 0%, ${doorFillColor}c4 36%, rgba(5,9,16,0.92) 100%)`,
+            boxShadow: `inset 0 0 24px ${doorAccentColor}20, 0 20px 50px rgba(0,0,0,0.36)`
           }}
         >
           <div
-            className={`office-door__core office-door__core--${doorRuntime.core}`}
+            className={`office-door__core office-door__core--${activeDoorRuntime?.core ?? "standby"}`}
             aria-label="office-door-core"
-            data-door-core-state={doorRuntime.core}
+            data-door-core-state={activeDoorRuntime?.core ?? "standby"}
             style={{
               position: "absolute",
               left: "50%",
@@ -350,14 +336,14 @@ function OfficeCurrentRoomStage({
               height: "56%",
               transform: "translateX(-50%)",
               borderRadius: "28px 28px 18px 18px",
-              background: `radial-gradient(circle at 50% 38%, ${accentColor}cc 0%, ${accentColor}33 38%, rgba(9,13,22,0.96) 100%)`,
-              boxShadow: `0 0 18px ${accentColor}55, inset 0 0 14px rgba(255,255,255,0.08)`
+              background: `radial-gradient(circle at 50% 38%, ${doorAccentColor}cc 0%, ${doorAccentColor}33 38%, rgba(9,13,22,0.96) 100%)`,
+              boxShadow: `0 0 18px ${doorAccentColor}55, inset 0 0 14px rgba(255,255,255,0.08)`
             }}
           />
           <div
-            className={`office-door__runes office-door__runes--${doorRuntime.runes}`}
+            className={`office-door__runes office-door__runes--${activeDoorRuntime?.runes ?? "offline"}`}
             aria-label="office-door-runes"
-            data-rune-band={doorRuntime.runes}
+            data-rune-band={activeDoorRuntime?.runes ?? "offline"}
             style={{
               position: "absolute",
               left: "50%",
@@ -374,16 +360,16 @@ function OfficeCurrentRoomStage({
                   width: "8px",
                   height: "14px",
                   borderRadius: "999px",
-                  background: accentColor,
-                  boxShadow: `0 0 10px ${accentColor}88`
+                  background: doorAccentColor,
+                  boxShadow: `0 0 10px ${doorAccentColor}88`
                 }}
               />
             ))}
           </div>
           <div
-            className={`office-door__threshold office-door__threshold--${doorRuntime.threshold}`}
+            className={`office-door__threshold office-door__threshold--${activeDoorRuntime?.threshold ?? "sealed"}`}
             aria-label="office-door-threshold"
-            data-threshold-state={doorRuntime.threshold}
+            data-threshold-state={activeDoorRuntime?.threshold ?? "sealed"}
             style={{
               position: "absolute",
               left: "14%",
@@ -391,8 +377,8 @@ function OfficeCurrentRoomStage({
               bottom: "10%",
               height: "12%",
               borderRadius: "999px",
-              background: `linear-gradient(180deg, ${accentColor}cc 0%, rgba(32,18,8,0.94) 100%)`,
-              boxShadow: `0 0 14px ${accentColor}66`
+              background: `linear-gradient(180deg, ${doorAccentColor}cc 0%, rgba(32,18,8,0.94) 100%)`,
+              boxShadow: `0 0 14px ${doorAccentColor}66`
             }}
           />
           <div
@@ -418,7 +404,7 @@ function OfficeCurrentRoomStage({
 export function OfficeRoute() {
   const currentRoomId = useAppStore((state) => state.currentRoomId ?? "office");
   const personaConfig = useAppStore(selectCurrentPersonaConfig);
-  const characterState = useAppStore((state) => state.character.state);
+  const [sceneDoorRuntime, setSceneDoorRuntime] = useState<OfficeDoorRuntimeState | null>(null);
   const canEnterOffice = useAppStore(
     (state) =>
       state.result !== null &&
@@ -452,12 +438,8 @@ export function OfficeRoute() {
         <div aria-label="office-observation-window" style={canvasFrameStyle}>
           <div style={ambientFrameStyle} />
           <div style={titleRibbonStyle}>SBTI Digital Office</div>
-          <OfficeCurrentRoomStage
-            roomId={currentRoomId}
-            persona={personaConfig}
-            characterState={characterState}
-          />
-          <GameCanvas onRoomChanged={handleRoomChanged} />
+          <OfficeCurrentRoomStage roomId={currentRoomId} persona={personaConfig} doorRuntime={sceneDoorRuntime} />
+          <GameCanvas onRoomChanged={handleRoomChanged} onDoorStateChanged={setSceneDoorRuntime} />
         </div>
       </div>
       <div aria-label="office-scene-overlay-layer" style={overlayLayerStyle}>

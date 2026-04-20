@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import type { RoomId } from "../types/domain";
+import type { OfficeDoorChangedEvent, OfficeDoorRuntimeState } from "./scenes/officeDoorRuntime";
+import { OFFICE_DOOR_CHANGED_EVENT } from "./scenes/officeDoorRuntime";
 
 type RoomEnteredEvent = {
   type: "ROOM_CHANGED";
@@ -9,17 +11,23 @@ type RoomEnteredEvent = {
 
 type GameCanvasProps = {
   onRoomChanged?: (roomId: RoomId | null) => void;
+  onDoorStateChanged?: (doorState: OfficeDoorRuntimeState) => void;
 };
 
-export function GameCanvas({ onRoomChanged }: GameCanvasProps) {
+export function GameCanvas({ onRoomChanged, onDoorStateChanged }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const destroyRef = useRef<(() => void) | null>(null);
   const onRoomChangedRef = useRef(onRoomChanged);
+  const onDoorStateChangedRef = useRef(onDoorStateChanged);
   const [isReady, setIsReady] = useState(import.meta.env.MODE === "test");
 
   useEffect(() => {
     onRoomChangedRef.current = onRoomChanged;
   }, [onRoomChanged]);
+
+  useEffect(() => {
+    onDoorStateChangedRef.current = onDoorStateChanged;
+  }, [onDoorStateChanged]);
 
   useEffect(() => {
     if (import.meta.env.MODE === "test" || !containerRef.current) {
@@ -75,11 +83,16 @@ export function GameCanvas({ onRoomChanged }: GameCanvasProps) {
       const handleRoomEntered = (event: RoomEnteredEvent) => {
         onRoomChangedRef.current?.(event.roomId);
       };
+      const handleDoorChanged = (event: OfficeDoorChangedEvent) => {
+        onDoorStateChangedRef.current?.(event.doorState);
+      };
 
       game.events.on("ROOM_CHANGED", handleRoomEntered);
+      game.events.on(OFFICE_DOOR_CHANGED_EVENT, handleDoorChanged);
       destroyRef.current = () => {
         canvasObserver.disconnect();
         game.events.off("ROOM_CHANGED", handleRoomEntered);
+        game.events.off(OFFICE_DOOR_CHANGED_EVENT, handleDoorChanged);
         game.destroy(true);
       };
     })();
