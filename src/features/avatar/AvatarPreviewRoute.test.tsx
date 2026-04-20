@@ -71,13 +71,22 @@ test("shows the richer sbti result narrative and portrait preview", async () => 
 
   render(<RouterProvider router={router} />);
 
+  expect(screen.getByTestId("avatar-preview-route")).toHaveAttribute(
+    "data-avatar-preview-theme",
+    "sbti-result"
+  );
+  expect(screen.getByLabelText("sbti-result-card")).toBeInTheDocument();
   expect(screen.getByRole("heading", { name: "拿捏者" })).toBeInTheDocument();
   expect(screen.getByText("控场与边界感很强的主导型人格")).toBeInTheDocument();
-  expect(screen.getByText("怎么样，被我拿捏了吧？")).toBeInTheDocument();
-  expect(screen.getByText("习惯先建立秩序、标准与控制面，再推进整体局势。")).toBeInTheDocument();
-  expect(screen.getByText("秩序主导")).toBeInTheDocument();
-  expect(screen.getByText("掌控 / 边界 / 决策")).toBeInTheDocument();
-  expect(screen.getByLabelText("人格立绘预览")).toBeInTheDocument();
+  expect(screen.getByLabelText("persona-slogan")).toHaveTextContent("怎么样，被我拿捏了吧？");
+  expect(screen.getByLabelText("persona-result-narrative")).toHaveTextContent(
+    "习惯先建立秩序、标准与控制面，再推进整体局势。"
+  );
+  expect(screen.getByLabelText("persona-dimension-summary")).toHaveTextContent("秩序主导");
+  expect(screen.getByLabelText("persona-dimension-summary")).toHaveTextContent("掌控");
+  expect(screen.getByLabelText("persona-dimension-summary")).toHaveTextContent("边界");
+  expect(screen.getByLabelText("persona-dimension-summary")).toHaveTextContent("决策");
+  expect(screen.getByLabelText("persona-preview-sprite")).toBeInTheDocument();
 });
 
 test("renders the shared registry portrait for the generated persona", async () => {
