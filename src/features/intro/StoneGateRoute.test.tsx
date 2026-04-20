@@ -33,7 +33,14 @@ test("renders animated stone gate leaves and inner portal states", async () => {
   const leftLeaf = screen.getByLabelText("stone-gate-left-leaf");
   const rightLeaf = screen.getByLabelText("stone-gate-right-leaf");
   const portalCore = screen.getByLabelText("stone-gate-core");
+  const portal = screen.getByLabelText("stone-gate-portal");
+  const rift = screen.getByLabelText("stone-gate-rift");
 
+  expect(portal).toHaveAttribute("data-gate-scale", "colossal");
+  expect(screen.getByLabelText("stone-gate-monolith-left")).toBeInTheDocument();
+  expect(screen.getByLabelText("stone-gate-monolith-right")).toBeInTheDocument();
+  expect(screen.getByLabelText("stone-gate-foreground-runes")).toBeInTheDocument();
+  expect(rift).toHaveAttribute("data-rift-state", "sealed");
   expect(leftLeaf).toHaveAttribute("data-motion-state", "sealed");
   expect(rightLeaf).toHaveAttribute("data-motion-state", "sealed");
   expect(portalCore).toHaveAttribute("data-energy-state", "dormant");
@@ -52,6 +59,7 @@ test("renders animated stone gate leaves and inner portal states", async () => {
   expect(rightLeaf).toHaveClass("stone-gate__leaf--opening");
   expect(portalCore).toHaveClass("stone-gate__core--charging");
   expect(screen.getByLabelText("stone-gate-runes")).toHaveAttribute("data-rune-state", "charging");
+  expect(rift).toHaveAttribute("data-rift-state", "charging");
 
   await screen.findByRole("button", { name: /开始试炼/i });
 
@@ -63,4 +71,5 @@ test("renders animated stone gate leaves and inner portal states", async () => {
   expect(portalCore).toHaveClass("stone-gate__core--open");
   expect(screen.getByLabelText("stone-gate-threshold")).toHaveAttribute("data-threshold-state", "open");
   expect(screen.getByLabelText("stone-gate-threshold")).toHaveClass("stone-gate__threshold--open");
+  expect(rift).toHaveAttribute("data-rift-state", "open");
 });

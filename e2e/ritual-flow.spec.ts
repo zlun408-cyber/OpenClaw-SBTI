@@ -20,7 +20,7 @@ test("ritual flow covers gate → quiz → avatar → office", async ({ page }) 
   await expect(page.getByText(/石门状态：封印/i)).toBeVisible();
   await openGateAndStartTrial(page);
   await expect(page.getByRole("progressbar", { name: /quiz progress/i })).toBeVisible();
-  await expect(page.getByText(/第 1 \/ 30 题/)).toBeVisible();
+  await expect(page.getByText(/第 1 \/ 31 题/)).toBeVisible();
 
   await answerQuizForControlPersona(page);
   await page.waitForURL("**/avatar");

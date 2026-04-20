@@ -7,11 +7,11 @@ import { appRoutes } from "../../app/router";
 import { createInitialAppState, useAppStore } from "../../state/appStore";
 import { questions } from "./questions";
 
-const answerEveryQuestionForAxis = (axis: "control" | "execution" | "harmony") => {
+const answerEveryQuestionForOptionIndex = (index: number) => {
   for (const question of questions) {
-    const option = question.options.find((item) => item.axis === axis);
+    const option = question.options[index];
     if (!option) {
-      throw new Error(`Missing ${axis} answer for ${question.id}`);
+      throw new Error(`Missing option ${index} for ${question.id}`);
     }
 
     fireEvent.click(screen.getByRole("button", { name: option.label }));
@@ -27,11 +27,15 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
-test("shows longer ritual progress metadata for the 30-question quiz", () => {
+test("renders the quiz as a full sbti ritual console instead of plain text buttons", () => {
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  expect(screen.getByText("第 1 / 30 题")).toBeInTheDocument();
+  expect(screen.getByTestId("sbti-quiz-shell")).toHaveAttribute("data-quiz-theme", "sbti-ritual");
+  expect(screen.getByText("第 1 / 31 题")).toBeInTheDocument();
+  expect(screen.getByText(/人格维度校准/i)).toBeInTheDocument();
+  expect(screen.getByLabelText("sbti-question-card")).toBeInTheDocument();
+  expect(screen.getAllByRole("button")).toHaveLength(4);
   expect(screen.getByRole("progressbar", { name: /quiz progress/i })).toHaveAttribute(
     "aria-valuenow",
     "3"
@@ -42,7 +46,7 @@ test("final answer enters warp overlay, locks inputs, and navigates after delay"
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  answerEveryQuestionForAxis("control");
+  answerEveryQuestionForOptionIndex(0);
 
   expect(screen.getByRole("status")).toHaveTextContent(/跃迁中/i);
   expect(useAppStore.getState().phase).toBe("warp");

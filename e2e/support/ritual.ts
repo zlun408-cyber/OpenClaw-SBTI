@@ -2,10 +2,10 @@ import { expect, type Page } from "@playwright/test";
 
 import { questions } from "../../src/features/quiz/questions";
 
-const CONTROL_QUIZ_OPTION_LABELS = questions.map((question) => {
-  const option = question.options.find((item) => item.axis === "control");
+const DOMINANT_QUIZ_OPTION_LABELS = questions.map((question) => {
+  const option = question.options[0];
   if (!option) {
-    throw new Error(`Missing control option for ${question.id}`);
+    throw new Error(`Missing dominant option for ${question.id}`);
   }
 
   return option.label;
@@ -21,7 +21,7 @@ export async function openGateAndStartTrial(page: Page) {
 }
 
 export async function answerQuizForControlPersona(page: Page) {
-  for (const label of CONTROL_QUIZ_OPTION_LABELS) {
+  for (const label of DOMINANT_QUIZ_OPTION_LABELS) {
     await page.getByRole("button", { name: label }).click();
   }
 }

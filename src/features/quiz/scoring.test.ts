@@ -1,21 +1,17 @@
 import { describe, expect, test } from "vitest";
 
-import { questions, type QuizAxis } from "./questions";
+import { questions } from "./questions";
 import { scoreQuiz } from "./scoring";
 
-const answersForAxis = (axis: QuizAxis) =>
-  questions.map((question) => {
-    const option = question.options.find((item) => item.axis === axis);
-    if (!option) {
-      throw new Error(`Missing ${axis} option for ${question.id}`);
-    }
-
-    return { questionId: question.id, value: option.id };
-  });
+const answersForOptionIndex = (index: number) =>
+  questions.map((question) => ({
+    questionId: question.id,
+    value: question.options[index]!.id
+  }));
 
 describe("scoreQuiz", () => {
-  test("returns a richer persona payload instead of the old 3-type placeholder", () => {
-    const result = scoreQuiz(answersForAxis("control"));
+  test("returns a richer persona payload instead of the old 3-result placeholder", () => {
+    const result = scoreQuiz(answersForOptionIndex(0));
 
     expect(result).toMatchObject({
       resultType: "CTRL",
@@ -25,27 +21,24 @@ describe("scoreQuiz", () => {
     });
   });
 
-  test("maps a dominant control answer profile to CTRL", () => {
-    const result = scoreQuiz(answersForAxis("control"));
+  test("maps a command-heavy answer profile to CTRL", () => {
+    const result = scoreQuiz(answersForOptionIndex(0));
 
     expect(result.resultType).toBe("CTRL");
     expect(result.title).toBe("拿捏者");
   });
 
-  test("resolves ties with a stable axis priority", () => {
-    const result = scoreQuiz(
-      questions.map((question, index) => {
-        const axis: QuizAxis = index % 3 === 0 ? "control" : index % 3 === 1 ? "execution" : "harmony";
-        const option = question.options.find((item) => item.axis === axis);
-        if (!option) {
-          throw new Error(`Missing ${axis} option for ${question.id}`);
-        }
+  test("maps a low-energy withdrawal answer profile to ZZZZ", () => {
+    const result = scoreQuiz(answersForOptionIndex(3));
 
-        return { questionId: question.id, value: option.id };
-      })
-    );
+    expect(result.resultType).toBe("ZZZZ");
+    expect(result.title).toBe("装死者");
+  });
 
-    expect(result.resultType).toBe("CTRL");
+  test("uses more than the legacy 3-result bucket model", () => {
+    const results = [0, 1, 2, 3].map((index) => scoreQuiz(answersForOptionIndex(index)).resultType);
+
+    expect(new Set(results).size).toBeGreaterThan(3);
   });
 
   test("rejects incomplete answer sets", () => {
@@ -58,7 +51,7 @@ describe("scoreQuiz", () => {
   });
 
   test("rejects duplicate answers for the same question", () => {
-    const answers = answersForAxis("control");
+    const answers = answersForOptionIndex(0);
 
     expect(() =>
       scoreQuiz([
@@ -70,7 +63,7 @@ describe("scoreQuiz", () => {
   });
 
   test("rejects invalid option ids", () => {
-    const answers = answersForAxis("control");
+    const answers = answersForOptionIndex(0);
 
     expect(() =>
       scoreQuiz([

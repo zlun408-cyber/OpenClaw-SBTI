@@ -16,11 +16,11 @@ beforeEach(() => {
 const ctrlResult = getPersonalityDefinition("CTRL");
 const drunkResult = getPersonalityDefinition("DRUNK");
 
-const answerEveryQuestionForAxis = (axis: "control" | "execution" | "harmony") => {
+const answerEveryQuestionForDominantPath = () => {
   for (const question of questions) {
-    const option = question.options.find((item) => item.axis === axis);
+    const option = question.options[0];
     if (!option) {
-      throw new Error(`Missing ${axis} answer for ${question.id}`);
+      throw new Error(`Missing dominant answer for ${question.id}`);
     }
 
     fireEvent.click(screen.getByRole("button", { name: option.label }));
@@ -99,7 +99,7 @@ test("completing quiz advances into avatar flow with generated full result paylo
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  answerEveryQuestionForAxis("control");
+  answerEveryQuestionForDominantPath();
 
   await waitForAvatarPreview();
   expect(screen.getByRole("heading", { name: "拿捏者" })).toBeInTheDocument();
@@ -115,7 +115,7 @@ test("entering office persists the chosen name", async () => {
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  answerEveryQuestionForAxis("control");
+  answerEveryQuestionForDominantPath();
   await waitForAvatarPreview();
 
   fireEvent.change(screen.getByLabelText(/角色姓名/i), { target: { value: "阿张" } });
@@ -146,7 +146,7 @@ test("restarting quiz clears stale preview state and blocks avatar deep-link", a
   const router = createMemoryRouter(appRoutes, { initialEntries: ["/quiz"] });
   render(<RouterProvider router={router} />);
 
-  answerEveryQuestionForAxis("control");
+  answerEveryQuestionForDominantPath();
   await waitForAvatarPreview();
 
   await act(async () => {
