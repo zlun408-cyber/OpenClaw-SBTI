@@ -99,9 +99,8 @@ const roomDoorStyle = {
   justifySelf: "start",
   width: "88px",
   height: "132px",
-  display: "grid",
-  placeItems: "end center",
-  paddingBottom: "12px",
+  position: "relative",
+  display: "block",
   borderRadius: "44px 44px 18px 18px",
   border: "2px solid rgba(247,212,139,0.42)",
   background:
@@ -265,8 +264,83 @@ function OfficeCurrentRoomStage({
             />
           ) : null}
         </div>
-        <div aria-label="office-entry-door" style={roomDoorStyle}>
-          ENTRY
+        <div
+          aria-label="office-entry-door"
+          data-room-id={roomId}
+          style={{
+            ...roomDoorStyle,
+            borderColor: `${accentColor}88`,
+            boxShadow: `inset 0 0 24px ${accentColor}20, 0 20px 50px rgba(0,0,0,0.36)`
+          }}
+        >
+          <div
+            aria-label="office-door-core"
+            data-door-core-state="active"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "18%",
+              width: "58%",
+              height: "56%",
+              transform: "translateX(-50%)",
+              borderRadius: "28px 28px 18px 18px",
+              background: `radial-gradient(circle at 50% 38%, ${accentColor}cc 0%, ${accentColor}33 38%, rgba(9,13,22,0.96) 100%)`,
+              boxShadow: `0 0 18px ${accentColor}55, inset 0 0 14px rgba(255,255,255,0.08)`
+            }}
+          />
+          <div
+            aria-label="office-door-runes"
+            data-rune-band="online"
+            style={{
+              position: "absolute",
+              left: "50%",
+              top: "12%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              gap: "4px"
+            }}
+          >
+            {Array.from({ length: 4 }).map((_, index) => (
+              <span
+                key={index}
+                style={{
+                  width: "8px",
+                  height: "14px",
+                  borderRadius: "999px",
+                  background: accentColor,
+                  boxShadow: `0 0 10px ${accentColor}88`
+                }}
+              />
+            ))}
+          </div>
+          <div
+            aria-label="office-door-threshold"
+            data-threshold-state="glowing"
+            style={{
+              position: "absolute",
+              left: "14%",
+              right: "14%",
+              bottom: "10%",
+              height: "12%",
+              borderRadius: "999px",
+              background: `linear-gradient(180deg, ${accentColor}cc 0%, rgba(32,18,8,0.94) 100%)`,
+              boxShadow: `0 0 14px ${accentColor}66`
+            }}
+          />
+          <div
+            style={{
+              position: "absolute",
+              left: "50%",
+              bottom: "16%",
+              transform: "translateX(-50%)",
+              color: "#F3DCB1",
+              fontSize: "11px",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase"
+            }}
+          >
+            ENTRY
+          </div>
         </div>
       </div>
     </section>

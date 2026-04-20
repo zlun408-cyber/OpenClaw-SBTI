@@ -97,6 +97,9 @@ test("renders the main office as a current-room in-room view with minimap and pe
   expect(within(stage).getByText("Main Office")).toBeInTheDocument();
   expect(screen.getByText("办公室")).toBeInTheDocument();
   expect(screen.getByLabelText("office-entry-door")).toBeInTheDocument();
+  expect(screen.getByLabelText("office-door-core")).toHaveAttribute("data-door-core-state", "active");
+  expect(screen.getByLabelText("office-door-threshold")).toHaveAttribute("data-threshold-state", "glowing");
+  expect(screen.getByLabelText("office-door-runes")).toHaveAttribute("data-rune-band", "online");
   expect(screen.getByAltText("拿捏者 房间立绘位")).toHaveAttribute(
     "src",
     "/assets/characters/ctrl/transparent.png"
@@ -119,6 +122,7 @@ test("updates the in-room shell and minimap highlight when the active room chang
   const stage = screen.getByLabelText("office-current-room-stage");
   expect(screen.getByText("培训室")).toBeInTheDocument();
   expect(within(stage).getByText("Training Room")).toBeInTheDocument();
+  expect(screen.getByLabelText("office-entry-door")).toHaveAttribute("data-room-id", "training");
   expect(screen.getByLabelText("minimap-room-training")).toHaveAttribute("aria-current", "true");
 });
 
