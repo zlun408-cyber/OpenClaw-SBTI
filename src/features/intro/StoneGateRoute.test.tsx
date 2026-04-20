@@ -37,8 +37,14 @@ test("renders animated stone gate leaves and inner portal states", async () => {
   const rift = screen.getByLabelText("stone-gate-rift");
 
   expect(portal).toHaveAttribute("data-gate-scale", "colossal");
+  expect(portal).toHaveAttribute("data-gate-style", "legendary-stone");
   expect(screen.getByLabelText("stone-gate-monolith-left")).toBeInTheDocument();
   expect(screen.getByLabelText("stone-gate-monolith-right")).toBeInTheDocument();
+  expect(screen.getByLabelText("stone-gate-beast-left")).toBeInTheDocument();
+  expect(screen.getByLabelText("stone-gate-beast-right")).toBeInTheDocument();
+  expect(screen.getByLabelText("stone-gate-center-seam")).toBeInTheDocument();
+  expect(screen.getByLabelText("stone-gate-torch-left")).toBeInTheDocument();
+  expect(screen.getByLabelText("stone-gate-torch-right")).toBeInTheDocument();
   expect(screen.getByLabelText("stone-gate-foreground-runes")).toBeInTheDocument();
   expect(rift).toHaveAttribute("data-rift-state", "sealed");
   expect(leftLeaf).toHaveAttribute("data-motion-state", "sealed");

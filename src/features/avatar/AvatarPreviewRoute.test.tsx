@@ -87,6 +87,8 @@ test("shows the richer sbti result narrative and portrait preview", async () => 
   expect(screen.getByLabelText("persona-dimension-summary")).toHaveTextContent("边界");
   expect(screen.getByLabelText("persona-dimension-summary")).toHaveTextContent("决策");
   expect(screen.getByLabelText("persona-preview-sprite")).toBeInTheDocument();
+  expect(screen.getByLabelText("persona-preview-sprite")).toHaveAttribute("data-preview-mode", "generated-standee");
+  expect(screen.getByLabelText("persona-preview-standee")).toHaveAttribute("data-persona-asset-key", "ctrl");
 });
 
 test("renders the shared registry portrait for the generated persona", async () => {
@@ -102,6 +104,8 @@ test("renders the shared registry portrait for the generated persona", async () 
     "src",
     "/assets/characters/drunk/transparent.png"
   );
+  expect(screen.getByLabelText("persona-preview-sprite")).toHaveAttribute("data-preview-mode", "generated-standee");
+  expect(screen.getByLabelText("persona-preview-standee")).toHaveAttribute("data-persona-asset-key", "drunk");
 });
 
 test("completing quiz advances into avatar flow with generated full result payload", async () => {

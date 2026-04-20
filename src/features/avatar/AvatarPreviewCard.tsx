@@ -9,6 +9,130 @@ type AvatarPreviewCardProps = {
   onEnterOffice: () => void;
 };
 
+const PREVIEW_PALETTES = [
+  { aura: "#5ffbf1", primary: "#8ea7ff", secondary: "#1d2848", accent: "#f8d29c" },
+  { aura: "#ffbd7a", primary: "#ff8f66", secondary: "#341f2f", accent: "#ffe0a6" },
+  { aura: "#d3b2f3", primary: "#8f7cff", secondary: "#251f48", accent: "#f4d9ff" },
+  { aura: "#9fe3c4", primary: "#6fce97", secondary: "#16372d", accent: "#dffde8" },
+  { aura: "#88c8ff", primary: "#6ea7ff", secondary: "#142845", accent: "#d3ebff" }
+] as const;
+
+function hashString(value: string) {
+  let hash = 0;
+
+  for (const char of value) {
+    hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  }
+
+  return hash;
+}
+
+function PersonaPreviewStandee({
+  assetKey,
+  title,
+  code
+}: {
+  assetKey: string;
+  title: string;
+  code: string;
+}) {
+  const palette = PREVIEW_PALETTES[hashString(assetKey) % PREVIEW_PALETTES.length] ?? PREVIEW_PALETTES[0];
+
+  return (
+    <div
+      aria-label="persona-preview-standee"
+      data-persona-asset-key={assetKey}
+      style={{
+        position: "relative",
+        width: "min(78%, 250px)",
+        aspectRatio: "0.76 / 1",
+        display: "grid",
+        placeItems: "center",
+        filter: `drop-shadow(0 24px 34px ${palette.secondary}aa)`
+      }}
+    >
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: "6% 12% 0",
+          borderRadius: "36px 36px 22px 22px",
+          background: `radial-gradient(circle at 50% 18%, ${palette.accent}aa 0%, ${palette.aura}36 26%, transparent 68%)`
+        }}
+      />
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          inset: "12% 18% 22%",
+          display: "grid",
+          gridTemplateRows: "26% 18% 1fr 18%",
+          justifyItems: "center"
+        }}
+      >
+        <div
+          style={{
+            width: "30%",
+            aspectRatio: "1 / 1",
+            background: palette.accent,
+            borderRadius: "8px",
+            boxShadow: `0 0 0 4px ${palette.secondary}, 0 0 0 10px ${palette.primary}55`,
+            imageRendering: "pixelated"
+          }}
+        />
+        <div
+          style={{
+            width: "44%",
+            height: "18%",
+            background: palette.primary,
+            clipPath: "polygon(10% 0, 90% 0, 100% 100%, 0 100%)"
+          }}
+        />
+        <div
+          style={{
+            width: "64%",
+            height: "100%",
+            borderRadius: "18px 18px 14px 14px",
+            background: `linear-gradient(180deg, ${palette.primary} 0%, ${palette.secondary} 100%)`,
+            boxShadow: `inset 0 0 0 4px ${palette.aura}55`
+          }}
+        />
+        <div
+          style={{
+            width: "82%",
+            height: "32%",
+            display: "grid",
+            gridTemplateColumns: "1fr 1fr",
+            gap: "14%"
+          }}
+        >
+          <span style={{ display: "block", background: palette.secondary, borderRadius: "10px" }} />
+          <span style={{ display: "block", background: palette.secondary, borderRadius: "10px" }} />
+        </div>
+      </div>
+      <div
+        aria-hidden="true"
+        style={{
+          position: "absolute",
+          left: "50%",
+          bottom: "4%",
+          transform: "translateX(-50%)",
+          padding: "8px 12px",
+          borderRadius: "999px",
+          border: `1px solid ${palette.aura}66`,
+          background: "rgba(4,10,20,0.82)",
+          color: "#f6fbff",
+          fontSize: "12px",
+          letterSpacing: "0.12em",
+          textTransform: "uppercase"
+        }}
+      >
+        {code} · {title}
+      </div>
+    </div>
+  );
+}
+
 export function AvatarPreviewCard({
   character,
   result,
@@ -17,6 +141,7 @@ export function AvatarPreviewCard({
   onEnterOffice
 }: AvatarPreviewCardProps) {
   const personaConfig = getCharacterConfig(result.code);
+  const usesGeneratedStandee = personaConfig.quality === "placeholder";
 
   return (
     <section
@@ -38,6 +163,7 @@ export function AvatarPreviewCard({
       <div style={{ display: "grid", gap: "16px" }}>
         <figure
           aria-label="persona-preview-sprite"
+          data-preview-mode={usesGeneratedStandee ? "generated-standee" : "asset-portrait"}
           style={{
             display: "grid",
             placeItems: "center",
@@ -61,6 +187,13 @@ export function AvatarPreviewCard({
               borderRadius: "18px"
             }}
           />
+          {usesGeneratedStandee ? (
+            <PersonaPreviewStandee
+              assetKey={personaConfig.assetKey}
+              title={result.title}
+              code={result.code}
+            />
+          ) : null}
           {personaConfig.transparent ? (
             <img
               alt={`${result.title} 人格立绘`}
@@ -70,7 +203,9 @@ export function AvatarPreviewCard({
                 maxHeight: "280px",
                 objectFit: "contain",
                 imageRendering: "pixelated",
-                filter: "drop-shadow(0 20px 28px rgba(0,0,0,0.42))"
+                filter: "drop-shadow(0 20px 28px rgba(0,0,0,0.42))",
+                opacity: usesGeneratedStandee ? 0.001 : 1,
+                position: usesGeneratedStandee ? "absolute" : "relative"
               }}
             />
           ) : null}
