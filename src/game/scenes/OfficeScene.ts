@@ -19,6 +19,7 @@ import {
   type OfficeDoorChangedEvent,
   type OfficeDoorRuntimeState
 } from "./officeDoorRuntime";
+import { resolveOfficeDoorMotionFrame } from "./officeDoorMotion";
 import {
   getOfficeRoomVisual,
   OFFICE_ENVIRONMENT_LAYERS,
@@ -213,7 +214,7 @@ export class OfficeScene extends Phaser.Scene {
       this.movement.startAutoMove(next);
     });
 
-    this.syncAvatarPresentation(0, { x: 0, y: 0 });
+    this.syncAvatarPresentation(0, "idle");
     this.syncRoomDoors(0, "idle");
     this.emitDoorChangedIfNeeded(resolveOfficeDoorRuntime({
       roomId: this.activeRoomId ?? "office",
@@ -255,7 +256,7 @@ export class OfficeScene extends Phaser.Scene {
 
     const effectiveState = this.resolveEffectiveCharacterState(movementDelta);
 
-    this.syncAvatarPresentation(time, movementDelta, effectiveState);
+    this.syncAvatarPresentation(time, effectiveState);
     this.syncRoomDoors(time, effectiveState);
     this.emitDoorChangedIfNeeded(
       resolveOfficeDoorRuntime({
@@ -562,7 +563,6 @@ export class OfficeScene extends Phaser.Scene {
 
   private syncRoomDoors(time: number, characterState: CharacterState) {
     const activeRoomId = this.activeRoomId ?? "office";
-    const pulse = (Math.sin(time / 220) + 1) / 2;
 
     (Object.keys(mapConfig.rooms) as RoomId[]).forEach((roomId) => {
       const runtime = resolveOfficeDoorRuntime({
@@ -577,32 +577,38 @@ export class OfficeScene extends Phaser.Scene {
       }
 
       const accent = runtime.accentColor;
-      const isAnimatedCore = ["routing", "syncing", "resonating", "release"].includes(runtime.core);
-      const isAnimatedRunes = ["streaming", "accelerating", "resonant", "confirming"].includes(runtime.runes);
-      const isAnimatedThreshold = ["tracking", "pulsing", "vibrating", "opening"].includes(runtime.threshold);
-      const auraAlpha = runtime.isActive ? 0.1 + pulse * 0.16 : 0.04;
-      const runeAlpha = runtime.isActive ? (isAnimatedRunes ? 0.42 + pulse * 0.5 : 0.42) : 0.12;
-      const coreScale = runtime.isActive ? (isAnimatedCore ? 1 + pulse * 0.18 : 1.08) : 0.94;
-      const thresholdScale = runtime.isActive ? (isAnimatedThreshold ? 1 + pulse * 0.1 : 1) : 0.88;
+      const proximity =
+        runtime.isActive && this.player
+          ? Phaser.Math.Clamp(
+              1 - Phaser.Math.Distance.Between(this.player.x, this.player.y, door.arch.x, door.arch.y) / 86,
+              0,
+              1
+            )
+          : 0;
+      const frame = resolveOfficeDoorMotionFrame({
+        runtime,
+        timeMs: time,
+        proximity
+      });
 
-      door.aura.setFillStyle(accent, auraAlpha).setScale(runtime.isActive ? 1.05 + pulse * 0.12 : 0.92);
+      door.aura.setFillStyle(accent, frame.auraAlpha).setScale(frame.auraScale);
       door.arch
-        .setStrokeStyle(2, accent, runtime.isActive ? 0.48 : 0.18)
-        .setFillStyle(runtime.fillColor, runtime.isActive ? 0.92 : 0.78);
-      door.core.setFillStyle(accent, runtime.isActive ? 0.28 + pulse * 0.28 : 0.12).setScale(coreScale);
+        .setStrokeStyle(2, accent, frame.archStrokeAlpha)
+        .setFillStyle(runtime.fillColor, frame.archFillAlpha)
+        .setScale(1, frame.archScaleY);
+      door.core.setFillStyle(accent, frame.coreAlpha).setScale(frame.coreScale);
       door.threshold
-        .setFillStyle(accent, runtime.isActive ? 0.32 + pulse * 0.26 : 0.14)
-        .setScale(thresholdScale, 1);
+        .setFillStyle(accent, frame.thresholdAlpha)
+        .setScale(frame.thresholdScaleX, 1);
       door.label
-        .setText(runtime.isActive ? "ENTRY" : "STANDBY")
+        .setText(frame.label)
         .setColor(runtime.isActive ? "#f3dcb1" : "#8fa4b7");
 
       door.runes.forEach((rune, index) => {
-        const phase = pulse + index * 0.12;
         rune
-          .setFillStyle(accent, runeAlpha)
-          .setScale(1, runtime.isActive ? 1 + Math.sin(phase * Math.PI * 2) * 0.18 : 0.82)
-          .setY(door.arch.y - 20 + (runtime.isActive ? Math.sin(phase * Math.PI * 2) * 1.8 : 0));
+          .setFillStyle(accent, frame.runeAlpha)
+          .setScale(1, runtime.isActive ? 1.04 + frame.runeOffsets[index] * 0.06 : 0.82)
+          .setY(door.arch.y - 20 - frame.runeOffsets[index]);
       });
     });
   }
@@ -628,7 +634,7 @@ export class OfficeScene extends Phaser.Scene {
     } satisfies OfficeDoorChangedEvent);
   }
 
-  private syncAvatarPresentation(time: number, movementDelta: Point, effectiveState: CharacterState) {
+  private syncAvatarPresentation(time: number, effectiveState: CharacterState) {
     if (
       !this.player ||
       !this.playerGlow ||
